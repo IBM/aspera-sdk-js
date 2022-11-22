@@ -1,1 +1,1 @@
-# aspera-desktop-sdk-js
+# aspera-desktop-sdk-ts

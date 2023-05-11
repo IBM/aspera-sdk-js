@@ -12,7 +12,7 @@ import {TransferSpec} from '../models/models';
  * @returns a promise that resolves if server can connect or rejects if not
  */
 export const testDesktopConnection = (): Promise<any> => {
-  return client.request('get_version')
+  return client.request('get_info')
     .then((data: DesktopInfo) => {
       // TODO: Update desktop to send back object with version and other info
       asperaDesktop.globals.desktopInfo = data;

@@ -1,14 +1,45 @@
-/**
- * Initialize IBM Aspera Desktop client.
- */
-const initAsperaDesktop = () => {
-  console.warn('Hello, World!');
-};
+import {Desktop} from './models/aspera-desktop.model';
+import {
+  initDesktop,
+  registerActivityCallback,
+  deregisterActivityCallback,
+  startTransfer,
+  testDesktopConnection,
+  removeTransfer,
+} from './app/core';
+
+export const asperaDesktop: Desktop = new Desktop();
+
+asperaDesktop.initDesktop = initDesktop;
+asperaDesktop.testDesktopConnection = testDesktopConnection;
+asperaDesktop.startTransfer = startTransfer;
+asperaDesktop.registerActivityCallback = registerActivityCallback;
+asperaDesktop.deregisterActivityCallback = deregisterActivityCallback;
+asperaDesktop.removeTransfer = removeTransfer;
+
+const launch = asperaDesktop.globals.launch;
+asperaDesktop.launch = launch;
 
 if (typeof (<any>window) === 'object') {
-  (<any>window).initAsperaDesktop = initAsperaDesktop;
+  (<any>window).asperaDesktop = asperaDesktop;
 }
 
+export {
+  initDesktop,
+  testDesktopConnection,
+  startTransfer,
+  launch,
+  registerActivityCallback,
+  deregisterActivityCallback,
+  removeTransfer,
+};
+
 export default {
-  initAsperaDesktop
+  initDesktop,
+  testDesktopConnection,
+  startTransfer,
+  launch,
+  registerActivityCallback,
+  deregisterActivityCallback,
+  removeTransfer,
 };

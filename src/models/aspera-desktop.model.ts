@@ -11,6 +11,8 @@ class DesktopGlobals {
   desktopInfo: DesktopInfo;
   /** Indication that the server has been verified as working */
   desktopVerified = false;
+  /** The unique ID for the website */
+  appId: string;
 
   backupLaunchMethod(url: string): void {
     window.alert(messages.loadingProtocol);
@@ -72,8 +74,8 @@ export class ActivityTracking {
    * @returns a promise that resolves when the websocket connection is established.
    * Currently this promise does not reject.
    */
-  setup(url: string): Promise<any> {
-    return websocketService.init(url)
+  setup(url: string, appId: string): Promise<any> {
+    return websocketService.init(url, appId)
       .then((response) => {
         websocketService.registerMessage('transfer_activity', (data: TransferResponse) => this.handleTransferActivity(data));
 
@@ -114,7 +116,7 @@ export class Desktop {
   /** Activity tracking for watching transfers */
   activityTracking: ActivityTracking = new ActivityTracking();
   /** Function to initialize Aspera Desktop */
-  initDesktop: () => Promise<any>;
+  initDesktop: (appId: string) => Promise<any>;
   /** Function to test the Aspera Desktop status */
   testDesktopConnection: () => Promise<any>;
   /** Function to initiate a transfer */

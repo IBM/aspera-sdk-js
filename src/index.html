@@ -132,7 +132,7 @@
         }, 1000)
       }
       function init() {
-        asperaDesktop.initDesktop().then(response => {
+        asperaDesktop.initDesktop('sdk-test-page').then(response => {
           console.log('INIT SUCCESS', response);
         }).catch(error => {
           console.log('INIT FAIL', error);

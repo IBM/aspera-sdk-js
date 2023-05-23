@@ -1,6 +1,6 @@
 import {asperaDesktop} from '../index';
 import {client} from '../helpers/client';
-import {errorLog, generateErrorBody, generatePromiseObjects, getWebsocketUrl, isValidTransferSpec} from '../helpers/helpers';
+import {errorLog, generateErrorBody, generatePromiseObjects, getWebsocketUrl, isValidTransferSpec, randomUUID} from '../helpers/helpers';
 import {messages} from '../constants/messages';
 import {DesktopInfo, TransferResponse} from '../models/aspera-desktop.model';
 import {TransferSpec} from '../models/models';
@@ -28,7 +28,7 @@ export const testDesktopConnection = (): Promise<any> => {
  * @returns a promise that resolves if the websocket connection is successful
  */
 export const initWebSocketConnection = (): Promise<any> => {
-  return asperaDesktop.activityTracking.setup(getWebsocketUrl(asperaDesktop.globals.desktopUrl))
+  return asperaDesktop.activityTracking.setup(getWebsocketUrl(asperaDesktop.globals.desktopUrl), asperaDesktop.globals.appId)
     .then(() => testDesktopConnection());
 };
 
@@ -36,10 +36,15 @@ export const initWebSocketConnection = (): Promise<any> => {
  * Initialize Aspera Desktop client. If client cannot (reject/catch), then
  * client should attempt fixing server URL or trying again. If still fails disable UI elements.
  *
+ * @param appId the unique ID for the website. Transfers initiated during this session
+ * will be associated with this ID. It is recommended to use a unique ID to keep transfer
+ * information private from other websites.
+ *
  * @returns a promise that resolves if Aspera Desktop is running properly or
  * rejects if unable to connect
  */
-export const initDesktop = (): Promise<any> => {
+export const initDesktop = (appId?: string): Promise<any> => {
+  asperaDesktop.globals.appId = appId ? appId : randomUUID();
   return initWebSocketConnection()
     .catch(error => {
       errorLog(messages.serverError, error);
@@ -74,6 +79,7 @@ export const startTransfer = (transferSpec: TransferSpec): Promise<any> => {
 
   const payload = {
     transfer_spec: transferSpec,
+    app_id: asperaDesktop.globals.appId,
   };
 
   client.request('start_transfer', payload)

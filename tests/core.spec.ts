@@ -8,7 +8,7 @@ describe('initHttpGateway', () => {
   });
 
   test('calls default URL', async () => {
-    initDesktop().catch(() => {});
+    initDesktop('fake').catch(() => {});
     // expect(fetch).toBeCalled();
   });
 });

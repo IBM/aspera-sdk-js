@@ -6,6 +6,8 @@ import {errorLog, generatePromiseObjects} from './helpers';
 export class WebsocketService {
   /** The main websocket connection to Aspera Desktop */
   private globalSocket: WebSocket;
+  /** The app ID of transfers we want to receive notifications for */
+  private appId: string;
   /** A map of requested subscription names and the callback for them */
   private sockets: Map<WebsocketTopics, Function> = new Map();
   /** The websocket URL to use */
@@ -59,7 +61,7 @@ export class WebsocketService {
 
       setTimeout(() => {
         this.globalSocket.close();
-        this.init(this.websocketUrl);
+        this.init(this.websocketUrl, this.appId);
       }, 3000);
     }
   }
@@ -96,7 +98,7 @@ export class WebsocketService {
       return;
     }
 
-    this.globalSocket.send(JSON.stringify({jsonrpc: '2.0', method: 'subscribe_transfer_activity', params: {}, id: 1}));
+    this.globalSocket.send(JSON.stringify({jsonrpc: '2.0', method: 'subscribe_transfer_activity', params: [this.appId], id: 1}));
   }
 
   /**
@@ -119,8 +121,9 @@ export class WebsocketService {
    *
    * @returns a promise that resolves when the websocket connection is established
    */
-  init(socketUrl: string): Promise<any> {
+  init(socketUrl: string, appId: string): Promise<any> {
     this.websocketUrl = socketUrl;
+    this.appId = appId;
 
     this.globalSocket = new WebSocket(this.websocketUrl);
 

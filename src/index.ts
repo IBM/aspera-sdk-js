@@ -6,6 +6,7 @@ import {
   startTransfer,
   testDesktopConnection,
   removeTransfer,
+  showDirectory,
 } from './app/core';
 
 export const asperaDesktop: Desktop = new Desktop();
@@ -16,6 +17,7 @@ asperaDesktop.startTransfer = startTransfer;
 asperaDesktop.registerActivityCallback = registerActivityCallback;
 asperaDesktop.deregisterActivityCallback = deregisterActivityCallback;
 asperaDesktop.removeTransfer = removeTransfer;
+asperaDesktop.showDirectory = showDirectory;
 
 const launch = asperaDesktop.globals.launch;
 asperaDesktop.launch = launch;
@@ -32,6 +34,7 @@ export {
   registerActivityCallback,
   deregisterActivityCallback,
   removeTransfer,
+  showDirectory,
 };
 
 export default {
@@ -42,4 +45,5 @@ export default {
   registerActivityCallback,
   deregisterActivityCallback,
   removeTransfer,
+  showDirectory,
 };

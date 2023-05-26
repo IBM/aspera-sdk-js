@@ -129,6 +129,8 @@ export class Desktop {
   deregisterActivityCallback: (id: string) => void;
   /** Function to remove a transfer */
   removeTransfer: (transferId: string) => Promise<any>;
+  /** Function to show the transfer's download directory in Finder or Windows Explorer */
+  showDirectory: (transferId: string) => Promise<any>;
 
   /**
    * Check if the Aspera Desktop HTTP server is ready to be used

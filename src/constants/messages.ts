@@ -7,6 +7,7 @@ export const messages = {
   removeTransferFailed: 'Unable to remove transfer',
   serverError: 'Unable to connect to Aspera Desktop server',
   serverNotVerified: 'The Aspera Desktop server has not been verified. Run test or init first',
+  showDirectoryFailed: 'Unable to show transfer directory',
   transferFailed: 'The transfer failed to initiate',
   websocketClosedError: 'The websocket was closed due to an error',
   websocketClosedUnexpect: 'The websocket was closed unexpectedly',

@@ -164,6 +164,14 @@
         })
       }
 
+      function showDirectory(id) {
+        asperaDesktop.showDirectory(id).then(response => {
+          console.log('SHOW DIRECTORY SUCCESS', response);
+        }).catch(error => {
+          console.log('SHOW DIRECTORY FAIL', error);
+        })
+      }
+
       function testDrop() {
         const callback = files => {
           console.log('DROP ZONE CALLBACK', files);
@@ -210,6 +218,7 @@
             </div>
             <div class="status">${transfer.status} - ${bytesCalc(transfer.bytes_written)} / ${bytesCalc(transfer.bytes_expected)}</div>
             <button onclick=remove("${transfer.uuid}")>Remove</button>
+            <button onclick=showDirectory("${transfer.uuid}")>Show</button>
           `;
           transferDom.appendChild(element);
         });

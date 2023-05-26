@@ -1,6 +1,6 @@
 import {asperaDesktop} from '../index';
 import {client} from '../helpers/client';
-import {errorLog, generateErrorBody, generatePromiseObjects, getWebsocketUrl, isValidTransferSpec, randomUUID} from '../helpers/helpers';
+import {errorLog, generateErrorBody, generatePromiseObjects, getWebsocketUrl, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
 import {messages} from '../constants/messages';
 import {DesktopInfo, TransferResponse} from '../models/aspera-desktop.model';
 import {TransferSpec} from '../models/models';
@@ -14,7 +14,6 @@ import {TransferSpec} from '../models/models';
 export const testDesktopConnection = (): Promise<any> => {
   return client.request('get_info')
     .then((data: DesktopInfo) => {
-      // TODO: Update desktop to send back object with version and other info
       asperaDesktop.globals.desktopInfo = data;
       asperaDesktop.globals.desktopVerified = true;
       return data;
@@ -62,17 +61,11 @@ export const initDesktop = (appId?: string): Promise<any> => {
  */
 export const startTransfer = (transferSpec: TransferSpec): Promise<any> => {
   if (!asperaDesktop.isReady) {
-    errorLog(messages.serverNotVerified);
-    return new Promise((resolve, reject) => {
-      reject(generateErrorBody(messages.serverNotVerified));
-    });
+    return throwError(messages.serverNotVerified);
   }
 
   if (!isValidTransferSpec(transferSpec)) {
-    errorLog(messages.notValidTransferSpec);
-    return new Promise((resolve, reject) => {
-      reject(generateErrorBody(messages.notValidTransferSpec, {transferSpec}));
-    });
+    return throwError(messages.notValidTransferSpec, {transferSpec});
   }
 
   const promiseInfo = generatePromiseObjects();
@@ -121,10 +114,7 @@ export const deregisterActivityCallback = (id: string): void => {
  */
 export const removeTransfer = (id: string): Promise<any> => {
   if (!asperaDesktop.isReady) {
-    errorLog(messages.serverNotVerified);
-    return new Promise((resolve, reject) => {
-      reject(generateErrorBody(messages.serverNotVerified));
-    });
+    return throwError(messages.serverNotVerified);
   }
 
   const promiseInfo = generatePromiseObjects();
@@ -138,6 +128,35 @@ export const removeTransfer = (id: string): Promise<any> => {
     .catch(error => {
       errorLog(messages.removeTransferFailed, error);
       promiseInfo.rejecter(generateErrorBody(messages.removeTransferFailed, error));
+    });
+
+  return promiseInfo.promise;
+};
+
+/**
+ * Opens and highlights the downloaded file in Finder or Windows Explorer. If multiple files,
+ * then only the first file will be selected.
+ *
+ * @param id transfer uuid
+ *
+ * @returns a promise that resolves if the file can be shown and rejects if not
+ */
+export const showDirectory = (id: string): Promise<any> => {
+  if (!asperaDesktop.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  const promiseInfo = generatePromiseObjects();
+
+  const payload = {
+    transfer_id: id,
+  };
+
+  client.request('show_directory', payload)
+    .then((data: any) => promiseInfo.resolver(data))
+    .catch(error => {
+      errorLog(messages.showDirectoryFailed, error);
+      promiseInfo.rejecter(generateErrorBody(messages.showDirectoryFailed, error));
     });
 
   return promiseInfo.promise;

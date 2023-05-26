@@ -111,7 +111,21 @@ export const randomUUID = (): string => {
   };
 
   return window.crypto?.randomUUID ? window.crypto.randomUUID() : fallback();
+};
 
+/**
+ * Return a rejected promise
+ *
+ * @param message the message indicating the error encountered
+ * @param debugData the data with useful debugging information
+ *
+ * @returns a rejected promise
+ */
+export const throwError = (message: string, debugData?: any): Promise<any> => {
+  errorLog(message, debugData);
+  return new Promise((resolve, reject) => {
+    reject(generateErrorBody(message, debugData));
+  });
 };
 
 export default {
@@ -121,4 +135,5 @@ export default {
   isValidTransferSpec,
   getWebsocketUrl,
   randomUUID,
+  throwError,
 };

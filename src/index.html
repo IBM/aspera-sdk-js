@@ -173,6 +173,14 @@
         })
       }
 
+      function getTransfers(ids) {
+        asperaDesktop.getTransfers(ids).then(response => {
+          console.log('GET TRANSFERS SUCCESS', response);
+        }).catch(error => {
+          console.log('GET TRANSFERS FAIL', error);
+        })
+      }
+
       function showDirectory(id) {
         asperaDesktop.showDirectory(id).then(response => {
           console.log('SHOW DIRECTORY SUCCESS', response);
@@ -205,6 +213,7 @@
             <div class="status">${transfer.status} - ${bytesCalc(transfer.bytes_written)} / ${bytesCalc(transfer.bytes_expected)}</div>
             <button onclick=remove("${transfer.uuid}")>Remove</button>
             <button onclick=stopTransfer("${transfer.uuid}")>Stop</button>
+            <button onclick=getTransfers(["${transfer.uuid}"])>Info</button>
             <button onclick=showDirectory("${transfer.uuid}")>Show</button>
           `;
           transferDom.appendChild(element);
@@ -227,6 +236,7 @@
       <button onclick="init()" type="button">Init SDK</button>
       <button onclick="testServer()" type="button">Test desktop</button>
       <button onclick="transfer()" type="button">Start transfer</button>
+      <button onclick="getTransfers()" type="button">Get transfers</button>
       <button onclick="launch()" type="button">Launch</button>
     </div>
     <div class="flex-page">

@@ -2,6 +2,7 @@
 export const messages = {
   callbackIsNotFunction: 'The provided callback is not a function',
   failedToGenerateIframe: 'Unable to generate IFRAME for download. Using new window',
+  getTransfersFailed: 'Unable to get transfers',
   loadingProtocol: 'Launching Aspera for Desktop',
   notValidTransferSpec: 'The supplied transferSpec is not valid',
   removeTransferFailed: 'Unable to remove transfer',

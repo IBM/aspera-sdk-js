@@ -133,6 +133,8 @@ export class Desktop {
   showDirectory: (transferId: string) => Promise<any>;
   /** Function to stop a transfer */
   stopTransfer: (transferId: string) => Promise<any>;
+  /** Function to get a list of transfers */
+  getTransfers: (transferIds: string[]) => Promise<any>;
 
   /**
    * Check if the Aspera Desktop HTTP server is ready to be used

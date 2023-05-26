@@ -162,6 +162,36 @@ export const stopTransfer = (id: string): Promise<any> => {
 };
 
 /**
+ * Get transfers.
+ *
+ * @param ids[] array of transfer uuids. If an empty array is provided, then all transfers will be returned.
+ *
+ * @returns a promise that resolves with an array of transfers. If no matching transfers are found,
+ * then an empty array is returned.
+ */
+export const getTransfers = (ids?: string[]): Promise<any> => {
+  if (!asperaDesktop.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  const promiseInfo = generatePromiseObjects();
+
+  const payload = {
+    transfer_ids: ids || [],
+    app_id: asperaDesktop.globals.appId,
+  };
+
+  client.request('get_transfers', payload)
+    .then((data: any) => promiseInfo.resolver(data))
+    .catch(error => {
+      errorLog(messages.getTransfersFailed, error);
+      promiseInfo.rejecter(generateErrorBody(messages.getTransfersFailed, error));
+    });
+
+  return promiseInfo.promise;
+};
+
+/**
  * Opens and highlights the downloaded file in Finder or Windows Explorer. If multiple files,
  * then only the first file will be selected.
  *

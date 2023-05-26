@@ -134,6 +134,34 @@ export const removeTransfer = (id: string): Promise<any> => {
 };
 
 /**
+ * Stop a transfer.
+ *
+ * @param id transfer uuid
+ *
+ * @returns a promise that resolves if transfer is stopped and rejects if transfer cannot be stopped
+ */
+export const stopTransfer = (id: string): Promise<any> => {
+  if (!asperaDesktop.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  const promiseInfo = generatePromiseObjects();
+
+  const payload = {
+    transfer_id: id,
+  };
+
+  client.request('stop_transfer', payload)
+    .then((data: any) => promiseInfo.resolver(data))
+    .catch(error => {
+      errorLog(messages.stopTransferFailed, error);
+      promiseInfo.rejecter(generateErrorBody(messages.stopTransferFailed, error));
+    });
+
+  return promiseInfo.promise;
+};
+
+/**
  * Opens and highlights the downloaded file in Finder or Windows Explorer. If multiple files,
  * then only the first file will be selected.
  *

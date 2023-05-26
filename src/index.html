@@ -132,7 +132,8 @@
         }, 1000)
       }
       function init() {
-        asperaDesktop.initDesktop('sdk-test-page').then(response => {
+        const id = document.querySelector('#app-id').value;
+        asperaDesktop.initDesktop(id).then(response => {
           console.log('INIT SUCCESS', response);
         }).catch(error => {
           console.log('INIT FAIL', error);
@@ -164,35 +165,20 @@
         })
       }
 
+      function stopTransfer(id) {
+        asperaDesktop.stopTransfer(id).then(response => {
+          console.log('STOP SUCCESS', response);
+        }).catch(error => {
+          console.log('STOP FAIL', error);
+        })
+      }
+
       function showDirectory(id) {
         asperaDesktop.showDirectory(id).then(response => {
           console.log('SHOW DIRECTORY SUCCESS', response);
         }).catch(error => {
           console.log('SHOW DIRECTORY FAIL', error);
         })
-      }
-
-      function testDrop() {
-        const callback = files => {
-          console.log('DROP ZONE CALLBACK', files);
-        }
-        asperaHttpGateway.createDropzone(callback, '#drop-area');
-      }
-
-      function getFiles() {
-        const formId = document.querySelector('#form-id').value;
-        const callback = files => {
-          console.log('FILE PICK CALLBACK', files);
-        }
-        asperaHttpGateway.getFilesForUpload(callback, formId);
-      }
-
-      function getFolders() {
-        const formId = document.querySelector('#form-id').value;
-        const callback = files => {
-          console.log('FOLDER PICK CALLBACK', files);
-        }
-        asperaHttpGateway.getFoldersForUpload(callback, formId);
       }
 
       function monitorTransfers(transfers) {
@@ -218,27 +204,11 @@
             </div>
             <div class="status">${transfer.status} - ${bytesCalc(transfer.bytes_written)} / ${bytesCalc(transfer.bytes_expected)}</div>
             <button onclick=remove("${transfer.uuid}")>Remove</button>
+            <button onclick=stopTransfer("${transfer.uuid}")>Stop</button>
             <button onclick=showDirectory("${transfer.uuid}")>Show</button>
           `;
           transferDom.appendChild(element);
         });
-      }
-
-      function stream() {
-        const videoInjectPoint = '.video-area';
-        const transferSpec = JSON.parse(document.querySelector('#test-input').value);
-        document.querySelector(videoInjectPoint).innerHTML = '<div class="loader"></div>';
-        asperaHttpGateway.startStream(transferSpec, videoInjectPoint).then(response => {
-          console.log('START STREAM SUCCESS', response);
-        }).catch(error => {
-          document.querySelector(videoInjectPoint).innerHTML = '<div class="error">Unable to load</div>';
-          console.log('START STREAM FAIL', error);
-        })
-      }
-
-      function injectStream() {
-        const streamUrl = document.querySelector('#stream-url').value;
-        asperaHttpGateway.injectStreamToDom(streamUrl, '.video-area');
       }
 
       function launch() {
@@ -256,28 +226,19 @@
     <div class="test-buttons">
       <button onclick="init()" type="button">Init SDK</button>
       <button onclick="testServer()" type="button">Test desktop</button>
-      <button onclick="testDrop()" type="button">Set dropzone</button>
-      <button onclick="getFiles()" type="button">Get files</button>
-      <button onclick="getFolders()" type="button">Get folders</button>
       <button onclick="transfer()" type="button">Start transfer</button>
-      <button onclick="stream()" type="button">Stream</button>
-      <button onclick="injectStream()" type="button">Inject URL stream</button>
       <button onclick="launch()" type="button">Launch</button>
     </div>
     <div class="flex-page">
       <div class="text-area">
-        <label for="server-url">Form ID</label>
-        <input type="text" id="form-id" value="test1"></input>
-        <label for="stream-url">Stream URL (for Inject URL stream)</label>
-        <input type="text" id="stream-url" value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"></input>
+        <label for="app-id">App ID</label>
+        <input type="text" id="app-id" value="test1"></input>
         <label for="test-input">transferSpec for download/upload</label>
         <textarea id="test-input"></textarea>
         <label for="test-output">Current values in asperaDesktop</label>
         <textarea id="test-output" readonly></textarea>
       </div>
       <div id="transfer-monitor" class="transfer-monitor">
-        <p>Streaming test</p>
-        <div class="video-area"></div>
         <br />
         <hl />
         <p>Drop test</p>

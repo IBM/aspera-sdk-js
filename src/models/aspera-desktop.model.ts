@@ -131,6 +131,8 @@ export class Desktop {
   removeTransfer: (transferId: string) => Promise<any>;
   /** Function to show the transfer's download directory in Finder or Windows Explorer */
   showDirectory: (transferId: string) => Promise<any>;
+  /** Function to stop a transfer */
+  stopTransfer: (transferId: string) => Promise<any>;
 
   /**
    * Check if the Aspera Desktop HTTP server is ready to be used

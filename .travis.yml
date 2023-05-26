@@ -1,0 +1,33 @@
+language: node_js
+node_js:
+  - 16
+before_install:
+  - printf "\n" >> ~/.npmrc
+  - curl -u $NPM_USERNAME:$NPM_PASSWORD https://na.artifactory.swg-devops.com/artifactory/api/npm/hyc-aspera-ui-team-npm-local/auth/aspera-ui >> ~/.npmrc
+  - curl -u $NPM_ASPERA_USERNAME:$NPM_ASPERA_PASSWORD https://na.artifactory.swg-devops.com/artifactory/api/npm/hyc-aspera-team-npm-virtual/auth/aspera >> ~/.npmrc
+stages:
+  - lint
+  - test
+  - name: docs
+    if: branch = main
+  - name: pages
+    if: branch = main
+jobs:
+  include:
+    - stage: lint
+      script: npm run lint
+    - stage: test
+      script: npm run test
+    - stage: docs
+      script: npm run docs
+    - stage: pages
+      script: npm run build:demo
+      deploy:
+        provider: pages
+        skip_cleanup: true
+        github_token: $GITHUB_TOKEN
+        github_url: github.ibm.com
+        keep_history: false
+        local_dir: dist/js
+        on:
+          branch: main

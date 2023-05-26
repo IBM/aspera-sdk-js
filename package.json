@@ -13,7 +13,8 @@
     "test:watch": "jest --watchAll",
     "lint": "eslint -c .eslintrc.js --ext .ts ./src",
     "docs": "typedoc src/index.ts",
-    "set:hosts": "if ! hostile list | grep \"127.0.0.1 desktop-sdk.aspera.us\" >/dev/null; then sudo hostile set 127.0.0.1 desktop-sdk.aspera.us; fi"
+    "set:hosts": "if ! hostile list | grep \"127.0.0.1 desktop-sdk.aspera.us\" >/dev/null; then sudo hostile set 127.0.0.1 desktop-sdk.aspera.us; fi",
+    "build:demo": "npm run build && cp src/index.html dist/js"
   },
   "repository": {
     "type": "git",

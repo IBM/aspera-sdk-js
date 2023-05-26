@@ -1,6 +1,6 @@
 {
   "name": "@ibm-aspera/desktop-sdk-js",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "IBM Aspera Desktop Group",
   "private": true,
   "main": "commonjs/index.js",

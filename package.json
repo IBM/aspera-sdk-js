@@ -23,7 +23,10 @@
     "url": "git@github.ibm.com:Aspera/desktop-sdk-ts.git"
   },
   "standard-version": {
-    "releaseCommitMessageFormat": "chore(release): %s\n\n[ci skip]"
+    "message": "chore(release): %s\n\n[ci skip]",
+    "scripts": {
+      "posttag": "npm run build"
+    }
   },
   "devDependencies": {
     "@types/jest": "^29.2.5",

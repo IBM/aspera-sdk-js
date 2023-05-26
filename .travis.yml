@@ -8,9 +8,12 @@ before_install:
 stages:
   - lint
   - test
-  - name: docs
-    if: branch = main
+  - docs
   - name: pages
+    if: branch = main
+  - name: release
+    if: branch = main
+  - name: build
     if: branch = main
 jobs:
   include:
@@ -31,3 +34,7 @@ jobs:
         local_dir: dist/js
         on:
           branch: main
+    - stage: release
+      script: git checkout main && npm run release -- --no-verify && git push --follow-tags origin main
+    - stage: build
+      script: git checkout main && git pull origin main && npm run build:deploy

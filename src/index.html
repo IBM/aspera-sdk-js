@@ -189,6 +189,10 @@
         })
       }
 
+      function monitorRemovedTransfers(transfer) {
+        console.log('TRANSFER WAS REMOVED', transfer);
+      }
+
       function monitorTransfers(transfers) {
         const transferDom = document.querySelector('#transfer-monitor');
         while (transferDom.firstChild) {
@@ -228,6 +232,7 @@
         generateObjectText();
       }, 3000)
       asperaDesktop.registerActivityCallback(monitorTransfers);
+      asperaDesktop.registerRemovedCallback(monitorRemovedTransfers);
     </script>
   </head>
   <body>

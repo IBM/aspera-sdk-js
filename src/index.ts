@@ -9,6 +9,8 @@ import {
   showDirectory,
   stopTransfer,
   getTransfers,
+  registerRemovedCallback,
+  deregisterRemovedCallback,
 } from './app/core';
 
 export const asperaDesktop: Desktop = new Desktop();
@@ -22,6 +24,8 @@ asperaDesktop.removeTransfer = removeTransfer;
 asperaDesktop.showDirectory = showDirectory;
 asperaDesktop.stopTransfer = stopTransfer;
 asperaDesktop.getTransfers = getTransfers;
+asperaDesktop.registerRemovedCallback = registerRemovedCallback;
+asperaDesktop.deregisterRemovedCallback = deregisterRemovedCallback;
 
 const launch = asperaDesktop.globals.launch;
 asperaDesktop.launch = launch;
@@ -41,6 +45,8 @@ export {
   showDirectory,
   stopTransfer,
   getTransfers,
+  registerRemovedCallback,
+  deregisterRemovedCallback,
 };
 
 export default {
@@ -54,4 +60,6 @@ export default {
   showDirectory,
   stopTransfer,
   getTransfers,
+  registerRemovedCallback,
+  deregisterRemovedCallback,
 };

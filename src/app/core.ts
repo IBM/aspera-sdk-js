@@ -3,7 +3,7 @@ import {client} from '../helpers/client';
 import {errorLog, generateErrorBody, generatePromiseObjects, getWebsocketUrl, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
 import {messages} from '../constants/messages';
 import {DesktopInfo, TransferResponse} from '../models/aspera-desktop.model';
-import {TransferSpec} from '../models/models';
+import {DesktopTransfer, TransferSpec} from '../models/models';
 
 /**
  * Check if Aspera Desktop connection works. This function is called by init
@@ -86,7 +86,7 @@ export const startTransfer = (transferSpec: TransferSpec): Promise<any> => {
 };
 
 /**
- * Register a callback event for getting transfer data
+ * Register a callback event for getting transfer updates
  *
  * @param callback callback function to receive transfers
  *
@@ -103,6 +103,28 @@ export const registerActivityCallback = (callback: (transfers: TransferResponse)
  */
 export const deregisterActivityCallback = (id: string): void => {
   asperaDesktop.activityTracking.removeCallback(id);
+};
+
+/**
+ * Register a callback event for when a user removes or cancels a transfer
+ * directly from Aspera Desktop. This may also be called if Aspera Desktop
+ * is configured to automatically remove completed transfers.
+ *
+ * @param callback callback function to receive transfers
+ *
+ * @returns ID representing the callback for deregistration purposes
+ */
+export const registerRemovedCallback = (callback: (transfer: DesktopTransfer) => void): string => {
+  return asperaDesktop.activityTracking.setRemovedCallback(callback);
+};
+
+/**
+ * Remove a callback from the removed transfer callback
+ *
+ * @param id the ID returned by `registerRemovedCallback`
+ */
+export const deregisterRemovedCallback = (id: string): void => {
+  asperaDesktop.activityTracking.removeRemovedCallback(id);
 };
 
 /**

@@ -49,21 +49,40 @@ export class TransferResponse {
   transfers: DesktopTransfer[];
 }
 
+export type ActivityMessageTypes = 'transferUpdated'|'transferRemoved';
+
+export class ActivityMessage {
+  type: ActivityMessageTypes;
+  data: unknown;
+}
+
 export class ActivityTracking {
-  /** Map of callbacks that receive transfers */
-  private callbacks: Map<string, Function> = new Map();
+  /** Map of callbacks that receive transfer update events */
+  private activity_callbacks: Map<string, Function> = new Map();
+  /** Map of callbacks that received removed transfer events */
+  private removed_callbacks: Map<string, Function> = new Map();
 
   /**
    * Notify all consumers when a message is received from the websocket
    *
    * @param data the data received from the websocket
    */
-  private handleTransferActivity(data: TransferResponse): void {
-    this.callbacks.forEach(callback => {
-      if (typeof callback === 'function') {
-        callback(data);
-      }
-    });
+  private handleTransferActivity(message: ActivityMessage): void {
+    if (message.type === 'transferUpdated') {
+      this.activity_callbacks.forEach(callback => {
+        if (typeof callback === 'function') {
+          callback(message.data);
+        }
+      });
+    }
+
+    if (message.type === 'transferRemoved') {
+      this.removed_callbacks.forEach(callback => {
+        if (typeof callback === 'function') {
+          callback(message.data);
+        }
+      });
+    };
   }
 
   /**
@@ -77,7 +96,7 @@ export class ActivityTracking {
   setup(url: string, appId: string): Promise<any> {
     return websocketService.init(url, appId)
       .then((response) => {
-        websocketService.registerMessage('transfer_activity', (data: TransferResponse) => this.handleTransferActivity(data));
+        websocketService.registerMessage('transfer_activity', (data: ActivityMessage) => this.handleTransferActivity(data));
 
         return response;
       });
@@ -95,8 +114,8 @@ export class ActivityTracking {
       errorLog(messages.callbackIsNotFunction);
       return;
     }
-    const id = `callback-${this.callbacks.size + 1}`;
-    this.callbacks.set(id, callback);
+    const id = `callback-${this.activity_callbacks.size + 1}`;
+    this.activity_callbacks.set(id, callback);
     return id;
   }
 
@@ -106,7 +125,33 @@ export class ActivityTracking {
    * @param id the string of the callback to remove
    */
   removeCallback(id: string): void {
-    this.callbacks.delete(id);
+    this.activity_callbacks.delete(id);
+  }
+
+  /**
+   * Register a callback for getting transfers back to the consumer
+   *
+   * @param callback the function to call with the array of transfers
+   *
+   * @returns the ID of the callback index
+   */
+  setRemovedCallback(callback: (transfer: DesktopTransfer) => void): string {
+    if (typeof callback !== 'function') {
+      errorLog(messages.callbackIsNotFunction);
+      return;
+    }
+    const id = `callback-${this.removed_callbacks.size + 1}`;
+    this.removed_callbacks.set(id, callback);
+    return id;
+  }
+
+  /**
+     * Remove the callback (deregister) from the list of callbacks
+     *
+     * @param id the string of the callback to remove
+     */
+  removeRemovedCallback(id: string): void {
+    this.removed_callbacks.delete(id);
   }
 }
 
@@ -127,6 +172,10 @@ export class Desktop {
   registerActivityCallback: (callback: (transfers: TransferResponse) => void) => string;
   /** Deregister callback to remove it from the callbacks getting transfer data */
   deregisterActivityCallback: (id: string) => void;
+  /** Register callback for removed transfers from the app */
+  registerRemovedCallback: (callback: (transfer: DesktopTransfer) => void) => string;
+  /** Deregister callback to remove it from the callbacks getting removed transfer data */
+  deregisterRemovedCallback: (id: string) => void;
   /** Function to remove a transfer */
   removeTransfer: (transferId: string) => Promise<any>;
   /** Function to show the transfer's download directory in Finder or Windows Explorer */

@@ -189,6 +189,14 @@
         })
       }
 
+      function showSelectFileDialog() {
+        asperaDesktop.showSelectFileDialog().then(response => {
+          console.log('SHOW FILE DIALOG SUCCESS', response);
+        }).catch(error => {
+          console.log('SHOW FILE DIALOG FAIL', error);
+        })
+      }
+
       function monitorRemovedTransfers(transfer) {
         console.log('TRANSFER WAS REMOVED', transfer);
       }
@@ -242,6 +250,7 @@
       <button onclick="testServer()" type="button">Test desktop</button>
       <button onclick="transfer()" type="button">Start transfer</button>
       <button onclick="getTransfers()" type="button">Get transfers</button>
+      <button onclick="showSelectFileDialog()" type="button">File Dialog</button>
       <button onclick="launch()" type="button">Launch</button>
     </div>
     <div class="flex-page">

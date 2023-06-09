@@ -10,6 +10,20 @@ export interface ErrorResponse {
   debugData?: any;
 }
 
+export interface FileFilter {
+  name: string;
+  extensions: string[];
+}
+
+export interface FileDialogOptions {
+  /** The title of the dialog */
+  title?: string;
+  /** Allow user to select multiple files */
+  multiple?: boolean;
+  /** The file types to filter by */
+  filters?: FileFilter[];
+}
+
 export interface TransferSpecPath {
   /** Source path for the transfer */
   source: string;

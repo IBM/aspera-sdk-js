@@ -11,6 +11,7 @@ import {
   getTransfers,
   registerRemovedCallback,
   deregisterRemovedCallback,
+  showSelectFileDialog,
 } from './app/core';
 
 export const asperaDesktop: Desktop = new Desktop();
@@ -26,6 +27,7 @@ asperaDesktop.stopTransfer = stopTransfer;
 asperaDesktop.getTransfers = getTransfers;
 asperaDesktop.registerRemovedCallback = registerRemovedCallback;
 asperaDesktop.deregisterRemovedCallback = deregisterRemovedCallback;
+asperaDesktop.showSelectFileDialog = showSelectFileDialog;
 
 const launch = asperaDesktop.globals.launch;
 asperaDesktop.launch = launch;
@@ -47,6 +49,7 @@ export {
   getTransfers,
   registerRemovedCallback,
   deregisterRemovedCallback,
+  showSelectFileDialog,
 };
 
 export default {
@@ -62,4 +65,5 @@ export default {
   getTransfers,
   registerRemovedCallback,
   deregisterRemovedCallback,
+  showSelectFileDialog,
 };

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.6](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.5...v0.1.6) (2023-06-13)
+
+
+### Features
+
+* use 33024 as default server port ([#36](https://github.ibm.com/Aspera/desktop-sdk-ts/issues/36)) ([7d8f916](https://github.ibm.com/Aspera/desktop-sdk-ts/commit/7d8f9168d88c65773137a3e81d0e8cedee67d545))
+
 ### [0.1.5](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.4...v0.1.5) (2023-06-09)
 
 

@@ -6,7 +6,7 @@ import {messages} from '../constants/messages';
 
 class DesktopGlobals {
   /** The URL of the Aspera Desktop HTTP server to use with the SDK */
-  desktopUrl = 'http://127.0.0.1:3001';
+  desktopUrl = 'http://127.0.0.1:33024';
   /** Desktop info */
   desktopInfo: DesktopInfo;
   /** Indication that the server has been verified as working */

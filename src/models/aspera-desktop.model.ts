@@ -1,4 +1,4 @@
-import {DesktopTransfer, FileDialogOptions, TransferSpec} from './models';
+import {DesktopTransfer, FileDialogOptions, FolderDialogOptions, TransferSpec} from './models';
 import {errorLog} from '../helpers/helpers';
 import {websocketService} from '../helpers/ws';
 import {hiddenStyleList, protocol} from '../constants/constants';
@@ -184,8 +184,10 @@ export class Desktop {
   stopTransfer: (transferId: string) => Promise<any>;
   /** Function to get a list of transfers */
   getTransfers: (transferIds: string[]) => Promise<any>;
-  /** Function to display a file browser dialog for the user to select files. */
+  /** Function to display a file dialog for the user to select files. */
   showSelectFileDialog: (options?: FileDialogOptions) => Promise<any>;
+  /** Function to display a folder dialog for the user to select folders. */
+  showSelectFolderDialog: (options?: FolderDialogOptions) => Promise<any>;
 
   /**
    * Check if the Aspera Desktop HTTP server is ready to be used

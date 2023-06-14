@@ -3,7 +3,7 @@ import {client} from '../helpers/client';
 import {errorLog, generateErrorBody, generatePromiseObjects, getWebsocketUrl, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
 import {messages} from '../constants/messages';
 import {DesktopInfo, TransferResponse} from '../models/aspera-desktop.model';
-import {DesktopTransfer, FileDialogOptions, TransferSpec} from '../models/models';
+import {DesktopTransfer, FileDialogOptions, FolderDialogOptions, TransferSpec} from '../models/models';
 
 /**
  * Check if Aspera Desktop connection works. This function is called by init
@@ -206,6 +206,34 @@ export const showSelectFileDialog = (options?: FileDialogOptions): Promise<any> 
     .catch(error => {
       errorLog(messages.showSelectFileDialogFailed, error);
       promiseInfo.rejecter(generateErrorBody(messages.showSelectFileDialogFailed, error));
+    });
+
+  return promiseInfo.promise;
+};
+
+/**
+ * Displays a folder browser dialog for the user to select folders.
+ *
+ * @param options folder dialog options
+ *
+ * @returns a promise that resolves with the selected folder(s) and rejects if user cancels dialog
+ */
+export const showSelectFolderDialog = (options?: FolderDialogOptions): Promise<any> => {
+  if (!asperaDesktop.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  const promiseInfo = generatePromiseObjects();
+
+  const payload = {
+    options: options || {},
+  };
+
+  client.request('show_folder_dialog', payload)
+    .then((data: any) => promiseInfo.resolver(data))
+    .catch(error => {
+      errorLog(messages.showSelectFolderDialogFailed, error);
+      promiseInfo.rejecter(generateErrorBody(messages.showSelectFolderDialogFailed, error));
     });
 
   return promiseInfo.promise;

@@ -16,12 +16,19 @@ export interface FileFilter {
 }
 
 export interface FileDialogOptions {
-  /** The title of the dialog */
+  /** The title of the file dialog */
   title?: string;
   /** Allow user to select multiple files */
   multiple?: boolean;
   /** The file types to filter by */
   filters?: FileFilter[];
+}
+
+export interface FolderDialogOptions {
+  /** The title of the folder dialog */
+  title?: string;
+  /** Allow user to select multiple folders */
+  multiple?: boolean;
 }
 
 export interface TransferSpecPath {

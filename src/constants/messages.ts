@@ -10,6 +10,7 @@ export const messages = {
   serverNotVerified: 'The Aspera Desktop server has not been verified. Run test or init first',
   showDirectoryFailed: 'Unable to show transfer directory',
   showSelectFileDialogFailed: 'Unable to show select file dialog',
+  showSelectFolderDialogFailed: 'Unable to show select folder dialog',
   stopTransferFailed: 'Unable to stop transfer',
   transferFailed: 'The transfer failed to initiate',
   websocketClosedError: 'The websocket was closed due to an error',

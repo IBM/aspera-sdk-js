@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.7](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.6...v0.1.7) (2023-06-14)
+
+
+### Features
+
+* show folder dialog ([#37](https://github.ibm.com/Aspera/desktop-sdk-ts/issues/37)) ([d66fff4](https://github.ibm.com/Aspera/desktop-sdk-ts/commit/d66fff4100761a0c5326de3a10410d164a5bb7ab))
+
 ### [0.1.6](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.5...v0.1.6) (2023-06-13)
 
 

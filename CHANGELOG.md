@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.8](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.7...v0.1.8) (2023-06-14)
+
+
+### Features
+
+* use Connect compatible transfer spec field names ([#38](https://github.ibm.com/Aspera/desktop-sdk-ts/issues/38)) ([b8ac8e4](https://github.ibm.com/Aspera/desktop-sdk-ts/commit/b8ac8e451947110d96cddb4aac11b71099ac09c2))
+
 ### [0.1.7](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.6...v0.1.7) (2023-06-14)
 
 

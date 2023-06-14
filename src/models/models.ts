@@ -47,8 +47,15 @@ export interface FaspProxy {
   password?: string;
 }
 
+export type OverwritePolicy = 'none'|'always'|'diff'|'older'|'diff+older';
+export type ResumePolicy = 'none'|'attributes'|'sparse_checksum'|'full_checksum';
+
 export interface TransferSpec {
-  authentication?: string; // FIXME: This is not a valid field in desktop
+  /**
+   * The type of authentication to use.
+   * @deprecated Either set the `token` or `remote_password` fields instead.
+   */
+  authentication?: 'token'|'password';
   /**
    * The algorithm used to encrypt data sent during a transfer.
    * @default "aes-128"
@@ -60,8 +67,12 @@ export interface TransferSpec {
    * encrypted files, set to `decrypt`. `content_protection_password` must be specified if this option is set.
    */
   content_protection?: 'encrypt'|'decrypt';
+  /**
+   * @deprecated Use `content_protection_password` instead.
+   */
+  content_protection_passphrase?: string;
   /** Password to encrypt or decrypt files when using `content_protection`. */
-  content_protection_password?: string; // FIXME: This is content_protection_passphrase in Connect
+  content_protection_password?: string;
   /**
    * Data to associate with the transfer. The cookie is reported to both client and server-side applications monitoring transfers.
    * It is often used by applications to identify associated transfers.
@@ -118,22 +129,30 @@ export interface TransferSpec {
   /** Port used for HTTPS fallback server */
   https_fallback_port?: number;
   /**
+   * @deprecated Use `lock_min_rate_kbps` instead.
+   */
+  lock_min_rate?: boolean;
+  /**
    * If `true`, lock the minimum transfer rate to the value set for `min_rate_kbps`.
    * If `false`, users can adjust the transfer rate up to the value set for `target_rate_cap_kbps`.
    * @default false
    */
-  lock_min_rate_kbps?: boolean; // FIXME: This is lock_min_rate in Connect
+  lock_min_rate_kbps?: boolean;
   /**
    * If true, lock the rate policy to the default value
    * @default false
    */
   lock_rate_policy?: boolean;
   /**
+   * @deprecated Use `lock_target_rate_kbps` instead.
+   */
+  lock_target_rate?: boolean;
+  /**
    * If `true`, lock the target transfer rate to the default value set for `target_rate_kbps`.
    * If `false`, users can adjust the transfer rate up to the value set for `target_rate_cap_kbps`.
    * @default false
    */
-  lock_target_rate_kbps?: boolean; // FIXME: This is lock_target_rate in Connect
+  lock_target_rate_kbps?: boolean;
   /** Moves source files to directory after they are transferred correctly */
   move_after_transfer?: string;
   /** Split files across multiple ascp sessions to enable faster transfers. */
@@ -143,7 +162,7 @@ export interface TransferSpec {
    * @default 0 (no files are split)
    */
   multi_session_threshold?: number;
-  // min_rate_kbps?: number; // FIXME: This is not a valid field in desktop?
+  // min_rate_kbps?: number; // FIXME: This is not a valid field in desktop
   /**
    * Overwrite destination files with the source files of the same name.
    *
@@ -159,7 +178,11 @@ export interface TransferSpec {
    * are compared based on sparse checksum. If `full_checksum`, the source and destination files are compared based on full checksum.
    * @default diff
    */
-  overwrite?: 'none'|'always'|'diff'|'older'|'diff+older';
+  overwrite?: OverwritePolicy;
+  /**
+   * @deprecated Use `overwrite` instead.
+   */
+  overwrite_policy?: OverwritePolicy;
   /**
    * A list of the file and directory paths to transfer. Use `destination_root` to specify the destination directory.
    * It is recommended to always specify both the `source` and `destination` properties for each path.
@@ -200,17 +223,25 @@ export interface TransferSpec {
   /** Remove empty source subdirectories and remove the source directory itself, if empty */
   remove_empty_source_dir?: boolean;
   /**
+   * @deprecated Use `resume_policy` instead.
+   */
+  resume?: ResumePolicy;
+  /**
    * If a transfer is interrupted or fails to finish, this policy directs the transfer to resume without retransferring the files.
    *
-   * - `0` – always re-transfer the entire file.
-   * - `1` – compare file attributes and resume if they match, and re-transfer if they do not.
-   * - `2` – compare file attributes and the sparse file checksums; resume if they match, and re-transfer if they do not.
-   * - `3` – compare file attributes and the full file checksums; resume if they match, and re-transfer if they do not.
+   * - `none` – always re-transfer the entire file.
+   * - `attributes` – compare file attributes and resume if they match, and re-transfer if they do not.
+   * - `sparse_checksum` – compare file attributes and the sparse file checksums; resume if they match, and re-transfer if they do not.
+   * - `full_checksum` – compare file attributes and the full file checksums; resume if they match, and re-transfer if they do not.
    * @default 2
    */
-  resume_policy?: '0'|'1'|'2'|'3'; // FIXME: This is resume in Connect
+  resume_policy?: ResumePolicy;
   /** Total time committed to retrying the transfer */
   retry_duration?: number;
+  /**
+   * @deprecated Use `save_before_overwrite` instead.
+   */
+  'save-before-overwrite'?: boolean;
   /** Rename the file instead of overwriting it. `resume_policy` must be set to `none` for this to take effect. */
   save_before_overwrite?: boolean;
   /** Don’t check for duplicate files at the destination. */

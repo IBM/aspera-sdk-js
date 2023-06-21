@@ -31,7 +31,16 @@ export interface FolderDialogOptions {
   multiple?: boolean;
 }
 
-export interface TransferSpecPath {
+export interface DesktopSpec {
+  /**
+   * By default, the destination of a download is relative to the user's download directory setting.
+   * Setting this value to `true` overrides this behavior, using absolute paths instead. This is useful
+   * if you want to allow users to download files to a specific directory.
+   */
+  use_absolute_destination_path?: boolean;
+}
+
+export interface Path {
   /** Source path for the transfer */
   source: string;
   /** Destination path for the transfer */
@@ -187,7 +196,7 @@ export interface TransferSpec {
    * A list of the file and directory paths to transfer. Use `destination_root` to specify the destination directory.
    * It is recommended to always specify both the `source` and `destination` properties for each path.
    */
-  paths?: TransferSpecPath[];
+  paths?: Path[];
   /** Calculate total size before transfer */
   precalculate_job_size?: boolean;
   /** Preserve the time the file was last accessed (read or write access) on the source. */

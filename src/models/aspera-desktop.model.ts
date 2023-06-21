@@ -1,4 +1,4 @@
-import {DesktopTransfer, FileDialogOptions, FolderDialogOptions, TransferSpec} from './models';
+import {DesktopSpec, DesktopTransfer, FileDialogOptions, FolderDialogOptions, TransferSpec} from './models';
 import {errorLog} from '../helpers/helpers';
 import {websocketService} from '../helpers/ws';
 import {hiddenStyleList, protocol} from '../constants/constants';
@@ -165,7 +165,7 @@ export class Desktop {
   /** Function to test the Aspera Desktop status */
   testDesktopConnection: () => Promise<any>;
   /** Function to initiate a transfer */
-  startTransfer: (transferSpec: TransferSpec) => Promise<any>;
+  startTransfer: (transferSpec: TransferSpec, desktopSpec: DesktopSpec) => Promise<any>;
   /** Function to launch Aspera Desktop */
   launch: () => void;
   /** Register callback for the transfer activity monitor */

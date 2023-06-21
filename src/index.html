@@ -149,8 +149,11 @@
       }
 
       function transfer() {
+        const desktopSpec = {
+          use_absolute_destination_path: false
+        };
         const transferSpec = JSON.parse(document.querySelector('#test-input').value);
-        asperaDesktop.startTransfer(transferSpec).then(response => {
+        asperaDesktop.startTransfer(transferSpec, desktopSpec).then(response => {
           console.log('TRANSFER SUCCESS', response);
         }).catch(error => {
           console.log('TRANSFER FAIL', error);

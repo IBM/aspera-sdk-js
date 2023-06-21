@@ -3,10 +3,10 @@ import {client} from '../helpers/client';
 import {errorLog, generateErrorBody, generatePromiseObjects, getWebsocketUrl, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
 import {messages} from '../constants/messages';
 import {DesktopInfo, TransferResponse} from '../models/aspera-desktop.model';
-import {DesktopTransfer, FileDialogOptions, FolderDialogOptions, TransferSpec} from '../models/models';
+import {DesktopSpec, DesktopTransfer, FileDialogOptions, FolderDialogOptions, TransferSpec} from '../models/models';
 
 /**
- * Check if Aspera Desktop connection works. This function is called by init
+ * Check if IBM Aspera Desktop connection works. This function is called by init
  * when initializing the SDK. This function can be used at any point for checking.
  *
  * @returns a promise that resolves if server can connect or rejects if not
@@ -21,7 +21,7 @@ export const testDesktopConnection = (): Promise<any> => {
 };
 
 /**
- * Initialize websocket connection to Aspera Desktop. This function only resolves
+ * Initialize websocket connection to IBM Aspera Desktop. This function only resolves
  * if the websocket connection is successful. It will attempt to reconnnect indefinitely.
  *
  * @returns a promise that resolves if the websocket connection is successful
@@ -32,14 +32,14 @@ export const initWebSocketConnection = (): Promise<any> => {
 };
 
 /**
- * Initialize Aspera Desktop client. If client cannot (reject/catch), then
+ * Initialize IBM Aspera Desktop client. If client cannot (reject/catch), then
  * client should attempt fixing server URL or trying again. If still fails disable UI elements.
  *
  * @param appId the unique ID for the website. Transfers initiated during this session
  * will be associated with this ID. It is recommended to use a unique ID to keep transfer
  * information private from other websites.
  *
- * @returns a promise that resolves if Aspera Desktop is running properly or
+ * @returns a promise that resolves if IBM Aspera Desktop is running properly or
  * rejects if unable to connect
  */
 export const initDesktop = (appId?: string): Promise<any> => {
@@ -56,10 +56,11 @@ export const initDesktop = (appId?: string): Promise<any> => {
  * Start a transfer
  *
  * @param transferSpec standard transferSpec for transfer
+ * @param desktopSpec IBM Aspera Desktop settings when starting a transfer
  *
  * @returns a promise that resolves if transfer initiation is successful and rejects if transfer cannot be started
  */
-export const startTransfer = (transferSpec: TransferSpec): Promise<any> => {
+export const startTransfer = (transferSpec: TransferSpec, desktopSpec: DesktopSpec): Promise<any> => {
   if (!asperaDesktop.isReady) {
     return throwError(messages.serverNotVerified);
   }
@@ -72,6 +73,7 @@ export const startTransfer = (transferSpec: TransferSpec): Promise<any> => {
 
   const payload = {
     transfer_spec: transferSpec,
+    desktop_spec: desktopSpec,
     app_id: asperaDesktop.globals.appId,
   };
 
@@ -107,7 +109,7 @@ export const deregisterActivityCallback = (id: string): void => {
 
 /**
  * Register a callback event for when a user removes or cancels a transfer
- * directly from Aspera Desktop. This may also be called if Aspera Desktop
+ * directly from IBM Aspera Desktop. This may also be called if IBM Aspera Desktop
  * is configured to automatically remove completed transfers.
  *
  * @param callback callback function to receive transfers

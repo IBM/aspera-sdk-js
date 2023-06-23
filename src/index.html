@@ -208,6 +208,14 @@
         })
       }
 
+      function openPreferences() {
+        asperaDesktop.showPreferences().then(response => {
+          console.log('SHOW PREFERENCES SUCCESS', response);
+        }).catch(error => {
+          console.log('SHOW PREFERENCES FAIL', error);
+        })
+      }
+
       function monitorRemovedTransfers(transfer) {
         console.log('TRANSFER WAS REMOVED', transfer);
       }
@@ -263,6 +271,7 @@
       <button onclick="getTransfers()" type="button">Get transfers</button>
       <button onclick="showSelectFileDialog()" type="button">Select File</button>
       <button onclick="showSelectFolderDialog()" type="button">Select Folder</button>
+      <button onclick="openPreferences()" type="button">Open Preferences</button>
       <button onclick="launch()" type="button">Launch</button>
     </div>
     <div class="flex-page">

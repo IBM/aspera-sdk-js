@@ -242,6 +242,28 @@ export const showSelectFolderDialog = (options?: FolderDialogOptions): Promise<a
 };
 
 /**
+ * Opens the IBM Aspera Desktop preferences page.
+ *
+ * @returns a promise that resolves when the preferences page is opened.
+ */
+export const showPreferences = (): Promise<any> => {
+  if (!asperaDesktop.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  const promiseInfo = generatePromiseObjects();
+
+  client.request('open_preferences')
+    .then((data: any) => promiseInfo.resolver(data))
+    .catch(error => {
+      errorLog(messages.showPreferencesFailed, error);
+      promiseInfo.rejecter(generateErrorBody(messages.showPreferencesFailed, error));
+    });
+
+  return promiseInfo.promise;
+};
+
+/**
  * Get transfers.
  *
  * @param ids[] array of transfer uuids. If an empty array is provided, then all transfers will be returned.

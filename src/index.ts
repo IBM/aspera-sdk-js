@@ -13,6 +13,7 @@ import {
   deregisterRemovedCallback,
   showSelectFileDialog,
   showSelectFolderDialog,
+  showPreferences,
 } from './app/core';
 
 export const asperaDesktop: Desktop = new Desktop();
@@ -30,6 +31,7 @@ asperaDesktop.registerRemovedCallback = registerRemovedCallback;
 asperaDesktop.deregisterRemovedCallback = deregisterRemovedCallback;
 asperaDesktop.showSelectFileDialog = showSelectFileDialog;
 asperaDesktop.showSelectFolderDialog = showSelectFolderDialog;
+asperaDesktop.showPreferences = showPreferences;
 
 const launch = asperaDesktop.globals.launch;
 asperaDesktop.launch = launch;
@@ -53,6 +55,7 @@ export {
   deregisterRemovedCallback,
   showSelectFileDialog,
   showSelectFolderDialog,
+  showPreferences,
 };
 
 export default {
@@ -70,4 +73,5 @@ export default {
   deregisterRemovedCallback,
   showSelectFileDialog,
   showSelectFolderDialog,
+  showPreferences,
 };

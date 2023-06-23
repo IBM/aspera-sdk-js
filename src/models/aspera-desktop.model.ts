@@ -5,7 +5,7 @@ import {hiddenStyleList, protocol} from '../constants/constants';
 import {messages} from '../constants/messages';
 
 class DesktopGlobals {
-  /** The URL of the Aspera Desktop HTTP server to use with the SDK */
+  /** The URL of the IBM Aspera Desktop HTTP server to use with the SDK */
   desktopUrl = 'http://127.0.0.1:33024';
   /** Desktop info */
   desktopInfo: DesktopInfo;
@@ -20,7 +20,7 @@ class DesktopGlobals {
   }
 
   /**
-   * Launch the Aspera Desktop via protocol url. By default a hidden IFRAME attempts to
+   * Launch the IBM Aspera Desktop via protocol url. By default a hidden IFRAME attempts to
    * open the app but if that fails a fallback of opening a new window happens.
    */
   launch(): void {
@@ -41,7 +41,7 @@ class DesktopGlobals {
 }
 
 export class DesktopInfo {
-  /** The version of Aspera Desktop */
+  /** The version of IBM Aspera Desktop */
   version: string;
 }
 
@@ -86,7 +86,7 @@ export class ActivityTracking {
   }
 
   /**
-   * Set up the websocket connection to Aspera Desktop
+   * Set up the websocket connection to IBM Aspera Desktop
    *
    * @param url websocket URL
    *
@@ -156,17 +156,17 @@ export class ActivityTracking {
 }
 
 export class Desktop {
-  /** Global information about Aspera Desktop */
+  /** Global information about IBM Aspera Desktop */
   globals: DesktopGlobals = new DesktopGlobals();
   /** Activity tracking for watching transfers */
   activityTracking: ActivityTracking = new ActivityTracking();
-  /** Function to initialize Aspera Desktop */
+  /** Function to initialize IBM Aspera Desktop */
   initDesktop: (appId: string) => Promise<any>;
-  /** Function to test the Aspera Desktop status */
+  /** Function to test the IBM Aspera Desktop status */
   testDesktopConnection: () => Promise<any>;
   /** Function to initiate a transfer */
   startTransfer: (transferSpec: TransferSpec, desktopSpec: DesktopSpec) => Promise<any>;
-  /** Function to launch Aspera Desktop */
+  /** Function to launch IBM Aspera Desktop */
   launch: () => void;
   /** Register callback for the transfer activity monitor */
   registerActivityCallback: (callback: (transfers: TransferResponse) => void) => string;
@@ -188,10 +188,11 @@ export class Desktop {
   showSelectFileDialog: (options?: FileDialogOptions) => Promise<any>;
   /** Function to display a folder dialog for the user to select folders. */
   showSelectFolderDialog: (options?: FolderDialogOptions) => Promise<any>;
+  /** Function to display the IBM Aspera Desktop preferences page */
+  showPreferences: () => Promise<any>;
 
   /**
-   * Check if the Aspera Desktop HTTP server is ready to be used
-   * and has been verified.
+   * Check if IBM Aspera Desktop is ready to be used and has been verified.
    *
    * @returns a boolean indicating if SDK can be used for requests
    */

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.9](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.8...v0.1.9) (2023-06-23)
+
+
+### Features
+
+* desktop spec parameter when starting a transfer ([#39](https://github.ibm.com/Aspera/desktop-sdk-ts/issues/39)) ([833a3c3](https://github.ibm.com/Aspera/desktop-sdk-ts/commit/833a3c3f940a3e875a94d1b6f32770b6c73db700))
+* show preferences ([#41](https://github.ibm.com/Aspera/desktop-sdk-ts/issues/41)) ([59a0aea](https://github.ibm.com/Aspera/desktop-sdk-ts/commit/59a0aeae887c45bb1501992efc9baf9a678b0a9c))
+
 ### [0.1.8](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.7...v0.1.8) (2023-06-14)
 
 

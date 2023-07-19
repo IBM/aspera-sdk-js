@@ -1,4 +1,4 @@
-import {DesktopSpec, DesktopTransfer, FileDialogOptions, FolderDialogOptions, TransferSpec} from './models';
+import {DesktopSpec, DesktopTransfer, ModifyTransferOptions, FileDialogOptions, FolderDialogOptions, TransferSpec} from './models';
 import {errorLog} from '../helpers/helpers';
 import {websocketService} from '../helpers/ws';
 import {hiddenStyleList, protocol} from '../constants/constants';
@@ -190,6 +190,8 @@ export class Desktop {
   showSelectFolderDialog: (options?: FolderDialogOptions) => Promise<any>;
   /** Function to display the IBM Aspera Desktop preferences page */
   showPreferences: () => Promise<any>;
+  /** Function to modify a running transfer */
+  modifyTransfer: (transferId: string, options: ModifyTransferOptions) => Promise<any>;
 
   /**
    * Check if IBM Aspera Desktop is ready to be used and has been verified.

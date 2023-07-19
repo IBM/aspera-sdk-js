@@ -14,6 +14,7 @@ import {
   showSelectFileDialog,
   showSelectFolderDialog,
   showPreferences,
+  modifyTransfer,
 } from './app/core';
 
 export const asperaDesktop: Desktop = new Desktop();
@@ -32,6 +33,7 @@ asperaDesktop.deregisterRemovedCallback = deregisterRemovedCallback;
 asperaDesktop.showSelectFileDialog = showSelectFileDialog;
 asperaDesktop.showSelectFolderDialog = showSelectFolderDialog;
 asperaDesktop.showPreferences = showPreferences;
+asperaDesktop.modifyTransfer = modifyTransfer;
 
 const launch = asperaDesktop.globals.launch;
 asperaDesktop.launch = launch;
@@ -56,6 +58,7 @@ export {
   showSelectFileDialog,
   showSelectFolderDialog,
   showPreferences,
+  modifyTransfer,
 };
 
 export default {
@@ -74,4 +77,5 @@ export default {
   showSelectFileDialog,
   showSelectFolderDialog,
   showPreferences,
+  modifyTransfer,
 };

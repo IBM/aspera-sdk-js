@@ -216,6 +216,18 @@
         })
       }
 
+      function modifyTransfer(id) {
+        const options = {
+          target_rate_kbps: 10,
+        };
+
+        asperaDesktop.modifyTransfer(id, options).then(response => {
+          console.log('MODIFY TRANSFER SUCCESS', response);
+        }).catch(error => {
+          console.log('MODIFY TRANSFER FAIL', error);
+        })
+      }
+
       function monitorRemovedTransfers(transfer) {
         console.log('TRANSFER WAS REMOVED', transfer);
       }
@@ -246,6 +258,7 @@
             <button onclick=stopTransfer("${transfer.uuid}")>Stop</button>
             <button onclick=getTransfers(["${transfer.uuid}"])>Info</button>
             <button onclick=showDirectory("${transfer.uuid}")>Show</button>
+            <button onclick=modifyTransfer("${transfer.uuid}")>Modify</button>
           `;
           transferDom.appendChild(element);
         });

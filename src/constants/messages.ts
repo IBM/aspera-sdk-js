@@ -13,6 +13,7 @@ export const messages = {
   showSelectFolderDialogFailed: 'Unable to show select folder dialog',
   showPreferencesFailed: 'Unable to show preferences',
   stopTransferFailed: 'Unable to stop transfer',
+  modifyTransferFailed: 'Unable to modify transfer',
   transferFailed: 'The transfer failed to initiate',
   websocketClosedError: 'The websocket was closed due to an error',
   websocketClosedUnexpect: 'The websocket was closed unexpectedly',

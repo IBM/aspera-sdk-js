@@ -31,6 +31,46 @@ export interface FolderDialogOptions {
   multiple?: boolean;
 }
 
+export interface ModifyTransferOptions {
+  /**
+   * @deprecated Use `lock_min_rate_kbps` instead.
+   */
+  lock_min_rate?: boolean;
+  /**
+   * If `true`, lock the minimum transfer rate to the value set for `min_rate_kbps`.
+   * If `false`, users can adjust the transfer rate up to the value set for `target_rate_cap_kbps`.
+   */
+  lock_min_rate_kbps?: boolean;
+  /**
+   * Lock the rate policy to the value set for `rate_policy`.
+   */
+  lock_rate_policy?: boolean;
+  /**
+   * @deprecated Use `lock_target_rate_kbps` instead.
+   */
+  lock_target_rate?: boolean;
+  /**
+   * If `true`, lock the target transfer rate to the default value set for `target_rate_kbps`.
+   * If `false`, users can adjust the transfer rate up to the value set for `target_rate_cap_kbps`.
+   */
+  lock_target_rate_kbps?: boolean;
+  /* Minimum transfer rate, in kilobits per second */
+  min_rate_kbps?: number;
+  /**
+   * The congestion control behavior to use when sharing bandwidth.
+   *
+   * - `fixed` - Transfer at the target rate regardless of actual network capacity. Do not share bandwidth. Not recommended.
+   * - `high` - When sharing bandwidth, transfer at twice the rate of a transfer using "fair" policy.
+   * - `fair` - Share bandwidth equally with other traffic.
+   * - `low` - Use only unutilized bandwidth.
+   */
+  rate_policy?: 'fixed'|'fair'|'high'|'low';
+  /** Ideal transfer rate, in kilobits per second. */
+  target_rate_kbps?: number;
+  /** Maximum target rate for incoming transfers, in kilobits per second. */
+  target_rate_cap_kbps?: number;
+}
+
 export interface DesktopSpec {
   /**
    * By default, the destination of a download is relative to the user's download directory setting.

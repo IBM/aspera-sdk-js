@@ -3,7 +3,7 @@ import {client} from '../helpers/client';
 import {errorLog, generateErrorBody, generatePromiseObjects, getWebsocketUrl, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
 import {messages} from '../constants/messages';
 import {DesktopInfo, TransferResponse} from '../models/aspera-desktop.model';
-import {DesktopSpec, DesktopTransfer, FileDialogOptions, FolderDialogOptions, TransferSpec} from '../models/models';
+import {DesktopSpec, DesktopTransfer, FileDialogOptions, FolderDialogOptions, ModifyTransferOptions, TransferSpec} from '../models/models';
 
 /**
  * Check if IBM Aspera Desktop connection works. This function is called by init
@@ -317,6 +317,36 @@ export const showDirectory = (id: string): Promise<any> => {
     .catch(error => {
       errorLog(messages.showDirectoryFailed, error);
       promiseInfo.rejecter(generateErrorBody(messages.showDirectoryFailed, error));
+    });
+
+  return promiseInfo.promise;
+};
+
+/**
+ * Modify the speed of a running transfer.
+ *
+ * @param id transfer uuid
+ * @param options transfer rate options
+ *
+ * @returns a promise that resolves if the transfer rate can be modified and rejects if not
+ */
+export const modifyTransfer = (id: string, options: ModifyTransferOptions): Promise<any> => {
+  if (!asperaDesktop.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  const promiseInfo = generatePromiseObjects();
+
+  const payload = {
+    transfer_id: id,
+    transfer_spec: options,
+  };
+
+  client.request('modify_transfer', payload)
+    .then((data: any) => promiseInfo.resolver(data))
+    .catch(error => {
+      errorLog(messages.modifyTransferFailed, error);
+      promiseInfo.rejecter(generateErrorBody(messages.modifyTransferFailed, error));
     });
 
   return promiseInfo.promise;

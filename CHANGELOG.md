@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.11](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.10...v0.1.11) (2023-07-20)
+
+
+### Features
+
+* set dropzone target ([#43](https://github.ibm.com/Aspera/desktop-sdk-ts/issues/43)) ([5586a4f](https://github.ibm.com/Aspera/desktop-sdk-ts/commit/5586a4f4b43580c19319afb6f2c7ba336a8c31af))
+
 ### [0.1.10](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.9...v0.1.10) (2023-07-19)
 
 

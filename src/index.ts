@@ -15,6 +15,7 @@ import {
   showSelectFolderDialog,
   showPreferences,
   modifyTransfer,
+  createDropzone,
 } from './app/core';
 
 export const asperaDesktop: Desktop = new Desktop();
@@ -34,6 +35,7 @@ asperaDesktop.showSelectFileDialog = showSelectFileDialog;
 asperaDesktop.showSelectFolderDialog = showSelectFolderDialog;
 asperaDesktop.showPreferences = showPreferences;
 asperaDesktop.modifyTransfer = modifyTransfer;
+asperaDesktop.createDropzone = createDropzone;
 
 const launch = asperaDesktop.globals.launch;
 asperaDesktop.launch = launch;
@@ -59,6 +61,7 @@ export {
   showSelectFolderDialog,
   showPreferences,
   modifyTransfer,
+  createDropzone,
 };
 
 export default {
@@ -78,4 +81,5 @@ export default {
   showSelectFolderDialog,
   showPreferences,
   modifyTransfer,
+  createDropzone,
 };

@@ -31,6 +31,17 @@ export interface FolderDialogOptions {
   multiple?: boolean;
 }
 
+export interface DesktopStyleFile {
+  /** Last modified date of the file in milliseconds since the UNIX epoch */
+  lastModified: number;
+  /** Absolute path of the file */
+  name: string;
+  /** Size in bytes of the file */
+  size: number;
+  /** Mime type of the file */
+  type: string;
+}
+
 export interface ModifyTransferOptions {
   /**
    * @deprecated Use `lock_min_rate_kbps` instead.

@@ -15,6 +15,8 @@ export const messages = {
   stopTransferFailed: 'Unable to stop transfer',
   modifyTransferFailed: 'Unable to modify transfer',
   transferFailed: 'The transfer failed to initiate',
+  unableToFindElementOnPage: 'Unable to find the element on the current page',
+  unableToReadDropped: 'The dropped item could not be parsed. Please try selecting via the select file/folder option',
   websocketClosedError: 'The websocket was closed due to an error',
   websocketClosedUnexpect: 'The websocket was closed unexpectedly',
   websocketNotReady: 'The websocket is not ready. Run init first',

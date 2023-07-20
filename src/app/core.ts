@@ -3,7 +3,7 @@ import {client} from '../helpers/client';
 import {errorLog, generateErrorBody, generatePromiseObjects, getWebsocketUrl, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
 import {messages} from '../constants/messages';
 import {DesktopInfo, TransferResponse} from '../models/aspera-desktop.model';
-import {DesktopSpec, DesktopTransfer, FileDialogOptions, FolderDialogOptions, ModifyTransferOptions, TransferSpec} from '../models/models';
+import {DesktopSpec, DesktopStyleFile, DesktopTransfer, FileDialogOptions, FolderDialogOptions, ModifyTransferOptions, TransferSpec} from '../models/models';
 
 /**
  * Check if IBM Aspera Desktop connection works. This function is called by init
@@ -350,4 +350,57 @@ export const modifyTransfer = (id: string, options: ModifyTransferOptions): Prom
     });
 
   return promiseInfo.promise;
+};
+
+/**
+ * Create a dropzone for the given element selector.
+ *
+ * @param callback the function to call once the files are dropped
+ * @param elementSelector the selector of the element on the page that should watch for drop events
+ */
+export const createDropzone = (
+  callback: (data: {event: any; files: {dataTransfer: {files: DesktopStyleFile[]}}}) => void,
+  elementSelector: string,
+): void => {
+  const elements = document.querySelectorAll(elementSelector);
+  if (!elements || !elements.length) {
+    errorLog(messages.unableToFindElementOnPage);
+    return;
+  }
+
+  const dragEvent = (event: any) => {
+    event.preventDefault();
+  };
+
+  const dropEvent = (event: any) => {
+    event.preventDefault();
+    const files: DesktopStyleFile[] = [];
+    if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length && event.dataTransfer.files[0]) {
+      for (let i = 0; i < event.dataTransfer.files.length; i++) {
+        const file = event.dataTransfer.files[i];
+        files.push({
+          lastModified: file.lastModified,
+          name: file.name,
+          size: file.size,
+          type: file.type
+        });
+      }
+
+      const payload = {
+        files,
+      };
+
+      client.request('dropped_files', payload)
+        .then((data: any) => callback(data))
+        .catch(error => {
+          errorLog(messages.unableToReadDropped, error);
+        });
+    }
+  };
+
+  elements.forEach(element => {
+    element.addEventListener('dragover', dragEvent);
+    element.addEventListener('drop', dropEvent);
+    asperaDesktop.globals.dropzonesCreated.set(elementSelector, [{event: 'dragover', callback: dragEvent}, {event: 'drop', callback: dropEvent}]);
+  });
 };

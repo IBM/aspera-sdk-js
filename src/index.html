@@ -228,12 +228,20 @@
         })
       }
 
+      function testDrop() {
+        const callback = files => {
+          console.log('DROP ZONE CALLBACK', files);
+        }
+
+        asperaDesktop.createDropzone(callback, '#drop-area');
+      }
+
       function monitorRemovedTransfers(transfer) {
         console.log('TRANSFER WAS REMOVED', transfer);
       }
 
       function monitorTransfers(transfers) {
-        const transferDom = document.querySelector('#transfer-monitor');
+        const transferDom = document.querySelector('#transfer');
         while (transferDom.firstChild) {
           transferDom.removeChild(transferDom.firstChild);
         }
@@ -248,7 +256,7 @@
         }
         transfers.transfers.forEach(transfer => {
           const element = document.createElement('div');
-          element.setAttribute('class', 'transfer');
+          element.setAttribute('class', 'transfer-item');
           element.innerHTML = `
             <div class="progress">
               <div class="bar" style="width: ${(transfer.percentage * 100).toFixed(2)}%;"></div>
@@ -286,6 +294,7 @@
       <button onclick="showSelectFolderDialog()" type="button">Select Folder</button>
       <button onclick="openPreferences()" type="button">Open Preferences</button>
       <button onclick="launch()" type="button">Launch</button>
+      <button onclick="testDrop()" type="button">Set dropzone</button>
     </div>
     <div class="flex-page">
       <div class="text-area">
@@ -301,7 +310,7 @@
         <hl />
         <p>Drop test</p>
         <div class="drop-area" id="drop-area">Drop area</div>
-        <div class="transfer"><div class="name">No transfers</div></div>
+        <div id="transfer" class="transfer"><div class="name">No transfers</div></div>
       </div>
     </div>
   </body>

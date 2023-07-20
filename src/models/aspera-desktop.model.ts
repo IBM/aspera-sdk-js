@@ -1,4 +1,4 @@
-import {DesktopSpec, DesktopTransfer, ModifyTransferOptions, FileDialogOptions, FolderDialogOptions, TransferSpec} from './models';
+import {DesktopSpec, DesktopTransfer, ModifyTransferOptions, FileDialogOptions, FolderDialogOptions, TransferSpec, DesktopStyleFile} from './models';
 import {errorLog} from '../helpers/helpers';
 import {websocketService} from '../helpers/ws';
 import {hiddenStyleList, protocol} from '../constants/constants';
@@ -13,6 +13,8 @@ class DesktopGlobals {
   desktopVerified = false;
   /** The unique ID for the website */
   appId: string;
+  /** Map of dropzones created by querySelector */
+  dropzonesCreated: Map<string, {event: string; callback: (event: any) => void}[]> = new Map();
 
   backupLaunchMethod(url: string): void {
     window.alert(messages.loadingProtocol);
@@ -192,6 +194,8 @@ export class Desktop {
   showPreferences: () => Promise<any>;
   /** Function to modify a running transfer */
   modifyTransfer: (transferId: string, options: ModifyTransferOptions) => Promise<any>;
+  /** Create dropzone for drop events of files */
+  createDropzone: (callback: (data: {event: any; files: {dataTransfer: {files: DesktopStyleFile[]}}}) => void, elementSelector: string) => void;
 
   /**
    * Check if IBM Aspera Desktop is ready to be used and has been verified.

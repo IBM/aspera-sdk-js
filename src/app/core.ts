@@ -404,3 +404,24 @@ export const createDropzone = (
     asperaDesktop.globals.dropzonesCreated.set(elementSelector, [{event: 'dragover', callback: dragEvent}, {event: 'drop', callback: dropEvent}]);
   });
 };
+
+/**
+ * Remove dropzone.
+ *
+ * @param elementSelector the selector of the element on the page that should remove
+ */
+export const removeDropzone = (elementSelector: string): void => {
+  const foundDropzone = asperaDesktop.globals.dropzonesCreated.get(elementSelector);
+
+  if (foundDropzone) {
+    foundDropzone.forEach(data => {
+      const elements = document.querySelectorAll(elementSelector);
+
+      if (elements && elements.length) {
+        elements.forEach(element => {
+          element.removeEventListener(data.event, data.callback);
+        });
+      }
+    });
+  }
+};

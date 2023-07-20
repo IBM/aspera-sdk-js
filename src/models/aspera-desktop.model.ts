@@ -196,6 +196,8 @@ export class Desktop {
   modifyTransfer: (transferId: string, options: ModifyTransferOptions) => Promise<any>;
   /** Create dropzone for drop events of files */
   createDropzone: (callback: (data: {event: any; files: {dataTransfer: {files: DesktopStyleFile[]}}}) => void, elementSelector: string) => void;
+  /** Remove dropzone for drop events of files */
+  removeDropzone: (elementSelector: string) => void;
 
   /**
    * Check if IBM Aspera Desktop is ready to be used and has been verified.

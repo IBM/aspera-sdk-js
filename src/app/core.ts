@@ -201,6 +201,7 @@ export const showSelectFileDialog = (options?: FileDialogOptions): Promise<any> 
 
   const payload = {
     options: options || {},
+    app_id: asperaDesktop.globals.appId,
   };
 
   client.request('show_file_dialog', payload)
@@ -229,6 +230,7 @@ export const showSelectFolderDialog = (options?: FolderDialogOptions): Promise<a
 
   const payload = {
     options: options || {},
+    app_id: asperaDesktop.globals.appId,
   };
 
   client.request('show_folder_dialog', payload)
@@ -388,6 +390,7 @@ export const createDropzone = (
 
       const payload = {
         files,
+        app_id: asperaDesktop.globals.appId,
       };
 
       client.request('dropped_files', payload)

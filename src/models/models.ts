@@ -89,6 +89,11 @@ export interface DesktopSpec {
    * if you want to allow users to download files to a specific directory.
    */
   use_absolute_destination_path?: boolean;
+  /**
+   * Base64 encoded preview image for the transfer. This image is displayed in the IBM Aspera Desktop transfer monitor
+   * alongside the transfer.
+   */
+  preview_base64?: string;
 }
 
 export interface Path {

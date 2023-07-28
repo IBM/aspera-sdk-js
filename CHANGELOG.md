@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.13](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.12...v0.1.13) (2023-07-28)
+
+
+### Features
+
+* preview_base64 desktop spec field ([#48](https://github.ibm.com/Aspera/desktop-sdk-ts/issues/48)) ([fbf592c](https://github.ibm.com/Aspera/desktop-sdk-ts/commit/fbf592cd17c80d3a6125f655cd1c308164a1104b))
+
 ### [0.1.12](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.11...v0.1.12) (2023-07-20)
 
 

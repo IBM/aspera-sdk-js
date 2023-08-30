@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.15](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.14...v0.1.15) (2023-08-30)
+
+
+### Bug Fixes
+
+* drop event object ([#54](https://github.ibm.com/Aspera/desktop-sdk-ts/issues/54)) ([adf52de](https://github.ibm.com/Aspera/desktop-sdk-ts/commit/adf52de3dda0930b3c306d3ff9095c155c5fb9b3))
+
 ### [0.1.14](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.13...v0.1.14) (2023-07-28)
 
 

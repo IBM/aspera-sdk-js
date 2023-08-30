@@ -394,7 +394,7 @@ export const createDropzone = (
       };
 
       client.request('dropped_files', payload)
-        .then((data: any) => callback(data))
+        .then((data: any) => callback({event, files: data}))
         .catch(error => {
           errorLog(messages.unableToReadDropped, error);
         });

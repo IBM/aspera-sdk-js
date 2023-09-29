@@ -31,6 +31,31 @@ export interface FolderDialogOptions {
   multiple?: boolean;
 }
 
+/**
+ * Options related to fetching the latest Aspera for Desktop installer information.
+ *
+ * These options allow clients to customize where the installer information is fetched from
+ * (e.g. when self-hosting) as well as which installer information is returned back to the caller.
+ */
+export interface InstallerOptions {
+  /**
+   * Custom URL to fetch Aspera for Desktop installers from. Generally this is only
+   * needed when self-hosting the installers rather than using the installers
+   * hosted on CloudFront.
+   *
+   * This URL should point to the directory containing the `latest.json` file that
+   * contains the installer information.
+   *
+   * Example: `https://example.com/aspera/desktop/downloads`
+   */
+  endpoint?: string;
+  /**
+   * If `true`, the response will contain the installer info for all platforms.
+   * By default, only the installer info for the user's detected platform is returned.
+   */
+  all?: true;
+}
+
 export interface DesktopStyleFile {
   /** Last modified date of the file in milliseconds since the UNIX epoch */
   lastModified: number;
@@ -393,6 +418,24 @@ export interface DesktopTransfer {
   // remaining_usec: number; // FIXME: Not yet added in desktop
   /** The title of the transfer */
   title: string;
+}
+
+export interface InstallerInfo {
+  /** Platform  */
+  platform: 'macos'|'windows'|'linux';
+  /** Architecture */
+  arch: string;
+  /** Installer type e.g. dmg, msi, etc. */
+  type: string;
+  /** Download URL */
+  url: string;
+  /** Version */
+  version: string;
+}
+
+export interface InstallerInfoResponse {
+  /** List of installers */
+  entries: InstallerInfo[];
 }
 
 export type WebsocketTopics = 'subscribe_transfer_activity' | 'transfer_activity';

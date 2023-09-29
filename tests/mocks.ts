@@ -1,18 +1,11 @@
 export const mockFetch = (data: any) =>  {
   const returnPromise = new Promise(resolver => {
-    resolver({});
+    resolver(data);
   });
   return jest.fn().mockImplementation(() => {
-    let localResolve;
-    const testPromise = new Promise(resolver => {
-      localResolve = resolver;
-    });
-
-    Promise.resolve({
+    return Promise.resolve({
       ok: true,
-      json: () => returnPromise.catch(() => {})
-    });
-
-    return testPromise;
+      json:() => returnPromise.catch(() => {}),
+    })
   });
 };

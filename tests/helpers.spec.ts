@@ -1,4 +1,4 @@
-import {errorLog, generateErrorBody, generatePromiseObjects, isValidTransferSpec} from '../src/helpers/helpers';
+import {errorLog, generateErrorBody, generatePromiseObjects, isValidTransferSpec, isValidURL} from '../src/helpers/helpers';
 import {TransferSpec} from '../src/models/models';
 
 describe('generatePromiseObjects', () => {
@@ -85,3 +85,31 @@ describe('isValidTransferSpec', () => {
     });
   });
 });
+
+describe('isValidURL', () => {
+  const validUrls = [
+    'http://www.aspera.us',
+    'https://www.aspera.us',
+    'https://aspera.us',
+    'https://aspera.us/aspera/desktop/latest.json',
+    'https://aspera.us///aspera/desktop',
+  ];
+  const invalidUrls = [
+    'aspera.us',
+    '/aspera/desktop',
+    'aspera',
+  ];
+
+  test('should return true if valid url', () => {
+    validUrls.forEach(url => {
+      expect(isValidURL(url)).toBe(true);
+    });
+  });
+
+  test('should return false if invalid url', () => {
+    invalidUrls.forEach(url => {
+      expect(isValidURL(url)).toBe(false);
+    });
+  });
+});
+

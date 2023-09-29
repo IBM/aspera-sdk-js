@@ -94,6 +94,25 @@ export const getWebsocketUrl = (serverUrl: string): string => {
 };
 
 /**
+ * Simple function to get the current platform.
+ *
+ * @returns a string indicating the current platform
+ */
+export const getCurrentPlatform = (): 'macos'|'windows'|'linux'|'unknown' => {
+  const ua = navigator.userAgent;
+
+  if (/Mac/.test(ua)) {
+    return 'macos';
+  } else if (/Win/.test(ua)) {
+    return 'windows';
+  } else if (/Linux/.test(ua)) {
+    return 'linux';
+  } else {
+    return 'unknown';
+  }
+};
+
+/**
  * Function used to create a random UUID
  *
  * @returns string
@@ -128,12 +147,30 @@ export const throwError = (message: string, debugData?: any): Promise<any> => {
   });
 };
 
+/**
+ * Check if the given string is a valid URL
+ *
+ * @param url string to check if valid URL
+ *
+ * @returns boolean
+ */
+export const isValidURL = (url: string): boolean => {
+  try {
+    new URL(url);
+    return true;
+  } catch(error) {
+    return false;
+  }
+};
+
 export default {
   generatePromiseObjects,
   errorLog,
   generateErrorBody,
   isValidTransferSpec,
   getWebsocketUrl,
+  getCurrentPlatform,
   randomUUID,
   throwError,
+  isValidURL,
 };

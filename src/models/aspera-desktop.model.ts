@@ -1,4 +1,4 @@
-import {DesktopSpec, DesktopTransfer, ModifyTransferOptions, FileDialogOptions, FolderDialogOptions, TransferSpec, DesktopStyleFile} from './models';
+import {DesktopSpec, DesktopTransfer, ModifyTransferOptions, InstallerOptions, FileDialogOptions, FolderDialogOptions, TransferSpec, DesktopStyleFile} from './models';
 import {errorLog} from '../helpers/helpers';
 import {websocketService} from '../helpers/ws';
 import {hiddenStyleList, protocol} from '../constants/constants';
@@ -7,6 +7,8 @@ import {messages} from '../constants/messages';
 class DesktopGlobals {
   /** The URL of the IBM Aspera Desktop HTTP server to use with the SDK */
   desktopUrl = 'http://127.0.0.1:33024';
+  /** The default URL to check for latest Aspera Desktop installers */
+  installerUrl = 'https://d3gcli72yxqn2z.cloudfront.net/downloads/desktop/latest/stable';
   /** Desktop info */
   desktopInfo: DesktopInfo;
   /** Indication that the server has been verified as working */
@@ -198,6 +200,8 @@ export class Desktop {
   createDropzone: (callback: (data: {event: any; files: {dataTransfer: {files: DesktopStyleFile[]}}}) => void, elementSelector: string) => void;
   /** Remove dropzone for drop events of files */
   removeDropzone: (elementSelector: string) => void;
+  /** Function to get latest installer information */
+  getInstallerInfo: (options: InstallerOptions) => Promise<any>;
 
   /**
    * Check if IBM Aspera Desktop is ready to be used and has been verified.

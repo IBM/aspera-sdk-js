@@ -18,6 +18,9 @@ import {
   createDropzone,
   removeDropzone,
 } from './app/core';
+import {
+  getInstallerInfo,
+} from './app/installer';
 
 export const asperaDesktop: Desktop = new Desktop();
 
@@ -38,6 +41,7 @@ asperaDesktop.showPreferences = showPreferences;
 asperaDesktop.modifyTransfer = modifyTransfer;
 asperaDesktop.createDropzone = createDropzone;
 asperaDesktop.removeDropzone = removeDropzone;
+asperaDesktop.getInstallerInfo = getInstallerInfo;
 
 const launch = asperaDesktop.globals.launch;
 asperaDesktop.launch = launch;
@@ -65,6 +69,7 @@ export {
   modifyTransfer,
   createDropzone,
   removeDropzone,
+  getInstallerInfo,
 };
 
 export default {
@@ -86,4 +91,5 @@ export default {
   modifyTransfer,
   createDropzone,
   removeDropzone,
+  getInstallerInfo,
 };

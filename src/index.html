@@ -236,6 +236,14 @@
         asperaDesktop.createDropzone(callback, '#drop-area');
       }
 
+      function getInstallerInfo() {
+        asperaDesktop.getInstallerInfo().then(response => {
+          console.log('INSTALLER INFO SUCCESS', response);
+        }).catch(error => {
+          console.log('INSTALLER INFO FAIL', error);
+        })
+      }
+
       function monitorRemovedTransfers(transfer) {
         console.log('TRANSFER WAS REMOVED', transfer);
       }
@@ -295,6 +303,7 @@
       <button onclick="openPreferences()" type="button">Open Preferences</button>
       <button onclick="launch()" type="button">Launch</button>
       <button onclick="testDrop()" type="button">Set dropzone</button>
+      <button onclick="getInstallerInfo()" type="button">Installers</button>
     </div>
     <div class="flex-page">
       <div class="text-area">

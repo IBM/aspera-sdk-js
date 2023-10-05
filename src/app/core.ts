@@ -3,7 +3,7 @@ import {client} from '../helpers/client';
 import {errorLog, generateErrorBody, generatePromiseObjects, getWebsocketUrl, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
 import {messages} from '../constants/messages';
 import {DesktopInfo, TransferResponse} from '../models/aspera-desktop.model';
-import {DesktopSpec, DesktopStyleFile, DesktopTransfer, FileDialogOptions, FolderDialogOptions, ModifyTransferOptions, TransferSpec} from '../models/models';
+import {DataTransferResponse, DesktopSpec, DesktopStyleFile, DesktopTransfer, FileDialogOptions, FolderDialogOptions, ModifyTransferOptions, TransferSpec} from '../models/models';
 
 /**
  * Check if IBM Aspera Desktop connection works. This function is called by init
@@ -60,7 +60,7 @@ export const initDesktop = (appId?: string): Promise<any> => {
  *
  * @returns a promise that resolves if transfer initiation is successful and rejects if transfer cannot be started
  */
-export const startTransfer = (transferSpec: TransferSpec, desktopSpec: DesktopSpec): Promise<any> => {
+export const startTransfer = (transferSpec: TransferSpec, desktopSpec: DesktopSpec): Promise<DesktopTransfer> => {
   if (!asperaDesktop.isReady) {
     return throwError(messages.serverNotVerified);
   }
@@ -192,7 +192,7 @@ export const stopTransfer = (id: string): Promise<any> => {
  *
  * @returns a promise that resolves with the selected file(s) and rejects if user cancels dialog
  */
-export const showSelectFileDialog = (options?: FileDialogOptions): Promise<any> => {
+export const showSelectFileDialog = (options?: FileDialogOptions): Promise<DataTransferResponse> => {
   if (!asperaDesktop.isReady) {
     return throwError(messages.serverNotVerified);
   }
@@ -221,7 +221,7 @@ export const showSelectFileDialog = (options?: FileDialogOptions): Promise<any> 
  *
  * @returns a promise that resolves with the selected folder(s) and rejects if user cancels dialog
  */
-export const showSelectFolderDialog = (options?: FolderDialogOptions): Promise<any> => {
+export const showSelectFolderDialog = (options?: FolderDialogOptions): Promise<DataTransferResponse> => {
   if (!asperaDesktop.isReady) {
     return throwError(messages.serverNotVerified);
   }
@@ -332,7 +332,7 @@ export const showDirectory = (id: string): Promise<any> => {
  *
  * @returns a promise that resolves if the transfer rate can be modified and rejects if not
  */
-export const modifyTransfer = (id: string, options: ModifyTransferOptions): Promise<any> => {
+export const modifyTransfer = (id: string, options: ModifyTransferOptions): Promise<DesktopTransfer> => {
   if (!asperaDesktop.isReady) {
     return throwError(messages.serverNotVerified);
   }
@@ -361,7 +361,7 @@ export const modifyTransfer = (id: string, options: ModifyTransferOptions): Prom
  * @param elementSelector the selector of the element on the page that should watch for drop events
  */
 export const createDropzone = (
-  callback: (data: {event: any; files: {dataTransfer: {files: DesktopStyleFile[]}}}) => void,
+  callback: (data: {event: any; files: DataTransferResponse}) => void,
   elementSelector: string,
 ): void => {
   const elements = document.querySelectorAll(elementSelector);

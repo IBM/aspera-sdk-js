@@ -56,6 +56,13 @@ export interface InstallerOptions {
   all?: true;
 }
 
+/** Data response containing the file(s) and folder(s) selected or dropped by the user. */
+export interface DataTransferResponse {
+  dataTransfer: {
+    files: DesktopStyleFile[];
+  };
+}
+
 export interface DesktopStyleFile {
   /** Last modified date of the file in milliseconds since the UNIX epoch */
   lastModified: number;

@@ -1,4 +1,4 @@
-import {DesktopSpec, DesktopTransfer, ModifyTransferOptions, InstallerOptions, FileDialogOptions, FolderDialogOptions, TransferSpec, DesktopStyleFile} from './models';
+import {DesktopSpec, DesktopTransfer, ModifyTransferOptions, InstallerOptions, FileDialogOptions, FolderDialogOptions, TransferSpec, DesktopStyleFile, InstallerInfoResponse, DataTransferResponse} from './models';
 import {errorLog} from '../helpers/helpers';
 import {websocketService} from '../helpers/ws';
 import {hiddenStyleList, protocol} from '../constants/constants';
@@ -169,7 +169,7 @@ export class Desktop {
   /** Function to test the IBM Aspera Desktop status */
   testDesktopConnection: () => Promise<any>;
   /** Function to initiate a transfer */
-  startTransfer: (transferSpec: TransferSpec, desktopSpec: DesktopSpec) => Promise<any>;
+  startTransfer: (transferSpec: TransferSpec, desktopSpec: DesktopSpec) => Promise<DesktopTransfer>;
   /** Function to launch IBM Aspera Desktop */
   launch: () => void;
   /** Register callback for the transfer activity monitor */
@@ -189,19 +189,19 @@ export class Desktop {
   /** Function to get a list of transfers */
   getTransfers: (transferIds: string[]) => Promise<any>;
   /** Function to display a file dialog for the user to select files. */
-  showSelectFileDialog: (options?: FileDialogOptions) => Promise<any>;
+  showSelectFileDialog: (options?: FileDialogOptions) => Promise<DataTransferResponse>;
   /** Function to display a folder dialog for the user to select folders. */
-  showSelectFolderDialog: (options?: FolderDialogOptions) => Promise<any>;
+  showSelectFolderDialog: (options?: FolderDialogOptions) => Promise<DataTransferResponse>;
   /** Function to display the IBM Aspera Desktop preferences page */
   showPreferences: () => Promise<any>;
   /** Function to modify a running transfer */
-  modifyTransfer: (transferId: string, options: ModifyTransferOptions) => Promise<any>;
+  modifyTransfer: (transferId: string, options: ModifyTransferOptions) => Promise<DesktopTransfer>;
   /** Create dropzone for drop events of files */
-  createDropzone: (callback: (data: {event: any; files: {dataTransfer: {files: DesktopStyleFile[]}}}) => void, elementSelector: string) => void;
+  createDropzone: (callback: (data: {event: any; files: DataTransferResponse}) => void, elementSelector: string) => void;
   /** Remove dropzone for drop events of files */
   removeDropzone: (elementSelector: string) => void;
   /** Function to get latest installer information */
-  getInstallerInfo: (options: InstallerOptions) => Promise<any>;
+  getInstallerInfo: (options: InstallerOptions) => Promise<InstallerInfoResponse>;
 
   /**
    * Check if IBM Aspera Desktop is ready to be used and has been verified.

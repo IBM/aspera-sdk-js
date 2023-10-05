@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.17](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.16...v0.1.17) (2023-10-05)
+
+
+### Features
+
+* add api return types ([#58](https://github.ibm.com/Aspera/desktop-sdk-ts/issues/58)) ([0038fd0](https://github.ibm.com/Aspera/desktop-sdk-ts/commit/0038fd093b8fe3a7e212987e5568f9e2f04b2b5e))
+
 ### [0.1.16](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.15...v0.1.16) (2023-09-29)
 
 

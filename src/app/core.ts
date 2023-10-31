@@ -266,14 +266,11 @@ export const showPreferences = (): Promise<any> => {
 };
 
 /**
- * Get transfers.
+ * Get all transfers associated with the current application.
  *
- * @param ids[] array of transfer uuids. If an empty array is provided, then all transfers will be returned.
- *
- * @returns a promise that resolves with an array of transfers. If no matching transfers are found,
- * then an empty array is returned.
+ * @returns a promise that resolves with an array of transfers.
  */
-export const getTransfers = (ids?: string[]): Promise<any> => {
+export const getAllTransfers = (): Promise<DesktopTransfer[]> => {
   if (!asperaDesktop.isReady) {
     return throwError(messages.serverNotVerified);
   }
@@ -281,15 +278,42 @@ export const getTransfers = (ids?: string[]): Promise<any> => {
   const promiseInfo = generatePromiseObjects();
 
   const payload = {
-    transfer_ids: ids || [],
     app_id: asperaDesktop.globals.appId,
   };
 
-  client.request('get_transfers', payload)
-    .then((data: any) => promiseInfo.resolver(data))
+  client.request('get_all_transfers', payload)
+    .then((data: DesktopTransfer[]) => promiseInfo.resolver(data))
     .catch(error => {
-      errorLog(messages.getTransfersFailed, error);
-      promiseInfo.rejecter(generateErrorBody(messages.getTransfersFailed, error));
+      errorLog(messages.getAllTransfersFailed, error);
+      promiseInfo.rejecter(generateErrorBody(messages.getAllTransfersFailed, error));
+    });
+
+  return promiseInfo.promise;
+};
+
+/**
+ * Get a specific transfer by ID.
+ *
+ * @param id transfer uuid
+ *
+ * @returns a promise that resolves with the transfer.
+ */
+export const getTransfer = (id: string): Promise<DesktopTransfer> => {
+  if (!asperaDesktop.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  const promiseInfo = generatePromiseObjects();
+
+  const payload = {
+    transfer_id: id,
+  };
+
+  client.request('get_transfer', payload)
+    .then((data: DesktopTransfer) => promiseInfo.resolver(data))
+    .catch(error => {
+      errorLog(messages.getTransferFailed, error);
+      promiseInfo.rejecter(generateErrorBody(messages.getTransferFailed, error));
     });
 
   return promiseInfo.promise;

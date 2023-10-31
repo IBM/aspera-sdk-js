@@ -186,8 +186,10 @@ export class Desktop {
   showDirectory: (transferId: string) => Promise<any>;
   /** Function to stop a transfer */
   stopTransfer: (transferId: string) => Promise<any>;
-  /** Function to get a list of transfers */
-  getTransfers: (transferIds: string[]) => Promise<any>;
+  /** Function to get a list of all transfers */
+  getAllTransfers: () => Promise<DesktopTransfer[]>;
+  /** Function to get information for a specific transfer */
+  getTransfer: (transferId: string) => Promise<DesktopTransfer>;
   /** Function to display a file dialog for the user to select files. */
   showSelectFileDialog: (options?: FileDialogOptions) => Promise<DataTransferResponse>;
   /** Function to display a folder dialog for the user to select folders. */

@@ -135,6 +135,12 @@
         const id = document.querySelector('#app-id').value;
         asperaDesktop.initDesktop(id).then(response => {
           console.log('INIT SUCCESS', response);
+
+          asperaDesktop.getAllTransfers().then(response => {
+            monitorTransfers({ transfers: response });
+          }).catch(error => {
+            console.log('GET ALL TRANSFERS FAIL', error);
+          })
         }).catch(error => {
           console.log('INIT FAIL', error);
         })
@@ -176,11 +182,19 @@
         })
       }
 
-      function getTransfers(ids) {
-        asperaDesktop.getTransfers(ids).then(response => {
-          console.log('GET TRANSFERS SUCCESS', response);
+      function getAllTransfers() {
+        asperaDesktop.getAllTransfers().then(response => {
+          console.log('GET ALL TRANSFERS SUCCESS', response);
         }).catch(error => {
-          console.log('GET TRANSFERS FAIL', error);
+          console.log('GET ALL TRANSFERS FAIL', error);
+        })
+      }
+
+      function getTransfer(id) {
+        asperaDesktop.getTransfer(id).then(response => {
+          console.log('GET TRANSFER SUCCESS', response);
+        }).catch(error => {
+          console.log('GET TRANSFER FAIL', error);
         })
       }
 
@@ -272,7 +286,7 @@
             <div class="status">${transfer.status} - ${bytesCalc(transfer.bytes_written)} / ${bytesCalc(transfer.bytes_expected)}</div>
             <button onclick=remove("${transfer.uuid}")>Remove</button>
             <button onclick=stopTransfer("${transfer.uuid}")>Stop</button>
-            <button onclick=getTransfers(["${transfer.uuid}"])>Info</button>
+            <button onclick=getTransfer("${transfer.uuid}")>Info</button>
             <button onclick=showDirectory("${transfer.uuid}")>Show</button>
             <button onclick=modifyTransfer("${transfer.uuid}")>Modify</button>
           `;
@@ -297,7 +311,7 @@
       <button onclick="init()" type="button">Init SDK</button>
       <button onclick="testServer()" type="button">Test desktop</button>
       <button onclick="transfer()" type="button">Start transfer</button>
-      <button onclick="getTransfers()" type="button">Get transfers</button>
+      <button onclick="getAllTransfers()" type="button">Get transfers</button>
       <button onclick="showSelectFileDialog()" type="button">Select File</button>
       <button onclick="showSelectFolderDialog()" type="button">Select Folder</button>
       <button onclick="openPreferences()" type="button">Open Preferences</button>

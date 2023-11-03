@@ -1,3 +1,4 @@
+import { JSONRPCErrorException } from 'json-rpc-2.0';
 import {errorLog, generateErrorBody, generatePromiseObjects, isValidTransferSpec, isValidURL} from '../src/helpers/helpers';
 import {TransferSpec} from '../src/models/models';
 
@@ -49,11 +50,13 @@ describe('generateErrorBody', () => {
   });
 
   test('should return error object with debugData if data is passed', () => {
-    const errorTest = { error: 'testing error body'};
+    const errorTest = new JSONRPCErrorException('testing error body', -32002, {foo: 'bar'});
     const errorResponse = generateErrorBody('testing', errorTest);
     expect(errorResponse.message).toBe('testing');
     expect(errorResponse.error).toBe(true);
-    expect(errorResponse.debugData).toBe(errorTest);
+    expect(errorResponse.debugData.message).toBe('testing error body');
+    expect(errorResponse.debugData.code).toBe(-32002);
+    expect(errorResponse.debugData.data).toStrictEqual({foo: 'bar'});
   });
 });
 

@@ -26,12 +26,21 @@ export const generatePromiseObjects = (): PromiseObject => {
  * @param debugData the data with useful debugging information
  */
 export const errorLog = (message: string, debugData?: any): void => {
+  if (debugData && debugData.code && debugData.message) {
+    debugData = {
+      code: debugData.code,
+      message: debugData.message,
+      data: debugData.data
+    };
+  }
+
   if (typeof (<any>window) === 'object') {
     if (!Array.isArray((<any>window).asperaDesktopLogs)) {
       (<any>window).asperaDesktopLogs = [];
     }
     (<any>window).asperaDesktopLogs.push({message, debugData});
   }
+
   console.warn(`Aspera Desktop SDK: ${message}`, debugData);
 };
 
@@ -48,8 +57,13 @@ export const generateErrorBody = (message: string, debugData?: any): ErrorRespon
     error: true,
     message
   };
-  if (debugData) {
-    errorResponse.debugData = debugData;
+
+  if (debugData && debugData.code && debugData.message) {
+    errorResponse.debugData = {
+      code: debugData.code,
+      message: debugData.message,
+      data: debugData.data
+    };
   }
 
   return errorResponse;

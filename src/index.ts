@@ -8,6 +8,7 @@ import {
   removeTransfer,
   showDirectory,
   stopTransfer,
+  resumeTransfer,
   getAllTransfers,
   getTransfer,
   registerRemovedCallback,
@@ -33,6 +34,7 @@ asperaDesktop.deregisterActivityCallback = deregisterActivityCallback;
 asperaDesktop.removeTransfer = removeTransfer;
 asperaDesktop.showDirectory = showDirectory;
 asperaDesktop.stopTransfer = stopTransfer;
+asperaDesktop.resumeTransfer = resumeTransfer;
 asperaDesktop.getAllTransfers = getAllTransfers;
 asperaDesktop.getTransfer = getTransfer;
 asperaDesktop.registerRemovedCallback = registerRemovedCallback;
@@ -62,6 +64,7 @@ export {
   removeTransfer,
   showDirectory,
   stopTransfer,
+  resumeTransfer,
   getAllTransfers,
   getTransfer,
   registerRemovedCallback,
@@ -85,6 +88,7 @@ export default {
   removeTransfer,
   showDirectory,
   stopTransfer,
+  resumeTransfer,
   getAllTransfers,
   getTransfer,
   registerRemovedCallback,

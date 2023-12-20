@@ -182,6 +182,15 @@
         })
       }
 
+      function resumeTransfer(id) {
+        const transferSpec = JSON.parse(document.querySelector('#test-input').value);
+        asperaDesktop.resumeTransfer(id, transferSpec).then(response => {
+          console.log('RESUME SUCCESS', response);
+        }).catch(error => {
+          console.log('RESUME FAIL', error);
+        })
+      }
+
       function getAllTransfers() {
         asperaDesktop.getAllTransfers().then(response => {
           console.log('GET ALL TRANSFERS SUCCESS', response);
@@ -286,6 +295,7 @@
             <div class="status">${transfer.status} - ${bytesCalc(transfer.bytes_written)} / ${bytesCalc(transfer.bytes_expected)}</div>
             <button onclick=remove("${transfer.uuid}")>Remove</button>
             <button onclick=stopTransfer("${transfer.uuid}")>Stop</button>
+            <button onclick=resumeTransfer("${transfer.uuid}")>Resume</button>
             <button onclick=getTransfer("${transfer.uuid}")>Info</button>
             <button onclick=showDirectory("${transfer.uuid}")>Show</button>
             <button onclick=modifyTransfer("${transfer.uuid}")>Modify</button>

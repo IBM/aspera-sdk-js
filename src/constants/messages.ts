@@ -16,6 +16,7 @@ export const messages = {
   showSelectFolderDialogFailed: 'Unable to show select folder dialog',
   showPreferencesFailed: 'Unable to show preferences',
   stopTransferFailed: 'Unable to stop transfer',
+  resumeTransferFailed: 'Unable to resume transfer',
   modifyTransferFailed: 'Unable to modify transfer',
   transferFailed: 'The transfer failed to initiate',
   unableToFindElementOnPage: 'Unable to find the element on the current page',

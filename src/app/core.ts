@@ -3,7 +3,7 @@ import {client} from '../helpers/client';
 import {errorLog, generateErrorBody, generatePromiseObjects, getWebsocketUrl, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
 import {messages} from '../constants/messages';
 import {DesktopInfo, TransferResponse} from '../models/aspera-desktop.model';
-import {DataTransferResponse, DesktopSpec, DesktopStyleFile, DesktopTransfer, FileDialogOptions, FolderDialogOptions, ModifyTransferOptions, TransferSpec} from '../models/models';
+import {DataTransferResponse, DesktopSpec, DesktopStyleFile, DesktopTransfer, FileDialogOptions, FolderDialogOptions, ModifyTransferOptions, ResumeTransferOptions, TransferSpec} from '../models/models';
 
 /**
  * Check if IBM Aspera Desktop connection works. This function is called by init
@@ -180,6 +180,35 @@ export const stopTransfer = (id: string): Promise<any> => {
     .catch(error => {
       errorLog(messages.stopTransferFailed, error);
       promiseInfo.rejecter(generateErrorBody(messages.stopTransferFailed, error));
+    });
+
+  return promiseInfo.promise;
+};
+
+/**
+ * Resume a paused or failed transfer.
+ *
+ * @param id transfer uuid
+ *
+ * @returns a promise that resolves with the new transfer object if transfer is resumed
+ */
+export const resumeTransfer = (id: string, options?: ResumeTransferOptions): Promise<DesktopTransfer> => {
+  if (!asperaDesktop.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  const promiseInfo = generatePromiseObjects();
+
+  const payload = {
+    transfer_id: id,
+    transfer_spec: options,
+  };
+
+  client.request('resume_transfer', payload)
+    .then((data: DesktopTransfer) => promiseInfo.resolver(data))
+    .catch(error => {
+      errorLog(messages.resumeTransferFailed, error);
+      promiseInfo.rejecter(generateErrorBody(messages.resumeTransferFailed, error));
     });
 
   return promiseInfo.promise;

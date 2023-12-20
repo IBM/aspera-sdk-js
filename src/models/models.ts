@@ -114,6 +114,17 @@ export interface ModifyTransferOptions {
   target_rate_cap_kbps?: number;
 }
 
+export interface ResumeTransferOptions {
+  remote_user?: string;
+  remote_password?: string;
+  token?: string;
+  /**
+   * @deprecated Use `content_protection_password` instead.
+   */
+  content_protection_passphrase?: string;
+  content_protection_password?: string;
+}
+
 export interface DesktopSpec {
   /**
    * By default, the destination of a download is relative to the user's download directory setting.

@@ -1,4 +1,4 @@
-import {DesktopSpec, DesktopTransfer, ModifyTransferOptions, InstallerOptions, FileDialogOptions, FolderDialogOptions, TransferSpec, DesktopStyleFile, InstallerInfoResponse, DataTransferResponse} from './models';
+import {DesktopSpec, DesktopTransfer, ModifyTransferOptions, InstallerOptions, FileDialogOptions, FolderDialogOptions, TransferSpec, DesktopStyleFile, InstallerInfoResponse, DataTransferResponse, ResumeTransferOptions} from './models';
 import {errorLog} from '../helpers/helpers';
 import {websocketService} from '../helpers/ws';
 import {hiddenStyleList, protocol} from '../constants/constants';
@@ -186,6 +186,8 @@ export class Desktop {
   showDirectory: (transferId: string) => Promise<any>;
   /** Function to stop a transfer */
   stopTransfer: (transferId: string) => Promise<any>;
+  /** Function to resume a transfer */
+  resumeTransfer: (transferId: string, options?: ResumeTransferOptions) => Promise<DesktopTransfer>;
   /** Function to get a list of all transfers */
   getAllTransfers: () => Promise<DesktopTransfer[]>;
   /** Function to get information for a specific transfer */

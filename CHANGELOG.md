@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.20](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.19...v0.1.20) (2023-12-20)
+
+
+### Features
+
+* **#32:** resume transfer ([#67](https://github.ibm.com/Aspera/desktop-sdk-ts/issues/67)) ([36357c3](https://github.ibm.com/Aspera/desktop-sdk-ts/commit/36357c3d986624389d12bac9b1d835db9d20aedf)), closes [#32](https://github.ibm.com/Aspera/desktop-sdk-ts/issues/32)
+
 ### [0.1.19](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.18...v0.1.19) (2023-11-03)
 
 

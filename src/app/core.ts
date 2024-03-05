@@ -130,6 +130,30 @@ export const deregisterRemovedCallback = (id: string): void => {
 };
 
 /**
+ * Register a callback for getting updates about the connection status of IBM Aspera Desktop.
+ *
+ * For example, to be notified of when the SDK loses connection with the application or connection
+ * is re-established. This can be useful if you want to handle the case where the user quits IBM Aspera Desktop
+ * after `initDesktop` has already been called, and want to prompt the user to relaunch the application.
+ *
+ * @param callback callback function to receive events
+ *
+ * @returns ID representing the callback for deregistration purposes
+ */
+export const registerStatusCallback = (callback: (status: 'CLOSED'|'RECONNECT') => void): string => {
+  return asperaDesktop.activityTracking.setWebSocketEventCallback(callback);
+};
+
+/**
+ * Remove a callback from getting connection status events.
+ *
+ * @param id the ID returned by `registerStatusCallback`
+ */
+export const deregisterStatusCallback = (id: string): void => {
+  asperaDesktop.activityTracking.removeWebSocketEventCallback(id);
+};
+
+/**
  * Remove a transfer. This will stop the transfer if it is in progress.
  *
  * @param id transfer uuid

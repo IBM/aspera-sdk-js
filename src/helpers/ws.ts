@@ -10,11 +10,15 @@ export class WebsocketService {
   private appId: string;
   /** A map of requested subscription names and the callback for them */
   private sockets: Map<WebsocketTopics, Function> = new Map();
+  /** The callback for websocket events */
+  private eventListener: Function;
+  /** Indicator if the websocket is already closed to avoid multiples for same event. */
+  private hasClosed = false;
   /** The websocket URL to use */
   private websocketUrl: string;
   /** Indicator if restart in process to avoid multiples */
   private restartingWebsocket = false;
-  /** Global promise object that resolves when init copmletes */
+  /** Global promise object that resolves when init completes */
   private initPromise = generatePromiseObjects();
 
   /** Log call for not being ready */
@@ -28,6 +32,11 @@ export class WebsocketService {
   private handleOpen = (): void => {
     this.restartingWebsocket = false;
     this.joinChannel();
+
+    if (typeof this.eventListener === 'function') {
+      this.hasClosed = false;
+      this.eventListener('RECONNECT');
+    }
   };
 
   /**
@@ -35,6 +44,12 @@ export class WebsocketService {
    */
   private handleClosed = (): void => {
     this.restartingWebsocket = false;
+
+    if (!this.hasClosed && typeof this.eventListener === 'function') {
+      this.hasClosed = true;
+      this.eventListener('CLOSED');
+    }
+
     this.handleDisconnect();
   };
 
@@ -112,6 +127,16 @@ export class WebsocketService {
         callback(data.result);
       });
     }
+  }
+
+  /**
+   *
+   * @param callback This function registers clients to a certain WebSocket event.
+   *
+   * @param callback - the callback function to call with the event name.
+   */
+  registerEvent(callback: Function): void {
+    this.eventListener = callback;
   }
 
   /**

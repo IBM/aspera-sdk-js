@@ -457,6 +457,7 @@ export interface InstallerInfoResponse {
 }
 
 export type WebsocketTopics = 'subscribe_transfer_activity' | 'transfer_activity';
+export type WebsocketEvents = 'CLOSED' | 'RECONNECT';
 
 export interface WebsocketMessage {
   jsonrpc: '2.0';

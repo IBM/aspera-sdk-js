@@ -19,6 +19,8 @@ import {
   modifyTransfer,
   createDropzone,
   removeDropzone,
+  registerStatusCallback,
+  deregisterStatusCallback,
 } from './app/core';
 import {
   getInstallerInfo,
@@ -46,6 +48,8 @@ asperaDesktop.modifyTransfer = modifyTransfer;
 asperaDesktop.createDropzone = createDropzone;
 asperaDesktop.removeDropzone = removeDropzone;
 asperaDesktop.getInstallerInfo = getInstallerInfo;
+asperaDesktop.registerStatusCallback = registerStatusCallback;
+asperaDesktop.deregisterStatusCallback = deregisterStatusCallback;
 
 const launch = asperaDesktop.globals.launch;
 asperaDesktop.launch = launch;
@@ -76,6 +80,8 @@ export {
   createDropzone,
   removeDropzone,
   getInstallerInfo,
+  registerStatusCallback,
+  deregisterStatusCallback,
 };
 
 export default {
@@ -100,4 +106,6 @@ export default {
   createDropzone,
   removeDropzone,
   getInstallerInfo,
+  registerStatusCallback,
+  deregisterStatusCallback,
 };

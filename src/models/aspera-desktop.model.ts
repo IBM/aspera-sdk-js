@@ -1,4 +1,4 @@
-import {DesktopSpec, DesktopTransfer, ModifyTransferOptions, InstallerOptions, FileDialogOptions, FolderDialogOptions, TransferSpec, DesktopStyleFile, InstallerInfoResponse, DataTransferResponse, ResumeTransferOptions} from './models';
+import {DesktopSpec, DesktopTransfer, ModifyTransferOptions, InstallerOptions, FileDialogOptions, FolderDialogOptions, TransferSpec, DesktopStyleFile, InstallerInfoResponse, DataTransferResponse, ResumeTransferOptions, WebsocketEvents} from './models';
 import {errorLog} from '../helpers/helpers';
 import {websocketService} from '../helpers/ws';
 import {hiddenStyleList, protocol} from '../constants/constants';
@@ -65,6 +65,8 @@ export class ActivityTracking {
   private activity_callbacks: Map<string, Function> = new Map();
   /** Map of callbacks that received removed transfer events */
   private removed_callbacks: Map<string, Function> = new Map();
+  /** Map of callbacks that receive connection events */
+  private event_callbacks: Map<string, Function> = new Map();
 
   /**
    * Notify all consumers when a message is received from the websocket
@@ -90,6 +92,20 @@ export class ActivityTracking {
   }
 
   /**
+   * Notify all consumers when a connection event occurs. For example, when the SDK
+   * websocket connection to IBM Aspera Desktop is closed or reconnected.
+   *
+   * @param event the event type.
+   */
+  private handleWebSocketEvents(event: WebsocketEvents): void {
+    this.event_callbacks.forEach(callback => {
+      if (typeof callback === 'function') {
+        callback(event);
+      }
+    });
+  }
+
+  /**
    * Set up the websocket connection to IBM Aspera Desktop
    *
    * @param url websocket URL
@@ -101,6 +117,7 @@ export class ActivityTracking {
     return websocketService.init(url, appId)
       .then((response) => {
         websocketService.registerMessage('transfer_activity', (data: ActivityMessage) => this.handleTransferActivity(data));
+        websocketService.registerEvent((status: 'CLOSED'|'RECONNECT') => this.handleWebSocketEvents(status));
 
         return response;
       });
@@ -150,12 +167,38 @@ export class ActivityTracking {
   }
 
   /**
-     * Remove the callback (deregister) from the list of callbacks
-     *
-     * @param id the string of the callback to remove
-     */
+   * Remove the callback (deregister) from the list of callbacks
+   *
+   * @param id the string of the callback to remove
+   */
   removeRemovedCallback(id: string): void {
     this.removed_callbacks.delete(id);
+  }
+
+  /**
+   * Register a callback for getting websocket events back to the consumer
+   *
+   * @param callback the function to call with the websocket event
+   *
+   * @returns the ID of the callback index
+   */
+  setWebSocketEventCallback(callback: (status: WebsocketEvents) => void): string {
+    if (typeof callback !== 'function') {
+      errorLog(messages.callbackIsNotFunction);
+      return;
+    }
+    const id = `callback-${this.event_callbacks.size + 1}`;
+    this.event_callbacks.set(id, callback);
+    return id;
+  }
+
+  /**
+   * Remove the callback (deregister) from the list of callbacks
+   *
+   * @param id the string of the callback to remove
+   */
+  removeWebSocketEventCallback(id: string): void {
+    this.event_callbacks.delete(id);
   }
 }
 
@@ -180,6 +223,10 @@ export class Desktop {
   registerRemovedCallback: (callback: (transfer: DesktopTransfer) => void) => string;
   /** Deregister callback to remove it from the callbacks getting removed transfer data */
   deregisterRemovedCallback: (id: string) => void;
+  /** Register callback for connection status events from the app */
+  registerStatusCallback: (callback: (status: 'CLOSED'|'RECONNECT') => void) => string;
+  /** Deregister callback to remove it from the callbacks getting connection events */
+  deregisterStatusCallback: (id: string) => void;
   /** Function to remove a transfer */
   removeTransfer: (transferId: string) => Promise<any>;
   /** Function to show the transfer's download directory in Finder or Windows Explorer */

@@ -304,6 +304,10 @@
         });
       }
 
+      function handleStatusEvents(status) {
+        console.log('CONNECTION STATUS RECEIVED:', status);
+      }
+
       function launch() {
         asperaDesktop.launch();
       }
@@ -313,6 +317,7 @@
       }, 3000)
       asperaDesktop.registerActivityCallback(monitorTransfers);
       asperaDesktop.registerRemovedCallback(monitorRemovedTransfers);
+      asperaDesktop.registerStatusCallback(handleStatusEvents);
     </script>
   </head>
   <body>

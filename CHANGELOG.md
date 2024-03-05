@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.21](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.20...v0.1.21) (2024-03-05)
+
+
+### Features
+
+* notify clients of websocket connection status ([#70](https://github.ibm.com/Aspera/desktop-sdk-ts/issues/70)) ([28f0435](https://github.ibm.com/Aspera/desktop-sdk-ts/commit/28f04358ba987ad83ac121c8cdb23a3fbd771ea7))
+
 ### [0.1.20](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.19...v0.1.20) (2023-12-20)
 
 

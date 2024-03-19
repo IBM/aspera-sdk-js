@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.24](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.23...v0.1.24) (2024-03-19)
+
+
+### Bug Fixes
+
+* update ready to check if app_id is set ([#73](https://github.ibm.com/Aspera/desktop-sdk-ts/issues/73)) ([9cbd17d](https://github.ibm.com/Aspera/desktop-sdk-ts/commit/9cbd17d2fba745ad2267efa2f9cd47cd8b9aed78))
+
 ### [0.1.23](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.22...v0.1.23) (2024-03-19)
 
 ### [0.1.22](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.21...v0.1.22) (2024-03-19)

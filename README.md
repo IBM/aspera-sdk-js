@@ -1,6 +1,6 @@
-# IBM Aspera Desktop JavaScript SDK
+# IBM Aspera for desktop JavaScript SDK
 
-Enables web applications to utilize Aspera file-transfer capabilities using the IBM Aspera Desktop application.
+Enables web applications to utilize Aspera file-transfer capabilities using the IBM Aspera for desktop application.
 
 ## Development
 

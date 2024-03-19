@@ -260,6 +260,6 @@ export class Desktop {
    * @returns a boolean indicating if SDK can be used for requests
    */
   get isReady(): boolean {
-    return this.globals.desktopVerified;
+    return this.globals.desktopVerified && this.globals.appId !== '';
   }
 };

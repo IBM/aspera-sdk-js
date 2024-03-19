@@ -34,3 +34,6 @@ secrets/
 .commit_*
 /lib/
 docs
+
+# JetBrains IDE
+.idea

@@ -253,6 +253,8 @@ export class Desktop {
   removeDropzone: (elementSelector: string) => void;
   /** Function to get latest installer information */
   getInstallerInfo: (options: InstallerOptions) => Promise<InstallerInfoResponse>;
+  /** Initialize drag and drop */
+  initDragDrop: () => Promise<any>;
 
   /**
    * Check if IBM Aspera Desktop is ready to be used and has been verified.

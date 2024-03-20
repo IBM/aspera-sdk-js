@@ -1,6 +1,7 @@
 /** @ignore */
 export const messages = {
   callbackIsNotFunction: 'The provided callback is not a function',
+  dragDropInitFailed: 'Unable to initialize drag-drop',
   failedToGenerateIframe: 'Unable to generate IFRAME for download. Using new window',
   getInstallerError: 'Unable to get latest installers',
   getAllTransfersFailed: 'Unable to get all transfers',

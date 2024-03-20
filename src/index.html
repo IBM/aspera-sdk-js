@@ -312,6 +312,10 @@
         asperaDesktop.launch();
       }
 
+      function initDragDrop() {
+        asperaDesktop.initDragDrop();
+      }
+
       setTimeout(() => {
         generateObjectText();
       }, 3000)
@@ -333,6 +337,7 @@
       <button onclick="launch()" type="button">Launch</button>
       <button onclick="testDrop()" type="button">Set dropzone</button>
       <button onclick="getInstallerInfo()" type="button">Installers</button>
+      <button onclick="initDragDrop()" type="button">Init drag-drop</button>
     </div>
     <div class="flex-page">
       <div class="text-area">

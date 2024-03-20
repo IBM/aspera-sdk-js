@@ -21,6 +21,28 @@ export const testDesktopConnection = (): Promise<any> => {
 };
 
 /**
+ * Initialize drag and drop.
+ *
+ * @returns a promise that resolves if the initialization was successful or not
+ */
+export const initDragDrop = (): Promise<boolean> => {
+  if (!asperaDesktop.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  const promiseInfo = generatePromiseObjects();
+
+  client.request('init_drag_drop')
+    .then((data: boolean) => promiseInfo.resolver(data))
+    .catch(error => {
+      errorLog(messages.dragDropInitFailed, error);
+      promiseInfo.rejecter(generateErrorBody(messages.dragDropInitFailed, error));
+    });
+
+  return promiseInfo.promise;
+};
+
+/**
  * Initialize websocket connection to IBM Aspera Desktop. This function only resolves
  * if the websocket connection is successful. It will attempt to reconnnect indefinitely.
  *
@@ -28,7 +50,8 @@ export const testDesktopConnection = (): Promise<any> => {
  */
 export const initWebSocketConnection = (): Promise<any> => {
   return asperaDesktop.activityTracking.setup(getWebsocketUrl(asperaDesktop.globals.desktopUrl), asperaDesktop.globals.appId)
-    .then(() => testDesktopConnection());
+    .then(() => testDesktopConnection())
+    .then(() => initDragDrop());
 };
 
 /**

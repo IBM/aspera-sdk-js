@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.25](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.24...v0.1.25) (2024-03-20)
+
+
+### Features
+
+* set up drag and drop during init ([#72](https://github.ibm.com/Aspera/desktop-sdk-ts/issues/72)) ([d74072e](https://github.ibm.com/Aspera/desktop-sdk-ts/commit/d74072e2f012da07ab328df47758c5397656a1e5))
+
 ### [0.1.24](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.23...v0.1.24) (2024-03-19)
 
 

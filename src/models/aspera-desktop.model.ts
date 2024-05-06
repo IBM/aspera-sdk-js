@@ -1,4 +1,4 @@
-import {DesktopSpec, DesktopTransfer, ModifyTransferOptions, InstallerOptions, FileDialogOptions, FolderDialogOptions, TransferSpec, DesktopStyleFile, InstallerInfoResponse, DataTransferResponse, ResumeTransferOptions, WebsocketEvents} from './models';
+import {DesktopSpec, DesktopTransfer, ModifyTransferOptions, InstallerOptions, FileDialogOptions, FolderDialogOptions, TransferSpec, DesktopStyleFile, InstallerInfoResponse, DataTransferResponse, ResumeTransferOptions, WebsocketEvents, CustomBrandingOptions} from './models';
 import {errorLog} from '../helpers/helpers';
 import {websocketService} from '../helpers/ws';
 import {hiddenStyleList, protocol} from '../constants/constants';
@@ -247,6 +247,8 @@ export class Desktop {
   showPreferences: () => Promise<any>;
   /** Function to modify a running transfer */
   modifyTransfer: (transferId: string, options: ModifyTransferOptions) => Promise<DesktopTransfer>;
+  /** Function to set custom branding for IBM Aspera Desktop */
+  setBranding: (id: string, options: CustomBrandingOptions) => Promise<any>;
   /** Create dropzone for drop events of files */
   createDropzone: (callback: (data: {event: any; files: DataTransferResponse}) => void, elementSelector: string) => void;
   /** Remove dropzone for drop events of files */

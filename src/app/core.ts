@@ -3,7 +3,7 @@ import {client} from '../helpers/client';
 import {errorLog, generateErrorBody, generatePromiseObjects, getWebsocketUrl, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
 import {messages} from '../constants/messages';
 import {DesktopInfo, TransferResponse} from '../models/aspera-desktop.model';
-import {DataTransferResponse, DesktopSpec, DesktopStyleFile, DesktopTransfer, FileDialogOptions, FolderDialogOptions, ModifyTransferOptions, ResumeTransferOptions, TransferSpec} from '../models/models';
+import {DataTransferResponse, DesktopSpec, DesktopStyleFile, DesktopTransfer, FileDialogOptions, FolderDialogOptions, ModifyTransferOptions, ResumeTransferOptions, TransferSpec, CustomBrandingOptions} from '../models/models';
 
 /**
  * Check if IBM Aspera Desktop connection works. This function is called by init
@@ -449,6 +449,43 @@ export const modifyTransfer = (id: string, options: ModifyTransferOptions): Prom
     .catch(error => {
       errorLog(messages.modifyTransferFailed, error);
       promiseInfo.rejecter(generateErrorBody(messages.modifyTransferFailed, error));
+    });
+
+  return promiseInfo.promise;
+};
+
+/**
+ * Set the custom branding template to be used by IBM Aspera Desktop. If the app is already
+ * configured to use a different branding, then the branding template you specify will be
+ * stored by the app, allowing the end user to switch at any point.
+ *
+ * @param id custom branding template id. This should be consistent across page loads.
+ * @param options custom branding options
+ *
+ * @returns a promise that resolves if the branding was properly set.
+ */
+export const setBranding = (id: string, options: CustomBrandingOptions): Promise<any> => {
+  if (!asperaDesktop.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  const promiseInfo = generatePromiseObjects();
+
+  const branding = {
+    id,
+    name: options.name,
+    theme: options.theme,
+  };
+
+  const payload = {
+    branding,
+  };
+
+  client.request('update_branding', payload)
+    .then((data: any) => promiseInfo.resolver(data))
+    .catch(error => {
+      errorLog(messages.setBrandingFailed, error);
+      promiseInfo.rejecter(generateErrorBody(messages.setBrandingFailed, error));
     });
 
   return promiseInfo.promise;

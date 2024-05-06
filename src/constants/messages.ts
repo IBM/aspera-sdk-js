@@ -12,6 +12,7 @@ export const messages = {
   removeTransferFailed: 'Unable to remove transfer',
   serverError: 'Unable to connect to IBM Aspera Desktop server',
   serverNotVerified: 'IBM Aspera Desktop has not been verified. Run test or init first',
+  setBrandingFailed: 'Unable to set custom branding',
   showDirectoryFailed: 'Unable to show transfer directory',
   showSelectFileDialogFailed: 'Unable to show select file dialog',
   showSelectFolderDialogFailed: 'Unable to show select folder dialog',

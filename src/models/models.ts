@@ -125,6 +125,13 @@ export interface ResumeTransferOptions {
   content_protection_password?: string;
 }
 
+export interface CustomBrandingOptions {
+  /** Display name for the branding template. This name is presented to the end user in the app settings when switching between different templates. */
+  name: string;
+  /** Custom theme template. */
+  theme: CustomTheme;
+}
+
 export interface DesktopSpec {
   /**
    * By default, the destination of a download is relative to the user's download directory setting.
@@ -465,3 +472,192 @@ export interface WebsocketMessage {
   params: any;
   id: number;
 }
+
+export interface CustomThemeItems {
+  /** Font family for typography */
+  typographyFontFamily?: string;
+  /** Header Background color */
+  headerBackground?: string;
+  /** Header text and icon color */
+  headerTextIcon?: string;
+  /** Header clickable items background color while active */
+  headerActiveItemBackground?: string;
+  /** Header clickable item icon color while active */
+  headerActiveItemColor?: string;
+  /** Header hover item icon background */
+  headerHoverItemBackground?: string;
+  /* Header accent borders */
+  headerAccentBorders?: string;
+  /** Left nav background */
+  leftNavBackground?: string;
+  /** Left nav text color */
+  leftNavTextColor?: string;
+  /** Left nav active background */
+  leftNavActiveItemBackground?: string;
+  /** Left nav active accent (left color) */
+  leftNavActiveItemAccent?: string;
+  /** Left nav hover background */
+  leftNavActiveItemHover?: string;
+  /** Login panel background color */
+  loginPanelBackgroundColor?: string;
+  /** Login panel text color */
+  loginPanelTextColor?: string;
+  /** Login in panel announcement background color */
+  loginInPanelAnnouncementBackgroundColor?: string;
+  /** Login in panel announcement text color */
+  loginInPanelAnnouncementTextColor?: string;
+  /** Login floating announcement background color  */
+  loginAnnouncementBackgroundColor?: string;
+  /** Login floating announcement text color */
+  loginAnnouncementBackgroundTextColor?: string;
+  /** Button primary background */
+  buttonPrimaryBackground?: string;
+  /** Button primary text */
+  buttonPrimaryText?: string;
+  /** Button primary hover background */
+  buttonPrimaryBackgroundHover?: string;
+  /** Button primary active background */
+  buttonPrimaryBackgroundActive?: string;
+  /** Button secondary background */
+  buttonSecondaryBackground?: string;
+  /** Button secondary text */
+  buttonSecondaryText?: string;
+  /** Button secondary hover background */
+  buttonSecondaryBackgroundHover?: string;
+  /** Button secondary active background */
+  buttonSecondaryBackgroundActive?: string;
+  /** Button tertiary border */
+  buttonTertiaryBorder?: string;
+  /** Button tertiary text */
+  buttonTertiaryText?: string;
+  /** Button tertiary text for active and hover states */
+  buttonTertiaryTextHoverActive?: string;
+  /** Button tertiary hover background */
+  buttonTertiaryBackgroundHover?: string;
+  /** Button tertiary active background */
+  buttonTertiaryBackgroundActive?: string;
+  '$background'?: string;
+  '$background-hover'?: string;
+  '$background-active'?: string;
+  '$background-selected'?: string;
+  '$background-selected-hover'?: string;
+  '$background-inverse'?: string;
+  '$background-inverse-hover'?: string;
+  '$background-brand'?: string;
+  '$layer-01'?: string;
+  '$layer-02'?: string;
+  '$layer-03'?: string;
+  '$layer-hover-01'?: string;
+  '$layer-hover-02'?: string;
+  '$layer-hover-03'?: string;
+  '$layer-active-01'?: string;
+  '$layer-active-02'?: string;
+  '$layer-active-03'?: string;
+  '$layer-selected-01'?: string;
+  '$layer-selected-02'?: string;
+  '$layer-selected-03'?: string;
+  '$layer-selected-hover-01'?: string;
+  '$layer-selected-hover-02'?: string;
+  '$layer-selected-hover-03'?: string;
+  '$layer-selected-inverse'?: string;
+  '$layer-selected-disabled'?: string;
+  '$layer-accent-01'?: string;
+  '$layer-accent-02'?: string;
+  '$layer-accent-03'?: string;
+  '$layer-accent-hover-01'?: string;
+  '$layer-accent-hover-02'?: string;
+  '$layer-accent-hover-03'?: string;
+  '$layer-accent-active-01'?: string;
+  '$layer-accent-active-02'?: string;
+  '$layer-accent-active-03'?: string;
+  '$field-01'?: string;
+  '$field-02'?: string;
+  '$field-03'?: string;
+  '$field-hover-01'?: string;
+  '$field-hover-02'?: string;
+  '$field-hover-03'?: string;
+  '$border-interactive'?: string;
+  '$border-subtle-00'?: string;
+  '$border-subtle-01'?: string;
+  '$border-subtle-02'?: string;
+  '$border-subtle-03'?: string;
+  '$border-subtle-selected-01'?: string;
+  '$border-subtle-selected-02'?: string;
+  '$border-subtle-selected-03'?: string;
+  '$border-strong-01'?: string;
+  '$border-strong-02'?: string;
+  '$border-strong-03'?: string;
+  '$border-tile-01'?: string;
+  '$border-tile-02'?: string;
+  '$border-tile-03'?: string;
+  '$border-inverse'?: string;
+  '$border-disabled'?: string;
+  '$text-primary'?: string;
+  '$text-secondary'?: string;
+  '$text-placeholder'?: string;
+  '$text-on-color'?: string;
+  '$text-on-color-disabled'?: string;
+  '$text-helper'?: string;
+  '$text-error'?: string;
+  '$text-inverse'?: string;
+  '$text-disabled'?: string;
+  '$link-primary'?: string;
+  '$link-primary-hover'?: string;
+  '$link-secondary'?: string;
+  '$link-inverse'?: string;
+  '$link-visited'?: string;
+  '$icon-primary'?: string;
+  '$icon-secondary'?: string;
+  '$icon-on-color'?: string;
+  '$icon-on-color-disabled'?: string;
+  '$icon-interactive'?: string;
+  '$icon-inverse'?: string;
+  '$icon-disabled'?: string;
+  /** These are ignored if core buttons are set for similar values */
+  '$button-primary'?: string;
+  /** These are ignored if core buttons are set for similar values */
+  '$button-primary-hover'?: string;
+  /** These are ignored if core buttons are set for similar values */
+  '$button-primary-active'?: string;
+  /** These are ignored if core buttons are set for similar values */
+  '$button-secondary'?: string;
+  /** These are ignored if core buttons are set for similar values */
+  '$button-secondary-hover'?: string;
+  /** These are ignored if core buttons are set for similar values */
+  '$button-secondary-active'?: string;
+  /** These are ignored if core buttons are set for similar values */
+  '$button-tertiary'?: string;
+  /** These are ignored if core buttons are set for similar values */
+  '$button-tertiary-hover'?: string;
+  /** These are ignored if core buttons are set for similar values */
+  '$button-tertiary-active'?: string;
+  '$button-danger-primary'?: string;
+  '$button-danger-secondary'?: string;
+  '$button-danger-hover'?: string;
+  '$button-danger-active'?: string;
+  '$button-separator'?: string;
+  '$button-disabled'?: string;
+  '$support-error'?: string;
+  '$support-success'?: string;
+  '$support-warning'?: string;
+  '$support-info'?: string;
+  '$support-error-inverse'?: string;
+  '$support-success-inverse'?: string;
+  '$support-warning-inverse'?: string;
+  '$support-info-inverse'?: string;
+  '$focus'?: string;
+  '$focus-inset'?: string;
+  '$focus-inverse'?: string;
+  '$interactive'?: string;
+  '$highlight'?: string;
+  '$toggle-off'?: string;
+  '$overlay'?: string;
+  '$skeleton-element'?: string;
+  '$skeleton-background'?: string;
+};
+
+export interface CustomTheme {
+  g10: CustomThemeItems;
+  g100: CustomThemeItems;
+  disableLightDarkMode?: boolean;
+};

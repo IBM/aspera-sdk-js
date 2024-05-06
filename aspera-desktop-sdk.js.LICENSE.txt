@@ -1,0 +1,7 @@
+/*!
+ * IBM Aspera Desktop SDK v0.1.25
+ * Licensed Materials – Property of IBM
+ * © Copyright IBM Corp. 2023
+ * U.S. Government Users Restricted Rights: Use, duplication or disclosure restricted by
+ * GSA ADP Schedule Contract with IBM Corp.
+ */

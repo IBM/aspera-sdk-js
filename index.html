@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script src="aspera-desktop-sdk.js"></script>
+    <title>Desktop SDK Test Server</title>
+    <style>
+      body {
+        padding: 30px;
+      }
+      .test-buttons {
+        margin: 30px 0;
+      }
+      .test-buttons button {
+        margin: 0 10px;
+        padding: 10px;
+      }
+      .flex-page {
+        display: flex;
+      }
+      .text-area, .transfer-monitor {
+        flex: 1;
+        padding-right: 20px;
+      }
+      .text-area * {
+        display: block;
+      }
+      .text-area textarea {
+        width: 600px;
+        padding: 3px;
+        font-size: 16px;
+        font-family: monospace;
+        height: 300px;
+      }
+      .text-area input {
+        font-size: 16px;
+        font-family: monospace;
+        padding: 3px;
+        width: 600px;
+      }
+      label {
+        font-weight: bold;
+        margin-top: 25px;
+      }
+      .transfer {
+        display: block;
+        margin-bottom: 20px;
+        position: relative;
+      }
+      .transfer .progress {
+        background-color: grey;
+        width: 100%;
+        height: 30px;
+      }
+
+      .transfer .bar {
+        background-color: green;
+        height: 100%;
+      }
+
+      .transfer .status {
+        position: absolute;
+        top: 5px;
+        left: 10px;
+        color: white;
+        font-weight: bold;
+      }
+
+      .drop-area {
+        height: 80px;
+        background-color: rgba(0,0,255,0.3);
+        text-align: center;
+        padding-top: 40px;
+        font-size: 18px;
+        margin-bottom: 20px;
+        font-weight: bold;
+      }
+
+      .loader {
+        border: 16px solid #f3f3f3;
+        border-top: 16px solid #3498db;
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
+        margin: 0 auto;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+      .error {
+        color: red;
+        margin: 15px 0;
+        text-align: center;
+        font-size: 32px;
+      }
+
+    </style>
+    <script>
+      function bytesCalc(value) {
+        if (value === null || value === '' || value === undefined) {
+          return '\u2014';
+        }
+        const base = 1024;
+        const units = [
+          'B',
+          'KB',
+          'MB',
+          'GB',
+          'TB'
+        ];
+
+        let unitIndex = 0;
+
+        if (Math.abs(value) > base) {
+          do {
+            value /= base;
+            ++unitIndex;
+          } while ( Math.abs(value) >= base && unitIndex < units.length - 1 );
+        }
+        value = value.toFixed(2);
+        return `${value} ${units[unitIndex]}`;
+      }
+
+      function generateObjectText() {
+        const text = JSON.stringify(asperaDesktop, undefined, 2);
+        document.querySelector('#test-output').value = text;
+        setTimeout(() => {
+          generateObjectText();
+        }, 1000)
+      }
+      function init() {
+        const id = document.querySelector('#app-id').value;
+        asperaDesktop.initDesktop(id).then(response => {
+          console.log('INIT SUCCESS', response);
+
+          asperaDesktop.getAllTransfers().then(response => {
+            monitorTransfers({ transfers: response });
+          }).catch(error => {
+            console.log('GET ALL TRANSFERS FAIL', error);
+          })
+        }).catch(error => {
+          console.log('INIT FAIL', error);
+        })
+      }
+
+      function testServer() {
+        asperaDesktop.testDesktopConnection().then(response => {
+          console.log('TEST SUCCESS', response);
+        }).catch(error => {
+          console.log('TEST FAIL', error);
+        })
+      }
+
+      function transfer() {
+        const desktopSpec = {
+          use_absolute_destination_path: false
+        };
+        const transferSpec = JSON.parse(document.querySelector('#test-input').value);
+        asperaDesktop.startTransfer(transferSpec, desktopSpec).then(response => {
+          console.log('TRANSFER SUCCESS', response);
+        }).catch(error => {
+          console.log('TRANSFER FAIL', error);
+        })
+      }
+
+      function remove(id) {
+        asperaDesktop.removeTransfer(id).then(response => {
+          console.log('REMOVE SUCCESS', response);
+        }).catch(error => {
+          console.log('REMOVE FAIL', error);
+        })
+      }
+
+      function stopTransfer(id) {
+        asperaDesktop.stopTransfer(id).then(response => {
+          console.log('STOP SUCCESS', response);
+        }).catch(error => {
+          console.log('STOP FAIL', error);
+        })
+      }
+
+      function resumeTransfer(id) {
+        const transferSpec = JSON.parse(document.querySelector('#test-input').value);
+        asperaDesktop.resumeTransfer(id, transferSpec).then(response => {
+          console.log('RESUME SUCCESS', response);
+        }).catch(error => {
+          console.log('RESUME FAIL', error);
+        })
+      }
+
+      function getAllTransfers() {
+        asperaDesktop.getAllTransfers().then(response => {
+          console.log('GET ALL TRANSFERS SUCCESS', response);
+        }).catch(error => {
+          console.log('GET ALL TRANSFERS FAIL', error);
+        })
+      }
+
+      function getTransfer(id) {
+        asperaDesktop.getTransfer(id).then(response => {
+          console.log('GET TRANSFER SUCCESS', response);
+        }).catch(error => {
+          console.log('GET TRANSFER FAIL', error);
+        })
+      }
+
+      function showDirectory(id) {
+        asperaDesktop.showDirectory(id).then(response => {
+          console.log('SHOW DIRECTORY SUCCESS', response);
+        }).catch(error => {
+          console.log('SHOW DIRECTORY FAIL', error);
+        })
+      }
+
+      function showSelectFileDialog() {
+        asperaDesktop.showSelectFileDialog().then(response => {
+          console.log('SHOW FILE DIALOG SUCCESS', response);
+        }).catch(error => {
+          console.log('SHOW FILE DIALOG FAIL', error);
+        })
+      }
+
+      function showSelectFolderDialog() {
+        asperaDesktop.showSelectFolderDialog().then(response => {
+          console.log('SHOW FOLDER DIALOG SUCCESS', response);
+        }).catch(error => {
+          console.log('SHOW FOLDER DIALOG FAIL', error);
+        })
+      }
+
+      function openPreferences() {
+        asperaDesktop.showPreferences().then(response => {
+          console.log('SHOW PREFERENCES SUCCESS', response);
+        }).catch(error => {
+          console.log('SHOW PREFERENCES FAIL', error);
+        })
+      }
+
+      function modifyTransfer(id) {
+        const options = {
+          target_rate_kbps: 10,
+        };
+
+        asperaDesktop.modifyTransfer(id, options).then(response => {
+          console.log('MODIFY TRANSFER SUCCESS', response);
+        }).catch(error => {
+          console.log('MODIFY TRANSFER FAIL', error);
+        })
+      }
+
+      function testDrop() {
+        const callback = files => {
+          console.log('DROP ZONE CALLBACK', files);
+        }
+
+        asperaDesktop.createDropzone(callback, '#drop-area');
+      }
+
+      function getInstallerInfo() {
+        asperaDesktop.getInstallerInfo().then(response => {
+          console.log('INSTALLER INFO SUCCESS', response);
+        }).catch(error => {
+          console.log('INSTALLER INFO FAIL', error);
+        })
+      }
+
+      function monitorRemovedTransfers(transfer) {
+        console.log('TRANSFER WAS REMOVED', transfer);
+      }
+
+      function monitorTransfers(transfers) {
+        const transferDom = document.querySelector('#transfer');
+        while (transferDom.firstChild) {
+          transferDom.removeChild(transferDom.firstChild);
+        }
+        if (!transfers.transfers.length) {
+          const element = document.createElement('div');
+          element.setAttribute('class', 'transfer');
+          element.innerHTML = `
+            <div class="name">No transfers</div>
+          `;
+          transferDom.appendChild(element);
+          return;
+        }
+        transfers.transfers.forEach(transfer => {
+          const element = document.createElement('div');
+          element.setAttribute('class', 'transfer-item');
+          element.innerHTML = `
+            <div class="progress">
+              <div class="bar" style="width: ${(transfer.percentage * 100).toFixed(2)}%;"></div>
+            </div>
+            <div class="status">${transfer.status} - ${bytesCalc(transfer.bytes_written)} / ${bytesCalc(transfer.bytes_expected)}</div>
+            <button onclick=remove("${transfer.uuid}")>Remove</button>
+            <button onclick=stopTransfer("${transfer.uuid}")>Stop</button>
+            <button onclick=resumeTransfer("${transfer.uuid}")>Resume</button>
+            <button onclick=getTransfer("${transfer.uuid}")>Info</button>
+            <button onclick=showDirectory("${transfer.uuid}")>Show</button>
+            <button onclick=modifyTransfer("${transfer.uuid}")>Modify</button>
+          `;
+          transferDom.appendChild(element);
+        });
+      }
+
+      function handleStatusEvents(status) {
+        console.log('CONNECTION STATUS RECEIVED:', status);
+      }
+
+      function launch() {
+        asperaDesktop.launch();
+      }
+
+      function initDragDrop() {
+        asperaDesktop.initDragDrop();
+      }
+
+      setTimeout(() => {
+        generateObjectText();
+      }, 3000)
+      asperaDesktop.registerActivityCallback(monitorTransfers);
+      asperaDesktop.registerRemovedCallback(monitorRemovedTransfers);
+      asperaDesktop.registerStatusCallback(handleStatusEvents);
+    </script>
+  </head>
+  <body>
+    <h1>Desktop SDK Test Server</h1>
+    <div class="test-buttons">
+      <button onclick="init()" type="button">Init SDK</button>
+      <button onclick="testServer()" type="button">Test desktop</button>
+      <button onclick="transfer()" type="button">Start transfer</button>
+      <button onclick="getAllTransfers()" type="button">Get transfers</button>
+      <button onclick="showSelectFileDialog()" type="button">Select File</button>
+      <button onclick="showSelectFolderDialog()" type="button">Select Folder</button>
+      <button onclick="openPreferences()" type="button">Open Preferences</button>
+      <button onclick="launch()" type="button">Launch</button>
+      <button onclick="testDrop()" type="button">Set dropzone</button>
+      <button onclick="getInstallerInfo()" type="button">Installers</button>
+      <button onclick="initDragDrop()" type="button">Init drag-drop</button>
+    </div>
+    <div class="flex-page">
+      <div class="text-area">
+        <label for="app-id">App ID</label>
+        <input type="text" id="app-id" value="test1"></input>
+        <label for="test-input">transferSpec for download/upload</label>
+        <textarea id="test-input"></textarea>
+        <label for="test-output">Current values in asperaDesktop</label>
+        <textarea id="test-output" readonly></textarea>
+      </div>
+      <div id="transfer-monitor" class="transfer-monitor">
+        <br />
+        <hl />
+        <p>Drop test</p>
+        <div class="drop-area" id="drop-area">Drop area</div>
+        <div id="transfer" class="transfer"><div class="name">No transfers</div></div>
+      </div>
+    </div>
+  </body>
+</html>

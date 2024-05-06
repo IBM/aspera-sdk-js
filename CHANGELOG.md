@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.26](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.25...v0.1.26) (2024-05-06)
+
+
+### Features
+
+* **#76:** custom branding support ([#77](https://github.ibm.com/Aspera/desktop-sdk-ts/issues/77)) ([c676313](https://github.ibm.com/Aspera/desktop-sdk-ts/commit/c67631322d056f0f808068d8f5e1d1d38d406b23)), closes [#76](https://github.ibm.com/Aspera/desktop-sdk-ts/issues/76)
+
 ### [0.1.25](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.24...v0.1.25) (2024-03-20)
 
 

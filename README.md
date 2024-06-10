@@ -11,7 +11,7 @@ $ npm install --save @ibm-aspera/desktop-sdk-js
 Install from source:
 
 ```shell
-$ git clone https://github.com/IBM/aspera-desktop-sdk-ts.git
+$ git clone https://github.com/IBM/aspera-desktop-sdk-js.git
 $ cd aspera-desktop-sdk-ts
 $ npm install
 ```

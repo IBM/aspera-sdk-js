@@ -33,7 +33,7 @@ build/.env.local*
 secrets/
 .commit_*
 /lib/
-docs
+sdk-docs
 
 # JetBrains IDE
 .idea

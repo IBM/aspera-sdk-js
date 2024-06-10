@@ -2,7 +2,6 @@
   "name": "@ibm-aspera/desktop-sdk-js",
   "version": "0.1.26",
   "author": "IBM Aspera Desktop Group",
-  "private": true,
   "main": "commonjs/index.js",
   "types": "commonjs/index.d.ts",
   "scripts": {
@@ -14,13 +13,13 @@
     "test:watch": "jest --watchAll",
     "release": "standard-version",
     "lint": "eslint -c .eslintrc.js --ext .ts ./src",
-    "docs": "typedoc src/index.ts",
+    "docs": "typedoc src/index.ts --out ./sdk-docs",
     "set:hosts": "if ! hostile list | grep \"127.0.0.1 desktop-sdk.aspera.us\" >/dev/null; then sudo hostile set 127.0.0.1 desktop-sdk.aspera.us; fi",
     "build:demo": "npm run build && cp src/index.html dist/js"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.ibm.com:Aspera/desktop-sdk-ts.git"
+    "url": "git@github.com:IBM/aspera-desktop-sdk-ts.git"
   },
   "standard-version": {
     "message": "chore(release): %s\n\n[ci skip]",

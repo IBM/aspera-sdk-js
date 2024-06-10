@@ -1,38 +1,23 @@
-# IBM Aspera for desktop TypeScript SDK
+# IBM Aspera for Desktop JavaScript SDK
+This JavaScript SDK allows web applications to integrate with the IBM Aspera for desktop app and perform high-speed Aspera file transfers.
 
-Enables web applications to utilize Aspera file-transfer capabilities using the IBM Aspera for desktop application.
+## Installation
+Install via npm:
+
+```shell
+$ npm install --save @ibm-aspera/desktop-sdk-js
+```
+
+Install from source:
+
+```shell
+$ git clone https://github.com/IBM/aspera-desktop-sdk-ts.git
+$ cd aspera-desktop-sdk-ts
+$ npm install
+```
+
+When installing from source, the `dist` directory includes a `js` directory that contains the bundled JavaScript SDK that can be included via `script` tag
+or copied to a web server for hosting.
 
 ## Development
-
-### Prerequisites
-
-* Install [Node.js 18](https://nodejs.org/en/download/)
-  - If you are on macOS, we recommend installing Node.js via a package manager such as [nvm](https://github.com/nvm-sh/nvm).
-* Git
-
-### Build
-
-```shell
-$ git clone https://github.com/Aspera/desktop-sdk-ts.git
-$ cd desktop-sdk-ts
-$ npm install
-$ npm run build
-```
-
-### Testing
-
-To run the test app:
-```shell
-$ npm run dev
-```
-
-To run the unit tests:
-```shell
-$ npm run test
-```
-
-### Documentation
-
-```shell
-$ npm run docs
-```
+To get started with development, take a look at the development docs [here](docs/DEVELOPMENT.md).

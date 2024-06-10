@@ -97,6 +97,19 @@
         font-size: 32px;
       }
 
+      .docs {
+        color: #343a40;
+        text-decoration: none;
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        border-bottom: 1px dashed #343a40;
+        transition: color 0.3s ease, border-bottom-color 0.3s ease;
+      }
+
+      .doc-link:hover {
+        color: #1d2124;
+        border-bottom-color: #1d2124;
+      }
     </style>
     <script>
       function bytesCalc(value) {
@@ -326,6 +339,7 @@
   </head>
   <body>
     <h1>Desktop SDK Test Server</h1>
+    <a href="/docs/index.html" class="docs" target="_blank">Documentation</a>
     <div class="test-buttons">
       <button onclick="init()" type="button">Init SDK</button>
       <button onclick="testServer()" type="button">Test desktop</button>

@@ -28,15 +28,9 @@ jobs:
         run: |
           npm ci
 
-      - name: Build Package
-        run: |
-          npm run build
-
       - name: Build Documentation
         run: |
-          npm run docs
-          cp src/index.html dist/js
-          cp -R sdk-docs dist/js/docs
+          npm run build:demo
 
       - name: Upload Artifact
         uses: actions/upload-pages-artifact@v3

@@ -32,10 +32,16 @@ module.exports = {
   devServer: {
     https: true,
     open: true,
-    static: {
-      publicPath: "/",
-      directory: "./src",
-    },
+    static: [
+      {
+        publicPath: "/",
+        directory: "./src",
+      },
+      {
+        publicPath: "/docs",
+        directory: "./dist/js/docs",
+      },
+    ],
     host: 'desktop-sdk.aspera.us',
     port: 4205
   },

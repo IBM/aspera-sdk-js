@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.27](https://github.com/IBM/aspera-desktop-sdk-js/compare/v0.1.26...v0.1.27) (2024-06-10)
+
+
+### Bug Fixes
+
+* scrub for open source ([#82](https://github.com/IBM/aspera-desktop-sdk-js/issues/82)) ([ec71567](https://github.com/IBM/aspera-desktop-sdk-js/commit/ec71567f9a1271c765c13fcbe9acb8cac517e595))
+
 ### [0.1.26](https://github.ibm.com/Aspera/desktop-sdk-ts/compare/v0.1.25...v0.1.26) (2024-05-06)
 
 

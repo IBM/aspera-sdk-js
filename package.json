@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:IBM/aspera-desktop-sdk-ts.git"
+    "url": "git@github.com:IBM/aspera-desktop-sdk-js.git"
   },
   "standard-version": {
     "message": "chore(release): %s\n\n[ci skip]",

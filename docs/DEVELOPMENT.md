@@ -14,7 +14,7 @@ Enables web applications to utilize Aspera file-transfer capabilities using the 
 
 ```shell
 $ git clone https://github.com/IBM/aspera-desktop-sdk-js.git
-$ cd aspera-desktop-sdk-ts
+$ cd aspera-desktop-sdk-js
 $ npm install
 $ npm run build
 ```

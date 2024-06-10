@@ -12,7 +12,7 @@ Install from source:
 
 ```shell
 $ git clone https://github.com/IBM/aspera-desktop-sdk-js.git
-$ cd aspera-desktop-sdk-ts
+$ cd aspera-desktop-sdk-js
 $ npm install
 ```
 
@@ -20,4 +20,4 @@ When installing from source, the `dist` directory includes a `js` directory that
 or copied to a web server for hosting.
 
 ## Development
-To get started with development, take a look at the development docs [here](docs/DEVELOPMENT.md).
+To get started with development, take a look [here](https://github.com/IBM/aspera-desktop-sdk-js/blob/main/docs/DEVELOPMENT.md).

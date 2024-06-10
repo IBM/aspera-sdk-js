@@ -3,10 +3,18 @@ name: Documentation
 on:
   push:
     branches:
-      - main
+      - docs
+
+permissions:
+  pages: write
+  id-token: write
 
 jobs:
   Documentation:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -30,8 +38,11 @@ jobs:
           cp src/index.html dist/js
           cp -R sdk-docs dist/js/docs
 
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@v4.2.2
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          branch: gh-pages
-          folder: dist/js
+          path: dist/js
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

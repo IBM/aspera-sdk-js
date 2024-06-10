@@ -38,7 +38,7 @@ module.exports = {
         directory: "./src",
       },
       {
-        publicPath: "/docs",
+        publicPath: "/aspera-desktop-sdk-js/docs",
         directory: "./dist/js/docs",
       },
     ],

@@ -167,6 +167,14 @@
         })
       }
 
+      function getInfo() {
+        asperaDesktop.getInfo().then(response => {
+          console.log('GET INFO SUCCESS', response);
+        }).catch(error => {
+          console.log('GET INFO FAIL', error);
+        })
+      }
+
       function transfer() {
         const desktopSpec = {
           use_absolute_destination_path: false
@@ -343,6 +351,7 @@
     <div class="test-buttons">
       <button onclick="init()" type="button">Init SDK</button>
       <button onclick="testServer()" type="button">Test desktop</button>
+      <button onclick="getInfo()" type="button">Get Info</button>
       <button onclick="transfer()" type="button">Start transfer</button>
       <button onclick="getAllTransfers()" type="button">Get transfers</button>
       <button onclick="showSelectFileDialog()" type="button">Select File</button>

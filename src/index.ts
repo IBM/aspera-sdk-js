@@ -23,6 +23,7 @@ import {
   deregisterStatusCallback,
   initDragDrop,
   setBranding,
+  getInfo,
 } from './app/core';
 import {
   getInstallerInfo,
@@ -54,6 +55,7 @@ asperaDesktop.registerStatusCallback = registerStatusCallback;
 asperaDesktop.deregisterStatusCallback = deregisterStatusCallback;
 asperaDesktop.initDragDrop = initDragDrop;
 asperaDesktop.setBranding = setBranding;
+asperaDesktop.getInfo = getInfo;
 
 const launch = asperaDesktop.globals.launch;
 asperaDesktop.launch = launch;
@@ -87,6 +89,7 @@ export {
   registerStatusCallback,
   deregisterStatusCallback,
   setBranding,
+  getInfo,
 };
 
 export default {
@@ -114,4 +117,5 @@ export default {
   registerStatusCallback,
   deregisterStatusCallback,
   setBranding,
+  getInfo,
 };

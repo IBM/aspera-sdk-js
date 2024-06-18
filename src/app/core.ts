@@ -565,3 +565,18 @@ export const removeDropzone = (elementSelector: string): void => {
     });
   }
 };
+
+/**
+ * Get metadata about the IBM Aspera Desktop installation.
+ *
+ * @returns a promise that returns information about the user's IBM Aspera Desktop installation.
+ */
+export const getInfo = (): Promise<DesktopInfo> => {
+  if (!asperaDesktop.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  return new Promise((resolve, reject) => {
+    resolve(asperaDesktop.globals.desktopInfo);
+  });
+};

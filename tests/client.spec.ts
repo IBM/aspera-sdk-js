@@ -2,7 +2,7 @@ import {mockFetch} from './mocks';
 import {asperaDesktop} from '../src';
 import {isSafari} from '../src/helpers/helpers';
 import {httpClient} from '../src/helpers/client/http-client';
-import {safariClient} from '../src/helpers/client/safari-extension';
+import {safariClient} from '../src/helpers/client/safari-client';
 
 const client: Client = isSafari() ? safariClient : httpClient;
 

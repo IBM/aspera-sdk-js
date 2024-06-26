@@ -1,6 +1,6 @@
 import {messages} from '../constants/messages';
 import {client} from '../helpers/client/client';
-import {asperaDesktop} from '../index';
+import {safariClient} from '../helpers/client/safari-client';
 import {
   errorLog,
   generateErrorBody,
@@ -11,6 +11,7 @@ import {
   randomUUID,
   throwError
 } from '../helpers/helpers';
+import {asperaDesktop} from '../index';
 import {DesktopInfo, TransferResponse} from '../models/aspera-desktop.model';
 import {
   CustomBrandingOptions,

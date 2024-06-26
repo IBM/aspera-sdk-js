@@ -10,7 +10,7 @@ import {asperaDesktop} from '../../index';
  *
  * @returns promise for the HTTP connection with catch supporting error
  */
-export const handlePromiseLikeErrors = (promise: PromiseLike<any>): Promise<any> => {
+const handlePromiseLikeErrors = (promise: PromiseLike<any>): Promise<any> => {
   const promiseInfo = generatePromiseObjects();
 
   promise.then(response => {

@@ -11,7 +11,7 @@ import {
   throwError
 } from '../helpers/helpers';
 import {httpClient} from '../helpers/client/http-client';
-import {safariClient} from '../helpers/client/safari-extension';
+import {safariClient} from '../helpers/client/safari-client';
 import {DesktopInfo, TransferResponse} from '../models/aspera-desktop.model';
 import {
   CustomBrandingOptions,

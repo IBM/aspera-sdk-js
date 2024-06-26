@@ -69,14 +69,7 @@ export const initDragDrop = (): Promise<boolean> => {
  * @returns a promise that resolves if the websocket connection is successful
  */
 export const initWebSocketConnection = (): Promise<any> => {
-  if (isSafari()) {
-    return testDesktopConnection()
-      .then(() => initDragDrop());
-  }
-
-  return asperaDesktop.activityTracking.setup(getWebsocketUrl(asperaDesktop.globals.desktopUrl), asperaDesktop.globals.appId)
-    .then(() => testDesktopConnection())
-    .then(() => initDragDrop());
+  return asperaDesktop.activityTracking.setup(getWebsocketUrl(asperaDesktop.globals.desktopUrl), asperaDesktop.globals.appId);
 };
 
 /**
@@ -92,7 +85,12 @@ export const initWebSocketConnection = (): Promise<any> => {
  */
 export const initDesktop = (appId?: string): Promise<any> => {
   asperaDesktop.globals.appId = appId ? appId : randomUUID();
-  return initWebSocketConnection()
+
+  const transferActivityPromise = isSafari() ? safariClient.monitorTransferActivity() : initWebSocketConnection();
+
+  return transferActivityPromise
+    .then(() => testDesktopConnection())
+    .then(() => initDragDrop())
     .catch(error => {
       errorLog(messages.serverError, error);
       asperaDesktop.globals.desktopVerified = false;

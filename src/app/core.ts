@@ -1,12 +1,9 @@
 import {messages} from '../constants/messages';
 import {client} from '../helpers/client/client';
-import {safariClient} from '../helpers/client/safari-client';
 import {
   errorLog,
   generateErrorBody,
   generatePromiseObjects,
-  getWebsocketUrl,
-  isSafari,
   isValidTransferSpec,
   randomUUID,
   throwError
@@ -64,16 +61,6 @@ export const initDragDrop = (): Promise<boolean> => {
 };
 
 /**
- * Initialize websocket connection to IBM Aspera Desktop. This function only resolves
- * if the websocket connection is successful. It will attempt to reconnnect indefinitely.
- *
- * @returns a promise that resolves if the websocket connection is successful
- */
-export const initWebSocketConnection = (): Promise<any> => {
-  return asperaDesktop.activityTracking.setup(getWebsocketUrl(asperaDesktop.globals.desktopUrl), asperaDesktop.globals.appId);
-};
-
-/**
  * Initialize IBM Aspera Desktop client. If client cannot (reject/catch), then
  * client should attempt fixing server URL or trying again. If still fails disable UI elements.
  *
@@ -87,9 +74,7 @@ export const initWebSocketConnection = (): Promise<any> => {
 export const initDesktop = (appId?: string): Promise<any> => {
   asperaDesktop.globals.appId = appId ? appId : randomUUID();
 
-  const transferActivityPromise = isSafari() ? safariClient.monitorTransferActivity() : initWebSocketConnection();
-
-  return transferActivityPromise
+  return asperaDesktop.activityTracking.setup(asperaDesktop.globals.appId)
     .then(() => testDesktopConnection())
     .then(() => initDragDrop())
     .catch(error => {

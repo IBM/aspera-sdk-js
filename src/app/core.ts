@@ -1,6 +1,6 @@
-import {asperaDesktop} from '../index';
 import {messages} from '../constants/messages';
 import {client} from '../helpers/client/client';
+import {asperaDesktop} from '../index';
 import {
   errorLog,
   generateErrorBody,

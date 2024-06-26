@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import {randomUUID} from '../helpers';
 
 /**
  * Enum defining different types of Safari extension events.
@@ -40,7 +40,7 @@ export interface PromiseExecutor {
 /**
  * Handles communication with the Safari extension using JSON-RPC over custom events.
  */
-export class SafariExtensionHandler {
+export class SafariClient implements Client {
   private safariExtensionExecutors: Map<string, PromiseExecutor>;
 
   /**
@@ -49,17 +49,17 @@ export class SafariExtensionHandler {
    */
   constructor() {
     this.safariExtensionExecutors = new Map();
-    this.listenSafariExtensionEvents();
+    this.listenResponseEvents();
   }
 
   /**
    * Sends a JSON-RPC request to the Safari extension.
    * @param method The method name to invoke on the extension.
-   * @param params Optional parameters for the method.
+   * @param payload Optional payload for the request.
    * @returns A Promise that resolves with the response from the extension.
    */
-  public sendRPCRequest(method: string, params?: any): Promise<any> {
-    const request = this.buildRPCRequest(method, params);
+  request = (method: string, payload: any = {}): Promise<any> => {
+    const request = this.buildRPCRequest(method, payload);
     const promise = new Promise<any>((resolve, reject) => {
       this.safariExtensionExecutors.set(request.id, { resolve, reject });
     });
@@ -67,20 +67,20 @@ export class SafariExtensionHandler {
     this.dispatchSafariExtensionEvent(SafariExtensionEventType.Request, request);
 
     return promise;
-  }
+  };
 
   /**
    * Builds a JSON-RPC request object with a unique identifier.
    * @param method The method name to invoke on the extension.
-   * @param params Optional parameters for the method.
+   * @param payload Optional parameters for the method.
    * @returns The constructed JSON-RPC request object.
    */
-  private buildRPCRequest(method: string, params?: any): JSONRPCRequest {
+  private buildRPCRequest(method: string, payload?: any): JSONRPCRequest {
     return {
       jsonrpc: '2.0',
       method,
-      params,
-      id: uuidv4()
+      params: payload,
+      id: randomUUID()
     };
   }
 
@@ -102,7 +102,7 @@ export class SafariExtensionHandler {
    * Resolves or rejects promises based on the response.
    * @param response The JSON-RPC response object received from the extension.
    */
-  private handleSafariExtensionEvent(response: JSONRPCResponse) {
+  private handleResponseEvent(response: JSONRPCResponse) {
     const requestId = response.id;
     const executor = this.safariExtensionExecutors.get(requestId);
 
@@ -123,13 +123,17 @@ export class SafariExtensionHandler {
 
   /**
    * Listens for 'AsperaDesktop.Response' events from the document,
-   * and delegates handling to the handleSafariExtensionEvent method.
+   * and delegates handling to the handleResponseEvent method.
    */
-  private listenSafariExtensionEvents() {
+  private listenResponseEvents() {
     document.addEventListener('AsperaDesktop.Response', (event: CustomEvent<JSONRPCResponse>) => {
-      this.handleSafariExtensionEvent(event.detail);
+      this.handleResponseEvent(event.detail);
     });
   }
 }
 
-export default SafariExtensionHandler;
+export const safariClient = new SafariClient();
+
+export default {
+  safariClient
+};

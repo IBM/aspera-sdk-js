@@ -1,4 +1,5 @@
 import {JSONRPCClient, JSONRPCRequest} from 'json-rpc-2.0';
+import Client from './client';
 import {generatePromiseObjects} from '../helpers';
 import {asperaDesktop} from '../../index';
 
@@ -80,6 +81,6 @@ class HttpClient implements Client {
 export const httpClient = new HttpClient();
 
 export default {
-  client: httpClient,
+  httpClient,
   handlePromiseLikeErrors,
 };

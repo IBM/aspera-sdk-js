@@ -1,5 +1,6 @@
 import {asperaDesktop} from '../index';
 import {messages} from '../constants/messages';
+import {client} from '../helpers/client/client';
 import {
   errorLog,
   generateErrorBody,
@@ -10,8 +11,6 @@ import {
   randomUUID,
   throwError
 } from '../helpers/helpers';
-import {httpClient} from '../helpers/client/http-client';
-import {safariClient} from '../helpers/client/safari-client';
 import {DesktopInfo, TransferResponse} from '../models/aspera-desktop.model';
 import {
   CustomBrandingOptions,
@@ -25,8 +24,6 @@ import {
   ResumeTransferOptions,
   TransferSpec
 } from '../models/models';
-
-const client: Client = isSafari() ? safariClient : httpClient;
 
 /**
  * Check if IBM Aspera Desktop connection works. This function is called by init

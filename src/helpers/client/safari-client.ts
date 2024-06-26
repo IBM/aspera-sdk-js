@@ -1,3 +1,4 @@
+import Client from './client';
 import {randomUUID} from '../helpers';
 
 /**

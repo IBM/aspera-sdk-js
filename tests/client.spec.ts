@@ -1,6 +1,6 @@
-import {client} from '../src/helpers/client';
-import {asperaDesktop} from '../src/index';
 import {mockFetch} from './mocks';
+import {asperaDesktop} from '../src';
+import {httpClient} from '../src/helpers/client/http-client';
 
 let id = 0;
 
@@ -42,12 +42,12 @@ describe('request', () => {
   const fakeData = {data: 'testing'};
 
   test('POST with no params should call url with no params', () => {
-    client.request('fake');
+    httpClient.request('fake');
     expect(fetch).toHaveBeenCalledWith(asperaDesktop.globals.desktopUrl, getExpectedRequest('fake'));
   });
 
   test('POST with params should call url with params', () => {
-    client.request('fake', fakeData);
+    httpClient.request('fake', fakeData);
     expect(fetch).toHaveBeenCalledWith(asperaDesktop.globals.desktopUrl, getExpectedRequest('fake', fakeData));
   });
 });

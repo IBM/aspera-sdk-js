@@ -1,6 +1,7 @@
 import {JSONRPCClient, JSONRPCRequest} from 'json-rpc-2.0';
-import {asperaDesktop} from '../index';
-import {generatePromiseObjects} from './helpers';
+import Client from './client';
+import {generatePromiseObjects} from '../helpers';
+import {asperaDesktop} from '../../index';
 
 /**
  * Wraps a promise like object and returns a promise that supports catch.
@@ -24,7 +25,7 @@ export const handlePromiseLikeErrors = (promise: PromiseLike<any>): Promise<any>
 /**
  * JSON RPC client using HTTP (fetch) as transport.
  */
-class HttpClient {
+class JSONRPCHttpClient {
   /** JSON-RPC client used to make requests */
   client: JSONRPCClient;
 
@@ -64,22 +65,22 @@ class HttpClient {
 /**
  * Client used for making requests to Aspera Desktop.
  */
-class Client {
+class HttpClient implements Client {
   /** HTTP client used to make requests */
-  httpClient: HttpClient;
+  httpClient: JSONRPCHttpClient;
 
   constructor() {
-    this.httpClient = new HttpClient();
+    this.httpClient = new JSONRPCHttpClient();
   };
 
-  request = (method: string, data: any = {}): Promise<any> => {
-    return handlePromiseLikeErrors(this.httpClient.request(method, data));
+  request = (method: string, payload: any = {}): Promise<any> => {
+    return handlePromiseLikeErrors(this.httpClient.request(method, payload));
   };
 }
 
-export const client = new Client();
+export const httpClient = new HttpClient();
 
 export default {
-  client,
+  httpClient,
   handlePromiseLikeErrors,
 };

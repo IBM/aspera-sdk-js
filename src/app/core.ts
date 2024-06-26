@@ -1,9 +1,29 @@
 import {asperaDesktop} from '../index';
-import {client} from '../helpers/client';
-import {errorLog, generateErrorBody, generatePromiseObjects, getWebsocketUrl, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
 import {messages} from '../constants/messages';
+import {client} from '../helpers/client/client';
+import {
+  errorLog,
+  generateErrorBody,
+  generatePromiseObjects,
+  getWebsocketUrl,
+  isSafari,
+  isValidTransferSpec,
+  randomUUID,
+  throwError
+} from '../helpers/helpers';
 import {DesktopInfo, TransferResponse} from '../models/aspera-desktop.model';
-import {DataTransferResponse, DesktopSpec, DesktopStyleFile, DesktopTransfer, FileDialogOptions, FolderDialogOptions, ModifyTransferOptions, ResumeTransferOptions, TransferSpec, CustomBrandingOptions} from '../models/models';
+import {
+  CustomBrandingOptions,
+  DataTransferResponse,
+  DesktopSpec,
+  DesktopStyleFile,
+  DesktopTransfer,
+  FileDialogOptions,
+  FolderDialogOptions,
+  ModifyTransferOptions,
+  ResumeTransferOptions,
+  TransferSpec
+} from '../models/models';
 
 /**
  * Check if IBM Aspera Desktop connection works. This function is called by init
@@ -49,6 +69,11 @@ export const initDragDrop = (): Promise<boolean> => {
  * @returns a promise that resolves if the websocket connection is successful
  */
 export const initWebSocketConnection = (): Promise<any> => {
+  if (isSafari()) {
+    return testDesktopConnection()
+      .then(() => initDragDrop());
+  }
+
   return asperaDesktop.activityTracking.setup(getWebsocketUrl(asperaDesktop.globals.desktopUrl), asperaDesktop.globals.appId)
     .then(() => testDesktopConnection())
     .then(() => initDragDrop());
@@ -236,6 +261,7 @@ export const stopTransfer = (id: string): Promise<any> => {
  * Resume a paused or failed transfer.
  *
  * @param id transfer uuid
+ * @param options resume transfer options
  *
  * @returns a promise that resolves with the new transfer object if transfer is resumed
  */
@@ -576,7 +602,7 @@ export const getInfo = (): Promise<DesktopInfo> => {
     return throwError(messages.serverNotVerified);
   }
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, _) => {
     resolve(asperaDesktop.globals.desktopInfo);
   });
 };

@@ -1,8 +1,11 @@
 import {mockFetch} from './mocks';
 import {asperaDesktop} from '../src';
-import Client from '../src/helpers/client';
+import {isSafari} from '../src/helpers/helpers';
+import {httpClient} from '../src/helpers/client/http-client';
+import {safariClient} from '../src/helpers/client/safari-extension';
 
-const client = new Client();
+const client: Client = isSafari() ? safariClient : httpClient;
+
 let id = 0;
 
 const getHeaders = () => {

@@ -181,13 +181,9 @@ export const isValidURL = (url: string): boolean => {
  * Checks if the current browser is Safari.
  * @returns {boolean} Whether the browser is Safari.
  */
-export const isSafari = () => {
-  const ua = navigator.userAgent.toLowerCase();
-  if (ua.indexOf('safari') !== -1) {
-    return ua.indexOf('chrome') === -1;
-  } else {
-    return false;
-  }
+export const isSafari = (): boolean => {
+  // eslint-disable-next-line
+  return /^((?!chrome|android).)*safari/i.test(navigator.userAgent) && !(window as any).MSStream;
 };
 
 export default {

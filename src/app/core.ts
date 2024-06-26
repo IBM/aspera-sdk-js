@@ -1,9 +1,47 @@
 import {asperaDesktop} from '../index';
-import {client} from '../helpers/client';
-import {errorLog, generateErrorBody, generatePromiseObjects, getWebsocketUrl, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
 import {messages} from '../constants/messages';
+import Client from '../helpers/client';
+import {
+  errorLog,
+  generateErrorBody,
+  generatePromiseObjects,
+  getWebsocketUrl,
+  isSafari,
+  isValidTransferSpec,
+  randomUUID,
+  throwError
+} from '../helpers/helpers';
+import SafariExtensionHandler from '../helpers/safari-extension';
 import {DesktopInfo, TransferResponse} from '../models/aspera-desktop.model';
-import {DataTransferResponse, DesktopSpec, DesktopStyleFile, DesktopTransfer, FileDialogOptions, FolderDialogOptions, ModifyTransferOptions, ResumeTransferOptions, TransferSpec, CustomBrandingOptions} from '../models/models';
+import {
+  CustomBrandingOptions,
+  DataTransferResponse,
+  DesktopSpec,
+  DesktopStyleFile,
+  DesktopTransfer,
+  FileDialogOptions,
+  FolderDialogOptions,
+  ModifyTransferOptions,
+  ResumeTransferOptions,
+  TransferSpec
+} from '../models/models';
+
+let client: Client | undefined;
+let safariExtensionHandler: SafariExtensionHandler | undefined;
+
+if (!isSafari()) {
+  client = new Client();
+} else {
+  safariExtensionHandler = new SafariExtensionHandler();
+}
+
+function dispatchRequest(method: string, payload?: any): Promise<any> {
+  if (safariExtensionHandler) {
+    return safariExtensionHandler.sendRPCRequest(method, payload);
+  }
+
+  return client.request(method, payload);
+}
 
 /**
  * Check if IBM Aspera Desktop connection works. This function is called by init
@@ -12,7 +50,7 @@ import {DataTransferResponse, DesktopSpec, DesktopStyleFile, DesktopTransfer, Fi
  * @returns a promise that resolves if server can connect or rejects if not
  */
 export const testDesktopConnection = (): Promise<any> => {
-  return client.request('get_info')
+  return dispatchRequest('get_info')
     .then((data: DesktopInfo) => {
       asperaDesktop.globals.desktopInfo = data;
       asperaDesktop.globals.desktopVerified = true;
@@ -32,7 +70,7 @@ export const initDragDrop = (): Promise<boolean> => {
 
   const promiseInfo = generatePromiseObjects();
 
-  client.request('init_drag_drop')
+  dispatchRequest('init_drag_drop')
     .then((data: boolean) => promiseInfo.resolver(data))
     .catch(error => {
       errorLog(messages.dragDropInitFailed, error);
@@ -49,6 +87,11 @@ export const initDragDrop = (): Promise<boolean> => {
  * @returns a promise that resolves if the websocket connection is successful
  */
 export const initWebSocketConnection = (): Promise<any> => {
+  if (isSafari()) {
+    return testDesktopConnection()
+      .then(() => initDragDrop());
+  }
+
   return asperaDesktop.activityTracking.setup(getWebsocketUrl(asperaDesktop.globals.desktopUrl), asperaDesktop.globals.appId)
     .then(() => testDesktopConnection())
     .then(() => initDragDrop());
@@ -100,7 +143,7 @@ export const startTransfer = (transferSpec: TransferSpec, desktopSpec: DesktopSp
     app_id: asperaDesktop.globals.appId,
   };
 
-  client.request('start_transfer', payload)
+  dispatchRequest('start_transfer', payload)
     .then((data: any) => promiseInfo.resolver(data))
     .catch(error => {
       errorLog(messages.transferFailed, error);
@@ -194,7 +237,7 @@ export const removeTransfer = (id: string): Promise<any> => {
     transfer_id: id,
   };
 
-  client.request('remove_transfer', payload)
+  dispatchRequest('remove_transfer', payload)
     .then((data: any) => promiseInfo.resolver(data))
     .catch(error => {
       errorLog(messages.removeTransferFailed, error);
@@ -222,7 +265,7 @@ export const stopTransfer = (id: string): Promise<any> => {
     transfer_id: id,
   };
 
-  client.request('stop_transfer', payload)
+  dispatchRequest('stop_transfer', payload)
     .then((data: any) => promiseInfo.resolver(data))
     .catch(error => {
       errorLog(messages.stopTransferFailed, error);
@@ -236,6 +279,7 @@ export const stopTransfer = (id: string): Promise<any> => {
  * Resume a paused or failed transfer.
  *
  * @param id transfer uuid
+ * @param options resume transfer options
  *
  * @returns a promise that resolves with the new transfer object if transfer is resumed
  */
@@ -251,7 +295,7 @@ export const resumeTransfer = (id: string, options?: ResumeTransferOptions): Pro
     transfer_spec: options,
   };
 
-  client.request('resume_transfer', payload)
+  dispatchRequest('resume_transfer', payload)
     .then((data: DesktopTransfer) => promiseInfo.resolver(data))
     .catch(error => {
       errorLog(messages.resumeTransferFailed, error);
@@ -280,7 +324,7 @@ export const showSelectFileDialog = (options?: FileDialogOptions): Promise<DataT
     app_id: asperaDesktop.globals.appId,
   };
 
-  client.request('show_file_dialog', payload)
+  dispatchRequest('show_file_dialog', payload)
     .then((data: any) => promiseInfo.resolver(data))
     .catch(error => {
       errorLog(messages.showSelectFileDialogFailed, error);
@@ -309,7 +353,7 @@ export const showSelectFolderDialog = (options?: FolderDialogOptions): Promise<D
     app_id: asperaDesktop.globals.appId,
   };
 
-  client.request('show_folder_dialog', payload)
+  dispatchRequest('show_folder_dialog', payload)
     .then((data: any) => promiseInfo.resolver(data))
     .catch(error => {
       errorLog(messages.showSelectFolderDialogFailed, error);
@@ -331,7 +375,7 @@ export const showPreferences = (): Promise<any> => {
 
   const promiseInfo = generatePromiseObjects();
 
-  client.request('open_preferences')
+  dispatchRequest('open_preferences')
     .then((data: any) => promiseInfo.resolver(data))
     .catch(error => {
       errorLog(messages.showPreferencesFailed, error);
@@ -357,7 +401,7 @@ export const getAllTransfers = (): Promise<DesktopTransfer[]> => {
     app_id: asperaDesktop.globals.appId,
   };
 
-  client.request('get_all_transfers', payload)
+  dispatchRequest('get_all_transfers', payload)
     .then((data: DesktopTransfer[]) => promiseInfo.resolver(data))
     .catch(error => {
       errorLog(messages.getAllTransfersFailed, error);
@@ -385,7 +429,7 @@ export const getTransfer = (id: string): Promise<DesktopTransfer> => {
     transfer_id: id,
   };
 
-  client.request('get_transfer', payload)
+  dispatchRequest('get_transfer', payload)
     .then((data: DesktopTransfer) => promiseInfo.resolver(data))
     .catch(error => {
       errorLog(messages.getTransferFailed, error);
@@ -414,7 +458,7 @@ export const showDirectory = (id: string): Promise<any> => {
     transfer_id: id,
   };
 
-  client.request('show_directory', payload)
+  dispatchRequest('show_directory', payload)
     .then((data: any) => promiseInfo.resolver(data))
     .catch(error => {
       errorLog(messages.showDirectoryFailed, error);
@@ -444,7 +488,7 @@ export const modifyTransfer = (id: string, options: ModifyTransferOptions): Prom
     transfer_spec: options,
   };
 
-  client.request('modify_transfer', payload)
+  dispatchRequest('modify_transfer', payload)
     .then((data: any) => promiseInfo.resolver(data))
     .catch(error => {
       errorLog(messages.modifyTransferFailed, error);
@@ -481,7 +525,7 @@ export const setBranding = (id: string, options: CustomBrandingOptions): Promise
     branding,
   };
 
-  client.request('update_branding', payload)
+  dispatchRequest('update_branding', payload)
     .then((data: any) => promiseInfo.resolver(data))
     .catch(error => {
       errorLog(messages.setBrandingFailed, error);
@@ -530,7 +574,7 @@ export const createDropzone = (
         app_id: asperaDesktop.globals.appId,
       };
 
-      client.request('dropped_files', payload)
+      dispatchRequest('dropped_files', payload)
         .then((data: any) => callback({event, files: data}))
         .catch(error => {
           errorLog(messages.unableToReadDropped, error);

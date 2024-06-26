@@ -1,7 +1,8 @@
-import {client} from '../src/helpers/client';
-import {asperaDesktop} from '../src/index';
 import {mockFetch} from './mocks';
+import {asperaDesktop} from '../src';
+import Client from '../src/helpers/client';
 
+const client = new Client();
 let id = 0;
 
 const getHeaders = () => {

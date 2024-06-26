@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.2.5",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^5.48.1",
     "@typescript-eslint/parser": "^5.48.1",
     "eslint": "^8.31.0",
@@ -45,6 +46,7 @@
     "webpack-dev-server": "^4.11.1"
   },
   "dependencies": {
-    "json-rpc-2.0": "^1.6.0"
+    "json-rpc-2.0": "^1.6.0",
+    "uuid": "^10.0.0"
   }
 }

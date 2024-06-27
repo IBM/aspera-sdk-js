@@ -40,6 +40,11 @@ export interface PromiseExecutor {
 }
 
 /**
+ * Global keep alive interval to prevent recursion.
+ */
+let keepAliveInterval: NodeJS.Timeout;
+
+/**
  * Handles communication with the Safari extension using JSON-RPC over custom events.
  */
 export class SafariClient implements Client {
@@ -53,6 +58,11 @@ export class SafariClient implements Client {
     this.safariExtensionExecutors = new Map();
     this.listenResponseEvents();
     this.listenTransferActivityEvents();
+
+    if (keepAliveInterval) {
+      clearTimeout(keepAliveInterval);
+    }
+
     this.keepAlive();
   }
 
@@ -166,7 +176,7 @@ export class SafariClient implements Client {
   private keepAlive() {
     this.dispatchEvent(SafariExtensionEventType.Ping);
 
-    setTimeout(() => {
+    keepAliveInterval = setTimeout(() => {
       this.keepAlive();
     }, 3000);
   }

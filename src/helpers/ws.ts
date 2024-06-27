@@ -148,7 +148,7 @@ export class WebsocketService {
    *
    * @returns a promise that resolves when the websocket connection is established
    */
-  init(socketUrl: string, appId: string): Promise<any> {
+  init(socketUrl: string, appId: string): Promise<unknown> {
     this.websocketUrl = socketUrl;
     this.appId = appId;
 

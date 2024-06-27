@@ -77,9 +77,9 @@ export class SafariClient implements Client {
    * Monitors transfer activity.
    * @returns A Promise that resolves with the response from the extension.
    */
-  public monitorTransferActivity(): Promise<any> {
+  public monitorTransferActivity(): Promise<unknown> {
     const request = this.buildRPCRequest('subscribe_transfer_activity', [asperaDesktop.globals.appId]);
-    const promise = new Promise<any>((resolve, reject) => {
+    const promise = new Promise<unknown>((resolve, reject) => {
       this.safariExtensionExecutors.set(request.id, { resolve, reject });
     });
 

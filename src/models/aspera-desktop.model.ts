@@ -117,7 +117,7 @@ export class ActivityTracking {
    * @returns a promise that resolves when the websocket connection is established.
    * Currently, this promise does not reject.
    */
-  setup(appId: string): Promise<any> {
+  setup(appId: string): Promise<unknown> {
     if (isSafari()) {
       return safariClient.monitorTransferActivity();
     }
@@ -125,11 +125,9 @@ export class ActivityTracking {
     const url = getWebsocketUrl(asperaDesktop.globals.desktopUrl);
 
     return websocketService.init(url, appId)
-      .then((response) => {
+      .then(() => {
         websocketService.registerMessage('transfer_activity', (data: ActivityMessage) => this.handleTransferActivity(data));
         websocketService.registerEvent((status: 'CLOSED'|'RECONNECT') => this.handleWebSocketEvents(status));
-
-        return response;
       });
   }
 

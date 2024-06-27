@@ -120,6 +120,7 @@ export class WebsocketService {
    * This function registers clients to listen to a certain message name. Returns any to allow functions to declare proper type
    *
    * @param messageName - the name of messages to listen to (one message name per subscription)
+   * @param callback - the callback function
    */
   registerMessage(messageName: WebsocketTopics, callback: Function): void {
     if (!this.sockets.get(messageName)) {
@@ -143,10 +144,11 @@ export class WebsocketService {
    * This function starts the websocket subscription with the websocket provider
    *
    * @param socketUrl - the websocket URL to use
+   * @param appId - the App ID
    *
    * @returns a promise that resolves when the websocket connection is established
    */
-  init(socketUrl: string, appId: string): Promise<any> {
+  init(socketUrl: string, appId: string): Promise<unknown> {
     this.websocketUrl = socketUrl;
     this.appId = appId;
 

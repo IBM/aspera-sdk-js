@@ -1,8 +1,10 @@
-import {DesktopSpec, DesktopTransfer, ModifyTransferOptions, InstallerOptions, FileDialogOptions, FolderDialogOptions, TransferSpec, DesktopStyleFile, InstallerInfoResponse, DataTransferResponse, ResumeTransferOptions, WebsocketEvents, CustomBrandingOptions} from './models';
-import {errorLog} from '../helpers/helpers';
-import {websocketService} from '../helpers/ws';
+import {DesktopSpec, DesktopTransfer, ModifyTransferOptions, InstallerOptions, FileDialogOptions, FolderDialogOptions, TransferSpec, InstallerInfoResponse, DataTransferResponse, ResumeTransferOptions, WebsocketEvents, CustomBrandingOptions} from './models';
 import {hiddenStyleList, protocol} from '../constants/constants';
 import {messages} from '../constants/messages';
+import {safariClient} from '../helpers/client/safari-client';
+import {errorLog, getWebsocketUrl, isSafari} from '../helpers/helpers';
+import {websocketService} from '../helpers/ws';
+import {asperaDesktop} from '../index';
 
 class DesktopGlobals {
   /** The URL of the IBM Aspera Desktop HTTP server to use with the SDK */
@@ -73,9 +75,9 @@ export class ActivityTracking {
   /**
    * Notify all consumers when a message is received from the websocket
    *
-   * @param data the data received from the websocket
+   * @param message the message received from the websocket
    */
-  private handleTransferActivity(message: ActivityMessage): void {
+  handleTransferActivity(message: ActivityMessage): void {
     if (message.type === 'transferUpdated') {
       this.activity_callbacks.forEach(callback => {
         if (typeof callback === 'function') {
@@ -90,7 +92,7 @@ export class ActivityTracking {
           callback(message.data);
         }
       });
-    };
+    }
   }
 
   /**
@@ -108,20 +110,24 @@ export class ActivityTracking {
   }
 
   /**
-   * Set up the websocket connection to IBM Aspera Desktop
+   * Set up the activity tracking with IBM Aspera Desktop.
    *
-   * @param url websocket URL
+   * @param appId - the App ID
    *
    * @returns a promise that resolves when the websocket connection is established.
-   * Currently this promise does not reject.
+   * Currently, this promise does not reject.
    */
-  setup(url: string, appId: string): Promise<any> {
+  setup(appId: string): Promise<unknown> {
+    if (isSafari()) {
+      return safariClient.monitorTransferActivity();
+    }
+
+    const url = getWebsocketUrl(asperaDesktop.globals.desktopUrl);
+
     return websocketService.init(url, appId)
-      .then((response) => {
+      .then(() => {
         websocketService.registerMessage('transfer_activity', (data: ActivityMessage) => this.handleTransferActivity(data));
         websocketService.registerEvent((status: 'CLOSED'|'RECONNECT') => this.handleWebSocketEvents(status));
-
-        return response;
       });
   }
 
@@ -270,4 +276,4 @@ export class Desktop {
   get isReady(): boolean {
     return this.globals.desktopVerified && this.globals.appId !== '';
   }
-};
+}

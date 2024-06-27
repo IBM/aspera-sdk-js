@@ -1,5 +1,6 @@
 import Client from './client';
 import {randomUUID} from '../helpers';
+import {asperaDesktop} from '../../index';
 
 /**
  * Enum defining different types of Safari extension events.
@@ -39,6 +40,11 @@ export interface PromiseExecutor {
 }
 
 /**
+ * Global keep alive timeout to prevent recursion.
+ */
+let keepAliveTimeout: ReturnType<typeof setTimeout>;
+
+/**
  * Handles communication with the Safari extension using JSON-RPC over custom events.
  */
 export class SafariClient implements Client {
@@ -51,6 +57,13 @@ export class SafariClient implements Client {
   constructor() {
     this.safariExtensionExecutors = new Map();
     this.listenResponseEvents();
+    this.listenTransferActivityEvents();
+
+    if (keepAliveTimeout) {
+      clearTimeout(keepAliveTimeout);
+    }
+
+    this.keepAlive();
   }
 
   /**
@@ -65,10 +78,25 @@ export class SafariClient implements Client {
       this.safariExtensionExecutors.set(request.id, { resolve, reject });
     });
 
-    this.dispatchSafariExtensionEvent(SafariExtensionEventType.Request, request);
+    this.dispatchEvent(SafariExtensionEventType.Request, request);
 
     return promise;
   };
+
+  /**
+   * Monitors transfer activity.
+   * @returns A Promise that resolves with the response from the extension.
+   */
+  public monitorTransferActivity(): Promise<unknown> {
+    const request = this.buildRPCRequest('subscribe_transfer_activity', [asperaDesktop.globals.appId]);
+    const promise = new Promise<unknown>((resolve, reject) => {
+      this.safariExtensionExecutors.set(request.id, { resolve, reject });
+    });
+
+    this.dispatchEvent(SafariExtensionEventType.Monitor, request);
+
+    return promise;
+  }
 
   /**
    * Builds a JSON-RPC request object with a unique identifier.
@@ -90,7 +118,7 @@ export class SafariClient implements Client {
    * @param type The type of Safari extension event to dispatch.
    * @param request Optional JSON-RPC request payload to send with the event.
    */
-  private dispatchSafariExtensionEvent(type: SafariExtensionEventType, request?: JSONRPCRequest) {
+  private dispatchEvent(type: SafariExtensionEventType, request?: JSONRPCRequest) {
     const payload = {
       detail: request ?? {}
     };
@@ -103,7 +131,7 @@ export class SafariClient implements Client {
    * Resolves or rejects promises based on the response.
    * @param response The JSON-RPC response object received from the extension.
    */
-  private handleResponseEvent(response: JSONRPCResponse) {
+  private handleResponse(response: JSONRPCResponse) {
     const requestId = response.id;
     const executor = this.safariExtensionExecutors.get(requestId);
 
@@ -124,12 +152,33 @@ export class SafariClient implements Client {
 
   /**
    * Listens for 'AsperaDesktop.Response' events from the document,
-   * and delegates handling to the handleResponseEvent method.
+   * and delegates handling to the handleResponse method.
    */
   private listenResponseEvents() {
     document.addEventListener('AsperaDesktop.Response', (event: CustomEvent<JSONRPCResponse>) => {
-      this.handleResponseEvent(event.detail);
+      this.handleResponse(event.detail);
     });
+  }
+
+  /**
+   * Listens for 'AsperaDesktop.TransferActivity' events from the document,
+   * and delegates handling to the handleTransferActivity method.
+   */
+  private listenTransferActivityEvents() {
+    document.addEventListener('AsperaDesktop.TransferActivity', (event: any) => {
+      asperaDesktop.activityTracking.handleTransferActivity(event.detail);
+    });
+  }
+
+  /**
+   * Sends a keep alive ping every 3 seconds.
+   */
+  private keepAlive() {
+    this.dispatchEvent(SafariExtensionEventType.Ping);
+
+    keepAliveTimeout = setTimeout(() => {
+      this.keepAlive();
+    }, 3000);
   }
 }
 

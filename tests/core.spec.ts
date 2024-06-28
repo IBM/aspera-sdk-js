@@ -1,5 +1,5 @@
-import {initDesktop} from '../src/app/core';
 import {mockFetch} from './mocks';
+import {initDesktop} from '../src';
 
 describe('initHttpGateway', () => {
 

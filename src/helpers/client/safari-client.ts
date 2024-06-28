@@ -245,17 +245,29 @@ export class SafariClient implements Client {
       return;
     }
 
+    this.safariExtensionEnabled = !this.safariExtensionEnabled;
+
+    console.log(`Safari extension status changed: ${this.safariExtensionEnabled ? 'Enabled' : 'Disabled'}`);
+
     if (isEnabled) {
-      if (this.subscribedTransferActivity) {
-        const resumeTransferActivity = () => {
-          console.log('Trying to resume transfer activity');
-
-          this.monitorTransferActivity()
-            .catch(() => resumeTransferActivity());
-        };
-
-        resumeTransferActivity();
+      if (!this.subscribedTransferActivity) {
+        return;
       }
+
+      const resumeTransferActivity = () => {
+        console.log('Resuming transfer activity');
+
+        this.monitorTransferActivity()
+          .catch(() => {
+            console.log('Failed to resume transfer activity, will try again in 1s');
+
+            setTimeout(() => {
+              resumeTransferActivity();
+            }, 1000);
+          });
+      };
+
+      resumeTransferActivity();
     } else {
       this.promiseExecutors.forEach((promiseExecutor) => {
         promiseExecutor.reject(new Error('The Safari extension is disabled or it\'s not responding'));
@@ -263,10 +275,6 @@ export class SafariClient implements Client {
 
       this.promiseExecutors.clear();
     }
-
-    this.safariExtensionEnabled = !this.safariExtensionEnabled;
-
-    console.log(`Safari extension status changed: ${this.safariExtensionEnabled ? 'Enabled' : 'Disabled'}`);
   }
 
   /**

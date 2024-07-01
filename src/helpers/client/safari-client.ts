@@ -52,8 +52,8 @@ export class SafariClient implements Client {
   private keepAliveInterval = 1000;
   private promiseExecutors: Map<string, PromiseExecutor>;
 
-  private lastSentPing: number = null;
-  private lastReceivedPong: number = null;
+  private lastSentPing: number|null = null;
+  private lastReceivedPong: number|null = null;
   private safariExtensionEnabled = false;
   private subscribedTransferActivity = false;
 
@@ -103,8 +103,6 @@ export class SafariClient implements Client {
     return promise
       .then(() => {
         this.subscribedTransferActivity = true;
-
-        console.log('Subscribed to transfer activity');
       });
   }
 
@@ -114,7 +112,7 @@ export class SafariClient implements Client {
    * @param payload Optional parameters for the method.
    * @returns The constructed JSON-RPC request object.
    */
-  private buildRPCRequest(method: string, payload?: any): JSONRPCRequest {
+  private buildRPCRequest(method: string, payload?: unknown): JSONRPCRequest {
     return {
       jsonrpc: '2.0',
       method,
@@ -142,7 +140,7 @@ export class SafariClient implements Client {
    * @param method The method name to invoke on the extension.
    * @param payload Optional parameters for the method.
    */
-  private dispatchPromiseEvent(type: SafariExtensionEventType, method: string, payload?: any): Promise<any> {
+  private dispatchPromiseEvent(type: SafariExtensionEventType, method: string, payload?: unknown): Promise<any> {
     const request = this.buildRPCRequest(method, payload);
     const promise = new Promise<any>((resolve, reject) => {
       this.promiseExecutors.set(request.id, { resolve, reject });
@@ -200,7 +198,7 @@ export class SafariClient implements Client {
    * Listens for 'AsperaDesktop.Status' events.
    */
   private listenStatusEvents() {
-    document.addEventListener('AsperaDesktop.Status', (_: any) => {
+    document.addEventListener('AsperaDesktop.Status', () => {
       // TODO: Aspera Desktop transfer activity status
     });
   }
@@ -256,7 +254,7 @@ export class SafariClient implements Client {
 
         this.monitorTransferActivity()
           .catch(() => {
-            console.log('Failed to resume transfer activity, will try again in 1s');
+            console.error('Failed to resume transfer activity, will try again in 1s');
 
             setTimeout(() => {
               resumeTransferActivity();
@@ -278,12 +276,7 @@ export class SafariClient implements Client {
    * Checks if the last pong received was longer than the max interval.
    */
   private checkSafariExtensionStatus(maxInterval: number) {
-    if (this.lastReceivedPong == null) {
-      this.safariExtensionStatusChanged(false);
-      return;
-    }
-
-    if (this.lastSentPing > this.lastReceivedPong || this.lastReceivedPong - this.lastSentPing >= maxInterval) {
+    if (this.lastReceivedPong == null || this.lastSentPing > this.lastReceivedPong || this.lastReceivedPong - this.lastSentPing >= maxInterval) {
       this.safariExtensionStatusChanged(false);
     }
   }

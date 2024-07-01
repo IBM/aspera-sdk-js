@@ -45,17 +45,14 @@ export interface PromiseExecutor {
 let keepAliveTimeout: ReturnType<typeof setTimeout>;
 
 /**
- * Global Safari extension timeout to prevent recursion.
- */
-let safariExtensionStatusTimeout: ReturnType<typeof setTimeout>;
-
-/**
  * Handles communication with the Safari extension using JSON-RPC over custom events.
  */
 export class SafariClient implements Client {
-  private keepAliveInterval = 2000;
+  private statusInterval = 200;
+  private keepAliveInterval = 1000;
   private promiseExecutors: Map<string, PromiseExecutor>;
 
+  private lastSentPing: number = null;
   private lastReceivedPong: number = null;
   private safariExtensionEnabled = false;
   private subscribedTransferActivity = false;
@@ -75,12 +72,7 @@ export class SafariClient implements Client {
       clearTimeout(keepAliveTimeout);
     }
 
-    if (safariExtensionStatusTimeout) {
-      clearTimeout(safariExtensionStatusTimeout);
-    }
-
     this.keepAlive();
-    this.checkSafariExtensionStatus();
   }
 
   /**
@@ -217,7 +209,7 @@ export class SafariClient implements Client {
    * Listens for 'AsperaDesktop.Pong' events.
    */
   private listenPongEvents() {
-    document.addEventListener('AsperaDesktop.Pong', (_: any) => {
+    document.addEventListener('AsperaDesktop.Pong', () => {
       this.lastReceivedPong = Date.now();
       this.safariExtensionStatusChanged(true);
     });
@@ -227,7 +219,12 @@ export class SafariClient implements Client {
    * Sends a keep alive ping according to the defined interval.
    */
   private keepAlive() {
+    this.lastSentPing = Date.now();
     this.dispatchEvent(SafariExtensionEventType.Ping);
+
+    setTimeout(() => {
+      this.checkSafariExtensionStatus(this.statusInterval);
+    }, this.statusInterval);
 
     keepAliveTimeout = setTimeout(() => {
       this.keepAlive();
@@ -278,16 +275,17 @@ export class SafariClient implements Client {
   }
 
   /**
-   * Checks every second if the last pong received was longer than the expected interval.
+   * Checks if the last pong received was longer than the max interval.
    */
-  private checkSafariExtensionStatus() {
-    if (this.lastReceivedPong !== null && Date.now() - this.lastReceivedPong > this.keepAliveInterval + 1000) {
+  private checkSafariExtensionStatus(maxInterval: number) {
+    if (this.lastReceivedPong == null) {
       this.safariExtensionStatusChanged(false);
+      return;
     }
 
-    safariExtensionStatusTimeout = setTimeout(() => {
-      this.checkSafariExtensionStatus();
-    }, 1000);
+    if (this.lastSentPing > this.lastReceivedPong || this.lastReceivedPong - this.lastSentPing >= maxInterval) {
+      this.safariExtensionStatusChanged(false);
+    }
   }
 }
 

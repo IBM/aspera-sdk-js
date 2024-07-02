@@ -232,7 +232,7 @@ export class SafariClient implements Client {
   /**
    * Listens for Safari extension status changes.
    * If the extension was disabled and enabled again after initializing the SDK, it
-   * will call 'monitorTransferActivity' indefinably to resume transfer activities.
+   * will call 'monitorTransferActivity' to resume transfer activities.
    */
   private safariExtensionStatusChanged(isEnabled: boolean) {
     // Return if the status is the same

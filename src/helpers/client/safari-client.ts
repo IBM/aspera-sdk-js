@@ -52,8 +52,8 @@ export class SafariClient implements Client {
   private keepAliveInterval = 1000;
   private promiseExecutors: Map<string, PromiseExecutor>;
 
-  private lastSentPing: number|null = null;
-  private lastReceivedPong: number|null = null;
+  private lastPing: number|null = null;
+  private lastPong: number|null = null;
   private safariExtensionEnabled = false;
   private subscribedTransferActivity = false;
 
@@ -208,7 +208,7 @@ export class SafariClient implements Client {
    */
   private listenPongEvents() {
     document.addEventListener('AsperaDesktop.Pong', () => {
-      this.lastReceivedPong = Date.now();
+      this.lastPong = Date.now();
       this.safariExtensionStatusChanged(true);
     });
   }
@@ -217,7 +217,7 @@ export class SafariClient implements Client {
    * Sends a keep alive ping according to the defined interval.
    */
   private keepAlive() {
-    this.lastSentPing = Date.now();
+    this.lastPing = Date.now();
     this.dispatchEvent(SafariExtensionEventType.Ping);
 
     setTimeout(() => {
@@ -276,7 +276,9 @@ export class SafariClient implements Client {
    * Checks if the last pong received was longer than the max interval.
    */
   private checkSafariExtensionStatus() {
-    if (this.lastReceivedPong == null || this.lastSentPing > this.lastReceivedPong || this.lastReceivedPong - this.lastSentPing >= 500) {
+    const pingPongDiff = this.lastPong - this.lastPing;
+
+    if (this.lastPong == null || this.lastPing > this.lastPong || pingPongDiff < 0 || pingPongDiff > 500) {
       this.safariExtensionStatusChanged(false);
     }
   }

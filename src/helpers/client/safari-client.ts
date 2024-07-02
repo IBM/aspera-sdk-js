@@ -198,8 +198,8 @@ export class SafariClient implements Client {
    * Listens for 'AsperaDesktop.Status' events.
    */
   private listenStatusEvents() {
-    document.addEventListener('AsperaDesktop.Status', () => {
-      // TODO: Aspera Desktop transfer activity status
+    document.addEventListener('AsperaDesktop.Status', (event: any) => {
+      asperaDesktop.activityTracking.handleWebSocketEvents(event.detail);
     });
   }
 

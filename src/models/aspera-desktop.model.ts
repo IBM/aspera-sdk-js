@@ -101,7 +101,7 @@ export class ActivityTracking {
    *
    * @param event the event type.
    */
-  private handleWebSocketEvents(event: WebsocketEvents): void {
+  handleWebSocketEvents(event: WebsocketEvents): void {
     this.event_callbacks.forEach(callback => {
       if (typeof callback === 'function') {
         callback(event);

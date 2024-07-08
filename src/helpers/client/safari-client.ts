@@ -242,16 +242,12 @@ export class SafariClient implements Client {
 
     this.safariExtensionEnabled = !this.safariExtensionEnabled;
 
-    console.log(`Safari extension status changed: ${this.safariExtensionEnabled ? 'Enabled' : 'Disabled'}`);
-
     if (isEnabled) {
       if (!this.subscribedTransferActivity) {
         return;
       }
 
       const resumeTransferActivity = () => {
-        console.log('Resuming transfer activity');
-
         this.monitorTransferActivity()
           .catch(() => {
             console.error('Failed to resume transfer activity, will try again in 1s');

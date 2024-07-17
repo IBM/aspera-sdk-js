@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.28](https://github.com/IBM/aspera-desktop-sdk-js/compare/v0.1.26...v0.1.28) (2024-07-17)
+
+
+### Features
+
+* **#8:** get info method ([#9](https://github.com/IBM/aspera-desktop-sdk-js/issues/9)) ([84f38c4](https://github.com/IBM/aspera-desktop-sdk-js/commit/84f38c42458d942243b7d7cb375e8c2a7287f086)), closes [#8](https://github.com/IBM/aspera-desktop-sdk-js/issues/8)
+* safari client implementation ([#10](https://github.com/IBM/aspera-desktop-sdk-js/issues/10)) ([35170a6](https://github.com/IBM/aspera-desktop-sdk-js/commit/35170a6a00daa25d979ae8753e8ca79329baf422))
+* safari extension state detection ([#12](https://github.com/IBM/aspera-desktop-sdk-js/issues/12)) ([94b376e](https://github.com/IBM/aspera-desktop-sdk-js/commit/94b376ec3416e0fb9e8cda5bc773a3942a09881b))
+* support for transfer activity on safari  ([#11](https://github.com/IBM/aspera-desktop-sdk-js/issues/11)) ([616c23b](https://github.com/IBM/aspera-desktop-sdk-js/commit/616c23bd9f58a3da8099468bbb66b10fe0c8582a))
+
+
+### Bug Fixes
+
+* main field in package.json ([#13](https://github.com/IBM/aspera-desktop-sdk-js/issues/13)) ([8d103ee](https://github.com/IBM/aspera-desktop-sdk-js/commit/8d103ee0dffa8753c0c507f38ea375b8721555db))
+* scrub for open source ([#82](https://github.com/IBM/aspera-desktop-sdk-js/issues/82)) ([ec71567](https://github.com/IBM/aspera-desktop-sdk-js/commit/ec71567f9a1271c765c13fcbe9acb8cac517e595))
+
 ### [0.1.27](https://github.com/IBM/aspera-desktop-sdk-js/compare/v0.1.26...v0.1.27) (2024-06-10)
 
 

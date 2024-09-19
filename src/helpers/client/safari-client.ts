@@ -142,13 +142,15 @@ export class SafariClient implements Client {
    */
   private dispatchPromiseEvent(type: SafariExtensionEventType, method: string, payload?: unknown): Promise<any> {
     const request = this.buildRPCRequest(method, payload);
-    const promise = new Promise<any>((resolve, reject) => {
-      this.promiseExecutors.set(request.id, { resolve, reject });
+
+    return new Promise<any>((resolve, reject) => {
+      if (this.safariExtensionEnabled) {
+        this.promiseExecutors.set(request.id, {resolve, reject});
+        this.dispatchEvent(type, request);
+      } else {
+        reject();
+      }
     });
-
-    this.dispatchEvent(type, request);
-
-    return promise;
   }
 
   /**

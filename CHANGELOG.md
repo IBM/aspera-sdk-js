@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.29](https://github.com/IBM/aspera-desktop-sdk-js/compare/v0.1.28...v0.1.29) (2024-09-19)
+
+
+### Bug Fixes
+
+* **#23:** reject when safari extension is not enabled ([#25](https://github.com/IBM/aspera-desktop-sdk-js/issues/25)) ([6e46a99](https://github.com/IBM/aspera-desktop-sdk-js/commit/6e46a99a3e1fdfc8e39ef8a41cc7416d2e1163c5)), closes [#23](https://github.com/IBM/aspera-desktop-sdk-js/issues/23)
+
 ### [0.1.28](https://github.com/IBM/aspera-desktop-sdk-js/compare/v0.1.26...v0.1.28) (2024-07-17)
 
 

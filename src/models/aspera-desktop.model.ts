@@ -72,8 +72,8 @@ export class ActivityTracking {
   /** Map of callbacks that receive connection events */
   private event_callbacks: Map<string, Function> = new Map();
 
-  /** Keep track of the last notified status to prevent duplication **/
-  private lastNotifiedEvent: WebsocketEvents | undefined;
+  /** Keep track of the last notified event to prevent duplication **/
+  private lastNotifiedEvent: WebsocketEvents;
 
   /**
    * Notify all consumers when a message is received from the websocket

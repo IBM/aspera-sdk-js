@@ -72,6 +72,9 @@ export class ActivityTracking {
   /** Map of callbacks that receive connection events */
   private event_callbacks: Map<string, Function> = new Map();
 
+  /** Keep track of the last notified event to prevent duplication **/
+  private lastNotifiedEvent: WebsocketEvents;
+
   /**
    * Notify all consumers when a message is received from the websocket
    *
@@ -102,11 +105,17 @@ export class ActivityTracking {
    * @param event the event type.
    */
   handleWebSocketEvents(event: WebsocketEvents): void {
+    if (this.lastNotifiedEvent === event) {
+      return;
+    }
+
     this.event_callbacks.forEach(callback => {
       if (typeof callback === 'function') {
         callback(event);
       }
     });
+
+    this.lastNotifiedEvent = event;
   }
 
   /**

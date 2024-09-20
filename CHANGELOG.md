@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.30](https://github.com/IBM/aspera-desktop-sdk-js/compare/v0.1.29...v0.1.30) (2024-09-20)
+
+
+### Bug Fixes
+
+* **#24:** prevent ws event duplication ([#26](https://github.com/IBM/aspera-desktop-sdk-js/issues/26)) ([9959b69](https://github.com/IBM/aspera-desktop-sdk-js/commit/9959b69dcb00693f79d963bad8da73caf0932192)), closes [#24](https://github.com/IBM/aspera-desktop-sdk-js/issues/24)
+
 ### [0.1.29](https://github.com/IBM/aspera-desktop-sdk-js/compare/v0.1.28...v0.1.29) (2024-09-19)
 
 

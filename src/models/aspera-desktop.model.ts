@@ -1,4 +1,18 @@
-import {DesktopSpec, DesktopTransfer, ModifyTransferOptions, InstallerOptions, FileDialogOptions, FolderDialogOptions, TransferSpec, InstallerInfoResponse, DataTransferResponse, ResumeTransferOptions, WebsocketEvents, CustomBrandingOptions, SafariExtensionEvents} from './models';
+import {
+  CustomBrandingOptions,
+  DataTransferResponse,
+  DesktopSpec,
+  DesktopTransfer,
+  FileDialogOptions,
+  FolderDialogOptions,
+  InstallerInfoResponse,
+  InstallerOptions,
+  ModifyTransferOptions,
+  ResumeTransferOptions,
+  SafariExtensionEvents,
+  TransferSpec,
+  WebsocketEvents
+} from './models';
 import {hiddenStyleList, protocol} from '../constants/constants';
 import {messages} from '../constants/messages';
 import {safariClient} from '../helpers/client/safari-client';

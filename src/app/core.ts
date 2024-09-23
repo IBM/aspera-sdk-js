@@ -1,9 +1,29 @@
 import {messages} from '../constants/messages';
 import {client} from '../helpers/client/client';
-import {errorLog, generateErrorBody, generatePromiseObjects, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
+import {
+  errorLog,
+  generateErrorBody,
+  generatePromiseObjects,
+  isValidTransferSpec,
+  randomUUID,
+  throwError
+} from '../helpers/helpers';
 import {asperaDesktop} from '../index';
 import {DesktopInfo, TransferResponse} from '../models/aspera-desktop.model';
-import {CustomBrandingOptions, DataTransferResponse, DesktopSpec, DesktopStyleFile, DesktopTransfer, FileDialogOptions, FolderDialogOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvents, TransferSpec, WebsocketEvents} from '../models/models';
+import {
+  CustomBrandingOptions,
+  DataTransferResponse,
+  DesktopSpec,
+  DesktopStyleFile,
+  DesktopTransfer,
+  FileDialogOptions,
+  FolderDialogOptions,
+  ModifyTransferOptions,
+  ResumeTransferOptions,
+  SafariExtensionEvents,
+  TransferSpec,
+  WebsocketEvents
+} from '../models/models';
 
 /**
  * Check if IBM Aspera Desktop connection works. This function is called by init

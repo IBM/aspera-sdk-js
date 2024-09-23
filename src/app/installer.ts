@@ -1,8 +1,15 @@
 import {asperaDesktop} from '../index';
-import {errorLog, generateErrorBody, generatePromiseObjects, getCurrentPlatform, isValidURL, throwError} from '../helpers/helpers';
+import {
+  errorLog,
+  generateErrorBody,
+  generatePromiseObjects,
+  getCurrentPlatform,
+  isValidURL,
+  throwError
+} from '../helpers/helpers';
 import {apiGet} from '../helpers/http';
 import {messages} from '../constants/messages';
-import {InstallerOptions, InstallerInfoResponse} from '../models/models';
+import {InstallerInfoResponse, InstallerOptions} from '../models/models';
 
 /**
  * Get the latest Aspera for Desktop installer information such as download URL and version.

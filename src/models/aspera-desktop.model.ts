@@ -1,4 +1,18 @@
-import {DesktopSpec, DesktopTransfer, ModifyTransferOptions, InstallerOptions, FileDialogOptions, FolderDialogOptions, TransferSpec, InstallerInfoResponse, DataTransferResponse, ResumeTransferOptions, WebsocketEvents, CustomBrandingOptions} from './models';
+import {
+  DesktopSpec,
+  DesktopTransfer,
+  ModifyTransferOptions,
+  InstallerOptions,
+  FileDialogOptions,
+  FolderDialogOptions,
+  TransferSpec,
+  InstallerInfoResponse,
+  DataTransferResponse,
+  ResumeTransferOptions,
+  WebsocketEvents,
+  CustomBrandingOptions,
+  SafariExtensionEvents
+} from './models';
 import {hiddenStyleList, protocol} from '../constants/constants';
 import {messages} from '../constants/messages';
 import {safariClient} from '../helpers/client/safari-client';
@@ -71,9 +85,13 @@ export class ActivityTracking {
   private removed_callbacks: Map<string, Function> = new Map();
   /** Map of callbacks that receive connection events */
   private event_callbacks: Map<string, Function> = new Map();
+  /** Map of callbacks that receive Safari extension events */
+  private safari_extension_callbacks: Map<string, Function> = new Map();
 
-  /** Keep track of the last notified event to prevent duplication **/
-  private lastNotifiedEvent: WebsocketEvents;
+  /** Keep track of the last notified websocket event to prevent duplication **/
+  private lastNotifiedWebSocketEvent: WebsocketEvents;
+  /** Keep track of the last notified Safari extension event to prevent duplication **/
+  private lastNotifiedSafariExtensionEvent: SafariExtensionEvents;
 
   /**
    * Notify all consumers when a message is received from the websocket
@@ -105,7 +123,7 @@ export class ActivityTracking {
    * @param event the event type.
    */
   handleWebSocketEvents(event: WebsocketEvents): void {
-    if (this.lastNotifiedEvent === event) {
+    if (this.lastNotifiedWebSocketEvent === event) {
       return;
     }
 
@@ -115,7 +133,26 @@ export class ActivityTracking {
       }
     });
 
-    this.lastNotifiedEvent = event;
+    this.lastNotifiedWebSocketEvent = event;
+  }
+
+  /**
+   * Notify all consumers when a Safari extension event occurs (enabled/disabled).
+   *
+   * @param event the event type.
+   */
+  handleSafariExtensionEvents(event: SafariExtensionEvents): void {
+    if (this.lastNotifiedSafariExtensionEvent === event) {
+      return;
+    }
+
+    this.event_callbacks.forEach(callback => {
+      if (typeof callback === 'function') {
+        callback(event);
+      }
+    });
+
+    this.lastNotifiedSafariExtensionEvent = event;
   }
 
   /**
@@ -216,6 +253,32 @@ export class ActivityTracking {
    */
   removeWebSocketEventCallback(id: string): void {
     this.event_callbacks.delete(id);
+  }
+
+  /**
+   * Register a callback for getting Safari extension events back to the consumer
+   *
+   * @param callback the function to call with the websocket event
+   *
+   * @returns the ID of the callback index
+   */
+  setSafariExtensionEventCallback(callback: (status: SafariExtensionEvents) => void): string {
+    if (typeof callback !== 'function') {
+      errorLog(messages.callbackIsNotFunction);
+      return;
+    }
+    const id = `callback-${this.safari_extension_callbacks.size + 1}`;
+    this.safari_extension_callbacks.set(id, callback);
+    return id;
+  }
+
+  /**
+   * Remove the callback (deregister) from the list of callbacks
+   *
+   * @param id the string of the callback to remove
+   */
+  removeSafariExtensionEventCallback(id: string): void {
+    this.safari_extension_callbacks.delete(id);
   }
 }
 

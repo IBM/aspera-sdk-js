@@ -148,7 +148,7 @@ export class SafariClient implements Client {
         this.promiseExecutors.set(request.id, {resolve, reject});
         this.dispatchEvent(type, request);
       } else {
-        reject();
+        reject(new Error('The Safari extension is disabled or it\'s not responding'));
       }
     });
   }
@@ -268,6 +268,8 @@ export class SafariClient implements Client {
 
       this.promiseExecutors.clear();
     }
+
+    asperaDesktop.activityTracking.handleSafariExtensionEvents(isEnabled ? 'ENABLED' : 'DISABLED');
   }
 
   /**

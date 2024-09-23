@@ -465,6 +465,7 @@ export interface InstallerInfoResponse {
 
 export type WebsocketTopics = 'subscribe_transfer_activity' | 'transfer_activity';
 export type WebsocketEvents = 'CLOSED' | 'RECONNECT';
+export type SafariExtensionEvents = 'ENABLED' | 'DISABLED';
 
 export interface WebsocketMessage {
   jsonrpc: '2.0';
@@ -654,10 +655,10 @@ export interface CustomThemeItems {
   '$overlay'?: string;
   '$skeleton-element'?: string;
   '$skeleton-background'?: string;
-};
+}
 
 export interface CustomTheme {
   g10: CustomThemeItems;
   g100: CustomThemeItems;
   disableLightDarkMode?: boolean;
-};
+}

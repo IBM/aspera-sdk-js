@@ -19,8 +19,8 @@ import {
   FileDialogOptions,
   FolderDialogOptions,
   ModifyTransferOptions,
-  ResumeTransferOptions,
-  TransferSpec
+  ResumeTransferOptions, SafariExtensionEvents,
+  TransferSpec, WebsocketEvents
 } from '../models/models';
 
 /**
@@ -172,7 +172,7 @@ export const deregisterRemovedCallback = (id: string): void => {
  *
  * @returns ID representing the callback for deregistration purposes
  */
-export const registerStatusCallback = (callback: (status: 'CLOSED'|'RECONNECT') => void): string => {
+export const registerStatusCallback = (callback: (status: WebsocketEvents) => void): string => {
   return asperaDesktop.activityTracking.setWebSocketEventCallback(callback);
 };
 
@@ -183,6 +183,28 @@ export const registerStatusCallback = (callback: (status: 'CLOSED'|'RECONNECT') 
  */
 export const deregisterStatusCallback = (id: string): void => {
   asperaDesktop.activityTracking.removeWebSocketEventCallback(id);
+};
+
+/**
+ * Register a callback for getting updates about the Safari extension status.
+ *
+ * This can be useful if you want to handle the case where the user enable or disable the Safari extension.
+ *
+ * @param callback callback function to receive events
+ *
+ * @returns ID representing the callback for deregistration purposes
+ */
+export const registerSafariExtensionStatusCallback = (callback: (status: SafariExtensionEvents) => void): string => {
+  return asperaDesktop.activityTracking.setSafariExtensionEventCallback(callback);
+};
+
+/**
+ * Remove a callback from getting Safari extension status events.
+ *
+ * @param id the ID returned by `registerStatusCallback`
+ */
+export const deregisterSafariExtensionStatusCallback = (id: string): void => {
+  asperaDesktop.activityTracking.removeSafariExtensionEventCallback(id);
 };
 
 /**

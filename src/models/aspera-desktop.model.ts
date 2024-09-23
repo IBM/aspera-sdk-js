@@ -290,9 +290,13 @@ export class Desktop {
   /** Deregister callback to remove it from the callbacks getting removed transfer data */
   deregisterRemovedCallback: (id: string) => void;
   /** Register callback for connection status events from the app */
-  registerStatusCallback: (callback: (status: 'CLOSED'|'RECONNECT') => void) => string;
+  registerStatusCallback: (callback: (status: WebsocketEvents) => void) => string;
   /** Deregister callback to remove it from the callbacks getting connection events */
   deregisterStatusCallback: (id: string) => void;
+  /** Register callback for Safari extension status events */
+  registerSafariExtensionStatusCallback: (callback: (status: SafariExtensionEvents) => void) => string;
+  /** Deregister callback to remove it from the callbacks getting Safari extension events */
+  deregisterSafariExtensionStatusCallback: (id: string) => void;
   /** Function to remove a transfer */
   removeTransfer: (transferId: string) => Promise<any>;
   /** Function to show the transfer's download directory in Finder or Windows Explorer */

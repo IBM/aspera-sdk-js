@@ -21,6 +21,8 @@ import {
   removeDropzone,
   registerStatusCallback,
   deregisterStatusCallback,
+  registerSafariExtensionStatusCallback,
+  deregisterSafariExtensionStatusCallback,
   initDragDrop,
   setBranding,
   getInfo,
@@ -53,6 +55,8 @@ asperaDesktop.removeDropzone = removeDropzone;
 asperaDesktop.getInstallerInfo = getInstallerInfo;
 asperaDesktop.registerStatusCallback = registerStatusCallback;
 asperaDesktop.deregisterStatusCallback = deregisterStatusCallback;
+asperaDesktop.registerSafariExtensionStatusCallback = registerSafariExtensionStatusCallback;
+asperaDesktop.deregisterSafariExtensionStatusCallback = deregisterSafariExtensionStatusCallback;
 asperaDesktop.initDragDrop = initDragDrop;
 asperaDesktop.setBranding = setBranding;
 asperaDesktop.getInfo = getInfo;
@@ -88,6 +92,8 @@ export {
   getInstallerInfo,
   registerStatusCallback,
   deregisterStatusCallback,
+  registerSafariExtensionStatusCallback,
+  deregisterSafariExtensionStatusCallback,
   setBranding,
   getInfo,
 };
@@ -116,6 +122,8 @@ export default {
   getInstallerInfo,
   registerStatusCallback,
   deregisterStatusCallback,
+  registerSafariExtensionStatusCallback,
+  deregisterSafariExtensionStatusCallback,
   setBranding,
   getInfo,
 };

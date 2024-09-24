@@ -13,7 +13,7 @@ export class WebsocketService {
   /** The callback for websocket events */
   private eventListener: Function;
   /** Indicator if the websocket is already closed to avoid multiples for same event. */
-  private hasClosed = false;
+  private isClosed = true;
   /** The websocket URL to use */
   private websocketUrl: string;
   /** Indicator if restart in process to avoid multiples */
@@ -30,11 +30,11 @@ export class WebsocketService {
    * This function handles when a connection is opened
    */
   private handleOpen = (): void => {
-    if (!this.hasClosed) {
+    if (!this.isClosed) {
       return;
     }
 
-    this.hasClosed = false;
+    this.isClosed = false;
     this.restartingWebsocket = false;
 
     this.joinChannel();
@@ -45,11 +45,11 @@ export class WebsocketService {
    * This function handles completed subscription
    */
   private handleClosed = (): void => {
-    if (this.hasClosed) {
+    if (this.isClosed) {
       return;
     }
 
-    this.hasClosed = true;
+    this.isClosed = true;
     this.restartingWebsocket = false;
 
     this.handleDisconnect();
@@ -141,7 +141,7 @@ export class WebsocketService {
    */
   registerEvent(callback: Function): void {
     this.eventListener = callback;
-    this.eventListener(this.hasClosed ? 'CLOSED': 'RECONNECT');
+    this.eventListener(this.isClosed ? 'CLOSED': 'RECONNECT');
   }
 
   /**

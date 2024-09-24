@@ -1,5 +1,5 @@
 import {TransferResponse} from '../models/aspera-desktop.model';
-import {WebsocketMessage, WebsocketTopics} from '../models/models';
+import {WebsocketEvents, WebsocketMessage, WebsocketTopics} from '../models/models';
 import {messages} from '../constants/messages';
 import {errorLog, generatePromiseObjects} from './helpers';
 
@@ -30,27 +30,30 @@ export class WebsocketService {
    * This function handles when a connection is opened
    */
   private handleOpen = (): void => {
-    this.restartingWebsocket = false;
-    this.joinChannel();
-
-    if (typeof this.eventListener === 'function') {
-      this.hasClosed = false;
-      this.eventListener('RECONNECT');
+    if (!this.hasClosed) {
+      return;
     }
+
+    this.hasClosed = false;
+    this.restartingWebsocket = false;
+
+    this.joinChannel();
+    this.notifyEvent('RECONNECT');
   };
 
   /**
    * This function handles completed subscription
    */
   private handleClosed = (): void => {
-    this.restartingWebsocket = false;
-
-    if (!this.hasClosed && typeof this.eventListener === 'function') {
-      this.hasClosed = true;
-      this.eventListener('CLOSED');
+    if (this.hasClosed) {
+      return;
     }
 
+    this.hasClosed = true;
+    this.restartingWebsocket = false;
+
     this.handleDisconnect();
+    this.notifyEvent('CLOSED');
   };
 
   /**
@@ -138,6 +141,7 @@ export class WebsocketService {
    */
   registerEvent(callback: Function): void {
     this.eventListener = callback;
+    this.eventListener(this.hasClosed ? 'CLOSED': 'RECONNECT');
   }
 
   /**
@@ -160,6 +164,12 @@ export class WebsocketService {
     this.globalSocket.onmessage = this.handleMessage;
 
     return this.initPromise.promise;
+  }
+
+  private notifyEvent(event: WebsocketEvents) {
+    if (typeof this.eventListener === 'function') {
+      this.eventListener(event);
+    }
   }
 }
 

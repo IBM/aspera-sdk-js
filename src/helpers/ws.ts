@@ -32,9 +32,10 @@ export class WebsocketService {
       return;
     }
 
-    this.isConnected = true;
-    this.joinChannel();
-    this.notifyEvent('RECONNECT');
+    if (this.joinChannel()) {
+      this.isConnected = true;
+      this.notifyEvent('RECONNECT');
+    }
   };
 
   /**
@@ -88,14 +89,15 @@ export class WebsocketService {
   /**
    * This function joins the channel to be able to subscribe to events
    */
-  private joinChannel(): void {
+  private joinChannel(): boolean {
     if (!this.globalSocket) {
       this.handleNotReady();
-
-      return;
+      return false;
     }
 
     this.globalSocket.send(JSON.stringify({jsonrpc: '2.0', method: 'subscribe_transfer_activity', params: [this.appId], id: 1}));
+
+    return true;
   }
 
   /**

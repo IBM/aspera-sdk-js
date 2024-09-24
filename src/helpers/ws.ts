@@ -32,7 +32,7 @@ export class WebsocketService {
       return;
     }
 
-    this.isConnected = false;
+    this.isConnected = true;
     this.joinChannel();
     this.notifyEvent('RECONNECT');
   };
@@ -47,8 +47,8 @@ export class WebsocketService {
       return;
     }
 
-    if (!this.isConnected) {
-      this.isConnected = true;
+    if (this.isConnected) {
+      this.isConnected = false;
       this.notifyEvent('CLOSED');
     }
 

@@ -28,14 +28,12 @@ export class WebsocketService {
    * This function handles when a connection is opened
    */
   private handleOpen = (): void => {
-    if (this.isConnected) {
+    if (this.isConnected || !this.joinChannel()) {
       return;
     }
 
-    if (this.joinChannel()) {
-      this.isConnected = true;
-      this.notifyEvent('RECONNECT');
-    }
+    this.isConnected = true;
+    this.notifyEvent('RECONNECT');
   };
 
   /**

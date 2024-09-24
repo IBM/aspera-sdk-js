@@ -41,15 +41,14 @@ export class WebsocketService {
    * This function handles completed subscription
    */
   private handleClosed = (): void => {
-    if (!this.globalSocket) {
-      this.handleNotReady();
-
-      return;
-    }
-
     if (this.isConnected) {
       this.isConnected = false;
       this.notifyEvent('CLOSED');
+    }
+
+    if (!this.globalSocket) {
+      this.handleNotReady();
+      return;
     }
 
     // Try to reconnect

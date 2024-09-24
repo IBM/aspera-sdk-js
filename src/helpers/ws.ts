@@ -21,9 +21,6 @@ export class WebsocketService {
   /** Global promise object that resolves when init completes */
   private initPromise = generatePromiseObjects();
 
-  /** Keep track of the last notifiedEvent **/
-  private lastNotifiedEvent: WebsocketEvents;
-
   /** Log call for not being ready */
   private handleNotReady(): void {
     errorLog(messages.websocketNotReady);
@@ -33,34 +30,30 @@ export class WebsocketService {
    * This function handles when a connection is opened
    */
   private handleOpen = (): void => {
-    const event = 'RECONNECT';
-
-    this.restartingWebsocket = false;
-    this.joinChannel();
-
-    if (typeof this.eventListener === 'function') {
-      this.hasClosed = false;
-      this.eventListener(event);
+    if (!this.hasClosed) {
+      return;
     }
 
-    this.lastNotifiedEvent = event;
+    this.hasClosed = false;
+    this.restartingWebsocket = false;
+
+    this.joinChannel();
+    this.notifyEvent('RECONNECT');
   };
 
   /**
    * This function handles completed subscription
    */
   private handleClosed = (): void => {
-    const event = 'CLOSED';
-
-    this.restartingWebsocket = false;
-
-    if (!this.hasClosed && typeof this.eventListener === 'function') {
-      this.hasClosed = true;
-      this.eventListener(event);
+    if (this.hasClosed) {
+      return;
     }
 
-    this.lastNotifiedEvent = event;
+    this.hasClosed = true;
+    this.restartingWebsocket = false;
+
     this.handleDisconnect();
+    this.notifyEvent('CLOSED');
   };
 
   /**
@@ -148,7 +141,7 @@ export class WebsocketService {
    */
   registerEvent(callback: Function): void {
     this.eventListener = callback;
-    this.eventListener(this.lastNotifiedEvent);
+    this.eventListener(this.hasClosed ? 'CLOSED': 'RECONNECT');
   }
 
   /**
@@ -171,6 +164,12 @@ export class WebsocketService {
     this.globalSocket.onmessage = this.handleMessage;
 
     return this.initPromise.promise;
+  }
+
+  private notifyEvent(event: WebsocketEvents) {
+    if (typeof this.eventListener === 'function') {
+      this.eventListener(event);
+    }
   }
 }
 

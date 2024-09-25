@@ -88,10 +88,10 @@ export class ActivityTracking {
   /** Map of callbacks that receive Safari extension events */
   private safari_extension_callbacks: Map<string, Function> = new Map();
 
-  /** Keep track of the last notified websocket event to prevent duplication **/
-  private lastNotifiedWebSocketEvent: WebsocketEvents;
-  /** Keep track of the last notified Safari extension event to prevent duplication **/
-  private lastNotifiedSafariExtensionEvent: SafariExtensionEvents;
+  /** Keep track of the last WebSocket event **/
+  private lastWebSocketEvent: WebsocketEvents;
+  /** Keep track of the last Safari extension event **/
+  private lastSafariExtensionEvent: SafariExtensionEvents;
 
   /**
    * Notify all consumers when a message is received from the websocket
@@ -117,42 +117,42 @@ export class ActivityTracking {
   }
 
   /**
-   * Notify all consumers when a connection event occurs. For example, when the SDK
+   * Notify all consumers when a connection webSocketEvent occurs. For example, when the SDK
    * websocket connection to IBM Aspera Desktop is closed or reconnected.
    *
-   * @param event the event type.
+   * @param webSocketEvent the event type.
    */
-  handleWebSocketEvents(event: WebsocketEvents): void {
-    if (this.lastNotifiedWebSocketEvent === event) {
+  handleWebSocketEvents(webSocketEvent: WebsocketEvents): void {
+    if (this.lastWebSocketEvent === webSocketEvent) {
       return;
     }
 
     this.event_callbacks.forEach(callback => {
       if (typeof callback === 'function') {
-        callback(event);
+        callback(webSocketEvent);
       }
     });
 
-    this.lastNotifiedWebSocketEvent = event;
+    this.lastWebSocketEvent = webSocketEvent;
   }
 
   /**
-   * Notify all consumers when a Safari extension event occurs (enabled/disabled).
+   * Notify all consumers when a Safari extension safariExtensionEvent occurs (enabled/disabled).
    *
-   * @param event the event type.
+   * @param safariExtensionEvent the event type.
    */
-  handleSafariExtensionEvents(event: SafariExtensionEvents): void {
-    if (this.lastNotifiedSafariExtensionEvent === event) {
+  handleSafariExtensionEvents(safariExtensionEvent: SafariExtensionEvents): void {
+    if (this.lastSafariExtensionEvent === safariExtensionEvent) {
       return;
     }
 
     this.event_callbacks.forEach(callback => {
       if (typeof callback === 'function') {
-        callback(event);
+        callback(safariExtensionEvent);
       }
     });
 
-    this.lastNotifiedSafariExtensionEvent = event;
+    this.lastSafariExtensionEvent = safariExtensionEvent;
   }
 
   /**

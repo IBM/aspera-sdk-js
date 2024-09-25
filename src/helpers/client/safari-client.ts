@@ -148,7 +148,7 @@ export class SafariClient implements Client {
         this.promiseExecutors.set(request.id, {resolve, reject});
         this.dispatchEvent(type, request);
       } else {
-        reject();
+        reject(new Error('The Safari extension is disabled or unresponsive'));
       }
     });
   }
@@ -263,11 +263,13 @@ export class SafariClient implements Client {
       resumeTransferActivity();
     } else {
       this.promiseExecutors.forEach((promiseExecutor) => {
-        promiseExecutor.reject(new Error('The Safari extension is disabled or it\'s not responding'));
+        promiseExecutor.reject(new Error('The Safari extension is disabled or unresponsive'));
       });
 
       this.promiseExecutors.clear();
     }
+
+    asperaDesktop.activityTracking.handleSafariExtensionEvents(isEnabled ? 'ENABLED' : 'DISABLED');
   }
 
   /**

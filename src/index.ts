@@ -1,33 +1,33 @@
 import {Desktop} from './models/aspera-desktop.model';
 import {
-  initDesktop,
-  registerActivityCallback,
+  createDropzone,
   deregisterActivityCallback,
-  startTransfer,
-  testDesktopConnection,
-  removeTransfer,
-  showDirectory,
-  stopTransfer,
-  resumeTransfer,
-  getAllTransfers,
-  getTransfer,
-  registerRemovedCallback,
   deregisterRemovedCallback,
+  deregisterSafariExtensionStatusCallback,
+  deregisterStatusCallback,
+  getAllTransfers,
+  getInfo,
+  getTransfer,
+  initDesktop,
+  initDragDrop,
+  modifyTransfer,
+  registerActivityCallback,
+  registerRemovedCallback,
+  registerSafariExtensionStatusCallback,
+  registerStatusCallback,
+  removeDropzone,
+  removeTransfer,
+  resumeTransfer,
+  setBranding,
+  showDirectory,
+  showPreferences,
   showSelectFileDialog,
   showSelectFolderDialog,
-  showPreferences,
-  modifyTransfer,
-  createDropzone,
-  removeDropzone,
-  registerStatusCallback,
-  deregisterStatusCallback,
-  initDragDrop,
-  setBranding,
-  getInfo,
+  startTransfer,
+  stopTransfer,
+  testDesktopConnection,
 } from './app/core';
-import {
-  getInstallerInfo,
-} from './app/installer';
+import {getInstallerInfo} from './app/installer';
 
 export const asperaDesktop: Desktop = new Desktop();
 
@@ -53,6 +53,8 @@ asperaDesktop.removeDropzone = removeDropzone;
 asperaDesktop.getInstallerInfo = getInstallerInfo;
 asperaDesktop.registerStatusCallback = registerStatusCallback;
 asperaDesktop.deregisterStatusCallback = deregisterStatusCallback;
+asperaDesktop.registerSafariExtensionStatusCallback = registerSafariExtensionStatusCallback;
+asperaDesktop.deregisterSafariExtensionStatusCallback = deregisterSafariExtensionStatusCallback;
 asperaDesktop.initDragDrop = initDragDrop;
 asperaDesktop.setBranding = setBranding;
 asperaDesktop.getInfo = getInfo;
@@ -88,6 +90,8 @@ export {
   getInstallerInfo,
   registerStatusCallback,
   deregisterStatusCallback,
+  registerSafariExtensionStatusCallback,
+  deregisterSafariExtensionStatusCallback,
   setBranding,
   getInfo,
 };
@@ -116,6 +120,8 @@ export default {
   getInstallerInfo,
   registerStatusCallback,
   deregisterStatusCallback,
+  registerSafariExtensionStatusCallback,
+  deregisterSafariExtensionStatusCallback,
   setBranding,
   getInfo,
 };

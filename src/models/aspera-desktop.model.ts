@@ -1,4 +1,18 @@
-import {DesktopSpec, DesktopTransfer, ModifyTransferOptions, InstallerOptions, FileDialogOptions, FolderDialogOptions, TransferSpec, InstallerInfoResponse, DataTransferResponse, ResumeTransferOptions, WebsocketEvents, CustomBrandingOptions} from './models';
+import {
+  CustomBrandingOptions,
+  DataTransferResponse,
+  DesktopSpec,
+  DesktopTransfer,
+  FileDialogOptions,
+  FolderDialogOptions,
+  InstallerInfoResponse,
+  InstallerOptions,
+  ModifyTransferOptions,
+  ResumeTransferOptions,
+  SafariExtensionEvents,
+  TransferSpec,
+  WebsocketEvents
+} from './models';
 import {hiddenStyleList, protocol} from '../constants/constants';
 import {messages} from '../constants/messages';
 import {safariClient} from '../helpers/client/safari-client';
@@ -71,9 +85,13 @@ export class ActivityTracking {
   private removed_callbacks: Map<string, Function> = new Map();
   /** Map of callbacks that receive connection events */
   private event_callbacks: Map<string, Function> = new Map();
+  /** Map of callbacks that receive Safari extension events */
+  private safari_extension_callbacks: Map<string, Function> = new Map();
 
-  /** Keep track of the last notified event to prevent duplication **/
-  private lastNotifiedEvent: WebsocketEvents;
+  /** Keep track of the last WebSocket event **/
+  private lastWebSocketEvent: WebsocketEvents;
+  /** Keep track of the last Safari extension event **/
+  private lastSafariExtensionEvent: SafariExtensionEvents;
 
   /**
    * Notify all consumers when a message is received from the websocket
@@ -99,23 +117,42 @@ export class ActivityTracking {
   }
 
   /**
-   * Notify all consumers when a connection event occurs. For example, when the SDK
+   * Notify all consumers when a connection webSocketEvent occurs. For example, when the SDK
    * websocket connection to IBM Aspera Desktop is closed or reconnected.
    *
-   * @param event the event type.
+   * @param webSocketEvent the event type.
    */
-  handleWebSocketEvents(event: WebsocketEvents): void {
-    if (this.lastNotifiedEvent === event) {
+  handleWebSocketEvents(webSocketEvent: WebsocketEvents): void {
+    if (this.lastWebSocketEvent === webSocketEvent) {
       return;
     }
 
     this.event_callbacks.forEach(callback => {
       if (typeof callback === 'function') {
-        callback(event);
+        callback(webSocketEvent);
       }
     });
 
-    this.lastNotifiedEvent = event;
+    this.lastWebSocketEvent = webSocketEvent;
+  }
+
+  /**
+   * Notify all consumers when a Safari extension safariExtensionEvent occurs (enabled/disabled).
+   *
+   * @param safariExtensionEvent the event type.
+   */
+  handleSafariExtensionEvents(safariExtensionEvent: SafariExtensionEvents): void {
+    if (this.lastSafariExtensionEvent === safariExtensionEvent) {
+      return;
+    }
+
+    this.event_callbacks.forEach(callback => {
+      if (typeof callback === 'function') {
+        callback(safariExtensionEvent);
+      }
+    });
+
+    this.lastSafariExtensionEvent = safariExtensionEvent;
   }
 
   /**
@@ -217,6 +254,32 @@ export class ActivityTracking {
   removeWebSocketEventCallback(id: string): void {
     this.event_callbacks.delete(id);
   }
+
+  /**
+   * Register a callback for getting Safari extension events back to the consumer
+   *
+   * @param callback the function to call with the websocket event
+   *
+   * @returns the ID of the callback index
+   */
+  setSafariExtensionEventCallback(callback: (status: SafariExtensionEvents) => void): string {
+    if (typeof callback !== 'function') {
+      errorLog(messages.callbackIsNotFunction);
+      return;
+    }
+    const id = `callback-${this.safari_extension_callbacks.size + 1}`;
+    this.safari_extension_callbacks.set(id, callback);
+    return id;
+  }
+
+  /**
+   * Remove the callback (deregister) from the list of callbacks
+   *
+   * @param id the string of the callback to remove
+   */
+  removeSafariExtensionEventCallback(id: string): void {
+    this.safari_extension_callbacks.delete(id);
+  }
 }
 
 export class Desktop {
@@ -241,9 +304,13 @@ export class Desktop {
   /** Deregister callback to remove it from the callbacks getting removed transfer data */
   deregisterRemovedCallback: (id: string) => void;
   /** Register callback for connection status events from the app */
-  registerStatusCallback: (callback: (status: 'CLOSED'|'RECONNECT') => void) => string;
+  registerStatusCallback: (callback: (status: WebsocketEvents) => void) => string;
   /** Deregister callback to remove it from the callbacks getting connection events */
   deregisterStatusCallback: (id: string) => void;
+  /** Register callback for Safari extension status events */
+  registerSafariExtensionStatusCallback: (callback: (status: SafariExtensionEvents) => void) => string;
+  /** Deregister callback to remove it from the callbacks getting Safari extension events */
+  deregisterSafariExtensionStatusCallback: (id: string) => void;
   /** Function to remove a transfer */
   removeTransfer: (transferId: string) => Promise<any>;
   /** Function to show the transfer's download directory in Finder or Windows Explorer */

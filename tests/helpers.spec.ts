@@ -1,5 +1,11 @@
-import { JSONRPCErrorException } from 'json-rpc-2.0';
-import {errorLog, generateErrorBody, generatePromiseObjects, isValidTransferSpec, isValidURL} from '../src/helpers/helpers';
+import {JSONRPCErrorException} from 'json-rpc-2.0';
+import {
+  errorLog,
+  generateErrorBody,
+  generatePromiseObjects,
+  isValidTransferSpec,
+  isValidURL
+} from '../src/helpers/helpers';
 import {TransferSpec} from '../src/models/models';
 
 describe('generatePromiseObjects', () => {

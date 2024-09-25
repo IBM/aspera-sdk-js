@@ -1,4 +1,4 @@
-import { generatePromiseObjects } from './helpers';
+import {generatePromiseObjects} from './helpers';
 
 /**
  * Check HTTP promise response for server error response (non 2XX status) and reject promise is error

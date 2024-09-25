@@ -12,12 +12,10 @@ export class WebsocketService {
   private sockets: Map<WebsocketTopics, Function> = new Map();
   /** The callback for websocket events */
   private eventListener: Function;
-  /** Indicator if the websocket is already closed to avoid multiples for same event. */
-  private hasClosed = false;
+  /** Indicator if the websocket is already connected */
+  private isConnected = false;
   /** The websocket URL to use */
   private websocketUrl: string;
-  /** Indicator if restart in process to avoid multiples */
-  private restartingWebsocket = false;
   /** Global promise object that resolves when init completes */
   private initPromise = generatePromiseObjects();
 
@@ -30,14 +28,11 @@ export class WebsocketService {
    * This function handles when a connection is opened
    */
   private handleOpen = (): void => {
-    if (!this.hasClosed) {
+    if (this.isConnected || !this.joinChannel()) {
       return;
     }
 
-    this.hasClosed = false;
-    this.restartingWebsocket = false;
-
-    this.joinChannel();
+    this.isConnected = true;
     this.notifyEvent('RECONNECT');
   };
 
@@ -45,15 +40,21 @@ export class WebsocketService {
    * This function handles completed subscription
    */
   private handleClosed = (): void => {
-    if (this.hasClosed) {
+    if (this.isConnected) {
+      this.isConnected = false;
+      this.notifyEvent('CLOSED');
+    }
+
+    if (!this.globalSocket) {
+      this.handleNotReady();
       return;
     }
 
-    this.hasClosed = true;
-    this.restartingWebsocket = false;
-
-    this.handleDisconnect();
-    this.notifyEvent('CLOSED');
+    // Try to reconnect
+    setTimeout(() => {
+      this.globalSocket.close();
+      this.init(this.websocketUrl, this.appId);
+    }, 3000);
   };
 
   /**
@@ -61,35 +62,12 @@ export class WebsocketService {
    */
   private handleError = (): void => {
     errorLog(messages.websocketClosedError);
-    this.restartingWebsocket = false;
   };
-
-  /**
-   * This function attempts to reconnect on error
-   */
-  private handleDisconnect(): void {
-    if (!this.globalSocket) {
-      this.handleNotReady();
-
-      return;
-    }
-
-    if (!this.restartingWebsocket) {
-      this.restartingWebsocket = true;
-
-      setTimeout(() => {
-        this.globalSocket.close();
-        this.init(this.websocketUrl, this.appId);
-      }, 3000);
-    }
-  }
 
   /**
    * This function handles messages received from the websocket
    */
   private handleMessage = (message: MessageEvent<string>): void => {
-    this.restartingWebsocket = false;
-
     const data: WebsocketMessage = JSON.parse(message.data);
 
     // Message we get on subscription
@@ -109,14 +87,15 @@ export class WebsocketService {
   /**
    * This function joins the channel to be able to subscribe to events
    */
-  private joinChannel(): void {
+  private joinChannel(): boolean {
     if (!this.globalSocket) {
       this.handleNotReady();
-
-      return;
+      return false;
     }
 
     this.globalSocket.send(JSON.stringify({jsonrpc: '2.0', method: 'subscribe_transfer_activity', params: [this.appId], id: 1}));
+
+    return true;
   }
 
   /**
@@ -141,7 +120,7 @@ export class WebsocketService {
    */
   registerEvent(callback: Function): void {
     this.eventListener = callback;
-    this.eventListener(this.hasClosed ? 'CLOSED': 'RECONNECT');
+    this.eventListener(this.isConnected ? 'RECONNECT': 'CLOSED');
   }
 
   /**

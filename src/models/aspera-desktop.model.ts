@@ -146,7 +146,7 @@ export class ActivityTracking {
       return;
     }
 
-    this.event_callbacks.forEach(callback => {
+    this.safari_extension_callbacks.forEach(callback => {
       if (typeof callback === 'function') {
         callback(safariExtensionEvent);
       }

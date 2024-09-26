@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.36](https://github.com/IBM/aspera-desktop-sdk-js/compare/v0.1.35...v0.1.36) (2024-09-26)
+
+
+### Bug Fixes
+
+* use correct callbacks for safari extension notifications ([#32](https://github.com/IBM/aspera-desktop-sdk-js/issues/32)) ([74ab8d6](https://github.com/IBM/aspera-desktop-sdk-js/commit/74ab8d67ffb4ab17354d038dbd7821ffa1815c7f))
+
 ### [0.1.35](https://github.com/IBM/aspera-desktop-sdk-js/compare/v0.1.34...v0.1.35) (2024-09-25)
 
 

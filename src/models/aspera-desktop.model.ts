@@ -343,6 +343,8 @@ export class Desktop {
   initDragDrop: () => Promise<any>;
   /** Function to get information about the IBM Aspera Desktop instance */
   getInfo: () => Promise<DesktopInfo>;
+  /** Function to get whether IBM Aspera Desktop is running on Safari */
+  isSafari: () => boolean;
 
   /**
    * Check if IBM Aspera Desktop is ready to be used and has been verified.

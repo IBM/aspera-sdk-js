@@ -187,13 +187,14 @@ export const isSafari = (): boolean => {
 };
 
 export default {
-  generatePromiseObjects,
   errorLog,
   generateErrorBody,
-  isValidTransferSpec,
-  getWebsocketUrl,
+  generatePromiseObjects,
   getCurrentPlatform,
+  getWebsocketUrl,
+  isSafari,
+  isValidURL,
+  isValidTransferSpec,
   randomUUID,
   throwError,
-  isValidURL,
 };

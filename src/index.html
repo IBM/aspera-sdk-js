@@ -145,9 +145,11 @@
         }, 1000)
       }
       function init() {
+        console.log('INITIALIZING...');
+
         const id = document.querySelector('#app-id').value;
-        asperaDesktop.initDesktop(id).then(response => {
-          console.log('INIT SUCCESS', response);
+        asperaDesktop.initDesktop(id).then(() => {
+          console.log('INIT SUCCESS');
 
           asperaDesktop.getAllTransfers().then(response => {
             monitorTransfers({ transfers: response });
@@ -325,10 +327,6 @@
         });
       }
 
-      function handleStatusEvents(status) {
-        console.log('CONNECTION STATUS RECEIVED:', status);
-      }
-
       function launch() {
         asperaDesktop.launch();
       }
@@ -342,7 +340,16 @@
       }, 3000)
       asperaDesktop.registerActivityCallback(monitorTransfers);
       asperaDesktop.registerRemovedCallback(monitorRemovedTransfers);
-      asperaDesktop.registerStatusCallback(handleStatusEvents);
+
+      asperaDesktop.registerStatusCallback((status) => {
+        console.log('Websocket status changed to:', status);
+      });
+
+      if (asperaDesktop.isSafari()) {
+        asperaDesktop.registerSafariExtensionStatusCallback((status) => {
+          console.log('Safari extension status changed to:', status);
+        });
+      }
     </script>
   </head>
   <body>

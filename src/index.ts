@@ -28,6 +28,7 @@ import {
   testDesktopConnection,
 } from './app/core';
 import {getInstallerInfo} from './app/installer';
+import {isSafari} from './helpers/helpers';
 
 export const asperaDesktop: Desktop = new Desktop();
 
@@ -58,6 +59,7 @@ asperaDesktop.deregisterSafariExtensionStatusCallback = deregisterSafariExtensio
 asperaDesktop.initDragDrop = initDragDrop;
 asperaDesktop.setBranding = setBranding;
 asperaDesktop.getInfo = getInfo;
+asperaDesktop.isSafari = isSafari;
 
 const launch = asperaDesktop.globals.launch;
 asperaDesktop.launch = launch;
@@ -67,6 +69,7 @@ if (typeof (<any>window) === 'object') {
 }
 
 export {
+  isSafari,
   initDesktop,
   testDesktopConnection,
   startTransfer,
@@ -97,6 +100,7 @@ export {
 };
 
 export default {
+  isSafari,
   initDesktop,
   testDesktopConnection,
   startTransfer,

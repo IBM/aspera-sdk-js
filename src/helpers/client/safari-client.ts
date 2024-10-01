@@ -52,6 +52,7 @@ export class SafariClient implements Client {
   private keepAliveInterval = 1000;
   private promiseExecutors: Map<string, PromiseExecutor>;
 
+  private isFirstPing = true;
   private lastPing: number|null = null;
   private lastPong: number|null = null;
   private safariExtensionEnabled = false;
@@ -146,9 +147,10 @@ export class SafariClient implements Client {
     return new Promise<any>((resolve, reject) => {
       if (this.safariExtensionEnabled) {
         this.promiseExecutors.set(request.id, {resolve, reject});
+
         this.dispatchEvent(type, request);
       } else {
-        reject(new Error('The Safari extension is disabled or unresponsive'));
+        reject('The Safari extension is disabled or unresponsive (dispatch)');
       }
     });
   }
@@ -163,8 +165,8 @@ export class SafariClient implements Client {
     const executor = this.promiseExecutors.get(requestId);
 
     if (!executor) {
-      console.error(`Unable to find a promise executor for ${requestId}`);
-      console.error(response);
+      console.warn(`Unable to find a promise executor for ${requestId}`);
+      console.warn(response);
       return;
     }
 
@@ -222,9 +224,13 @@ export class SafariClient implements Client {
     this.lastPing = Date.now();
     this.dispatchEvent(SafariExtensionEventType.Ping);
 
-    setTimeout(() => {
-      this.checkSafariExtensionStatus();
-    }, this.statusInterval);
+    if (this.isFirstPing) {
+      this.isFirstPing = false;
+    } else {
+      setTimeout(() => {
+        this.checkSafariExtensionStatus();
+      }, this.statusInterval);
+    }
 
     keepAliveTimeout = setTimeout(() => {
       this.keepAlive();
@@ -237,39 +243,36 @@ export class SafariClient implements Client {
    * will call 'monitorTransferActivity' to resume transfer activities.
    */
   private safariExtensionStatusChanged(isEnabled: boolean) {
-    // Return if the status is the same
     if (isEnabled === this.safariExtensionEnabled) {
       return;
     }
 
-    this.safariExtensionEnabled = !this.safariExtensionEnabled;
+    this.safariExtensionEnabled = isEnabled;
 
     if (isEnabled) {
-      if (!this.subscribedTransferActivity) {
-        return;
+      if (this.subscribedTransferActivity) {
+        const resumeTransferActivity = () => {
+          this.monitorTransferActivity()
+            .catch(() => {
+              console.error('Failed to resume transfer activity, will try again in 1s');
+
+              setTimeout(() => {
+                resumeTransferActivity();
+              }, 1000);
+            });
+        };
+
+        resumeTransferActivity();
       }
-
-      const resumeTransferActivity = () => {
-        this.monitorTransferActivity()
-          .catch(() => {
-            console.error('Failed to resume transfer activity, will try again in 1s');
-
-            setTimeout(() => {
-              resumeTransferActivity();
-            }, 1000);
-          });
-      };
-
-      resumeTransferActivity();
     } else {
       this.promiseExecutors.forEach((promiseExecutor) => {
-        promiseExecutor.reject(new Error('The Safari extension is disabled or unresponsive'));
+        promiseExecutor.reject('The Safari extension is disabled or unresponsive (extension status)');
       });
 
       this.promiseExecutors.clear();
     }
 
-    asperaDesktop.activityTracking.handleSafariExtensionEvents(isEnabled ? 'ENABLED' : 'DISABLED');
+    asperaDesktop.activityTracking.handleSafariExtensionEvents(this.safariExtensionEnabled ? 'ENABLED' : 'DISABLED');
   }
 
   /**

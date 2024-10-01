@@ -79,15 +79,13 @@ export const initDesktop = (appId?: string): Promise<any> => {
   return asperaDesktop.activityTracking.setup(asperaDesktop.globals.appId)
     .then(() => testDesktopConnection())
     .then(() => initDragDrop())
-    .then(data => {
+    .then(() => {
       asperaDesktop.activityTracking.handleWebSocketEvents('RECONNECT');
-
-      return data;
     })
     .catch(error => {
       errorLog(messages.serverError, error);
       asperaDesktop.globals.desktopVerified = false;
-      return generateErrorBody(messages.serverError, error);
+      throw generateErrorBody(messages.serverError, error);
     });
 };
 

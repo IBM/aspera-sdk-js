@@ -52,7 +52,7 @@ class JSONRPCHttpClient {
       if (response.ok) {
         return response.json().then(rpcResponse => this.client.receive(rpcResponse));
       } else if (request.id !== undefined) {
-        throw Promise.reject(new Error(response.statusText));
+        throw Promise.reject(response.statusText);
       }
     });
   };

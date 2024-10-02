@@ -243,6 +243,11 @@ export class ActivityTracking {
     }
     const id = `callback-${this.event_callbacks.size + 1}`;
     this.event_callbacks.set(id, callback);
+
+    if (this.lastWebSocketEvent) {
+      callback(this.lastWebSocketEvent);
+    }
+
     return id;
   }
 
@@ -269,6 +274,11 @@ export class ActivityTracking {
     }
     const id = `callback-${this.safari_extension_callbacks.size + 1}`;
     this.safari_extension_callbacks.set(id, callback);
+
+    if (this.lastSafariExtensionEvent) {
+      callback(this.lastSafariExtensionEvent);
+    }
+
     return id;
   }
 

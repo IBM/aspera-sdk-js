@@ -150,7 +150,10 @@ export class SafariClient implements Client {
 
         this.dispatchEvent(type, request);
       } else {
-        reject('The Safari extension is disabled or unresponsive (dispatch)');
+        console.warn('The Safari extension is disabled or unresponsive (dispatch event)');
+        console.warn(`Failed event: ${JSON.stringify(request)}`);
+
+        reject('The Safari extension is disabled or unresponsive (dispatch event)');
       }
     });
   }
@@ -166,7 +169,7 @@ export class SafariClient implements Client {
 
     if (!executor) {
       console.warn(`Unable to find a promise executor for ${requestId}`);
-      console.warn(response);
+      console.warn(`Response: ${response}`);
       return;
     }
 

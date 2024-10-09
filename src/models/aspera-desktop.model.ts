@@ -89,9 +89,9 @@ export class ActivityTracking {
   private safari_extension_callbacks: Map<string, Function> = new Map();
 
   /** Keep track of the last WebSocket event **/
-  private lastWebSocketEvent: WebsocketEvents;
+  private lastWebSocketEvent: WebsocketEvents = 'CLOSED';
   /** Keep track of the last Safari extension event **/
-  private lastSafariExtensionEvent: SafariExtensionEvents;
+  private lastSafariExtensionEvent: SafariExtensionEvents = 'DISABLED';
 
   /**
    * Notify all consumers when a message is received from the websocket
@@ -243,6 +243,7 @@ export class ActivityTracking {
     }
     const id = `callback-${this.event_callbacks.size + 1}`;
     this.event_callbacks.set(id, callback);
+    callback(this.lastWebSocketEvent);
     return id;
   }
 
@@ -269,6 +270,7 @@ export class ActivityTracking {
     }
     const id = `callback-${this.safari_extension_callbacks.size + 1}`;
     this.safari_extension_callbacks.set(id, callback);
+    callback(this.lastSafariExtensionEvent);
     return id;
   }
 

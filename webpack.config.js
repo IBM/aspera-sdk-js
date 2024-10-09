@@ -30,7 +30,9 @@ module.exports = {
     ]
   },
   devServer: {
-    https: true,
+    server: {
+      type: 'https',
+    },
     open: true,
     static: [
       {

@@ -40,7 +40,7 @@ class DesktopGlobals {
   }
 
   /**
-   * Launch the IBM Aspera Desktop via protocol url. By default a hidden IFRAME attempts to
+   * Launch the IBM Aspera Desktop via protocol url. By default, a hidden IFRAME attempts to
    * open the app but if that fails a fallback of opening a new window happens.
    */
   launch(): void {

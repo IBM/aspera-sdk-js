@@ -48,7 +48,9 @@ class JSONRPCHttpClient {
       body: JSON.stringify(request),
     };
 
-    return fetch(asperaDesktop.globals.desktopUrl, options).then(response => {
+    const rpcServerURL = `${asperaDesktop.globals.desktopUrl}:${asperaDesktop.globals.rpcPort}`;
+
+    return fetch(rpcServerURL, options).then(response => {
       if (response.ok) {
         return response.json().then(rpcResponse => this.client.receive(rpcResponse));
       } else if (request.id !== undefined) {

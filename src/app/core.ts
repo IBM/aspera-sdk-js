@@ -70,13 +70,22 @@ export const initDragDrop = (): Promise<boolean> => {
  * will be associated with this ID. It is recommended to use a unique ID to keep transfer
  * information private from other websites.
  *
+ * @param sessionId the unique session ID for the current user.
+ *
  * @returns a promise that resolves if IBM Aspera Desktop is running properly or
  * rejects if unable to connect
  */
-export const initDesktop = (appId?: string): Promise<any> => {
-  asperaDesktop.globals.appId = appId ? appId : randomUUID();
+export const initDesktop = (appId?: string, sessionId?: string): Promise<any> => {
+  if (asperaDesktop.globals.desktopVerified) {
+    return new Promise((_, reject) => {
+      reject('This app has already initialized the SDK');
+    });
+  }
 
-  return asperaDesktop.activityTracking.setup(asperaDesktop.globals.appId)
+  asperaDesktop.globals.appId = appId ? appId : randomUUID();
+  asperaDesktop.globals.sessionId = sessionId;
+
+  return asperaDesktop.activityTracking.setup()
     .then(() => testDesktopConnection())
     .then(() => initDragDrop())
     .catch(error => {
@@ -575,7 +584,7 @@ export const createDropzone = (
   elements.forEach(element => {
     element.addEventListener('dragover', dragEvent);
     element.addEventListener('drop', dropEvent);
-    asperaDesktop.globals.dropzonesCreated.set(elementSelector, [{event: 'dragover', callback: dragEvent}, {event: 'drop', callback: dropEvent}]);
+    asperaDesktop.globals.dropZonesCreated.set(elementSelector, [{event: 'dragover', callback: dragEvent}, {event: 'drop', callback: dropEvent}]);
   });
 };
 
@@ -585,7 +594,7 @@ export const createDropzone = (
  * @param elementSelector the selector of the element on the page that should remove
  */
 export const removeDropzone = (elementSelector: string): void => {
-  const foundDropzone = asperaDesktop.globals.dropzonesCreated.get(elementSelector);
+  const foundDropzone = asperaDesktop.globals.dropZonesCreated.get(elementSelector);
 
   if (foundDropzone) {
     foundDropzone.forEach(data => {

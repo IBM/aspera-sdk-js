@@ -1,7 +1,8 @@
+import {errorLog, generatePromiseObjects, getWebsocketUrl} from './helpers';
+import {messages} from '../constants/messages';
+import {asperaDesktop} from '../index';
 import {TransferResponse} from '../models/aspera-desktop.model';
 import {WebsocketEvents, WebsocketMessage, WebsocketTopics} from '../models/models';
-import {messages} from '../constants/messages';
-import {errorLog, generatePromiseObjects} from './helpers';
 
 export class WebsocketService {
   /** The main websocket connection to Aspera Desktop */
@@ -14,8 +15,6 @@ export class WebsocketService {
   private eventListener: Function;
   /** Indicator if the websocket is already connected */
   private isConnected = false;
-  /** The websocket URL to use */
-  private websocketUrl: string;
   /** Global promise object that resolves when init completes */
   private initPromise = generatePromiseObjects();
 
@@ -33,6 +32,7 @@ export class WebsocketService {
     }
 
     this.isConnected = true;
+    this.updateRPCPort();
     this.notifyEvent('RECONNECT');
   };
 
@@ -50,11 +50,7 @@ export class WebsocketService {
       return;
     }
 
-    // Try to reconnect
-    setTimeout(() => {
-      this.globalSocket.close();
-      this.init(this.websocketUrl, this.appId);
-    }, 3000);
+    this.reconnect();
   };
 
   /**
@@ -126,29 +122,83 @@ export class WebsocketService {
   /**
    * This function starts the websocket subscription with the websocket provider
    *
-   * @param socketUrl - the websocket URL to use
-   * @param appId - the App ID
-   *
    * @returns a promise that resolves when the websocket connection is established
    */
-  init(socketUrl: string, appId: string): Promise<unknown> {
-    this.websocketUrl = socketUrl;
-    this.appId = appId;
-
-    this.globalSocket = new WebSocket(this.websocketUrl);
-
-    this.globalSocket.onerror = this.handleError;
-    this.globalSocket.onclose = this.handleClosed;
-    this.globalSocket.onopen = this.handleOpen;
-    this.globalSocket.onmessage = this.handleMessage;
+  init(): Promise<unknown> {
+    this.connect();
 
     return this.initPromise.promise;
+  }
+
+  private connect() {
+    this.getWebSocketConnection(33024, 33029)
+      .then((webSocket) => {
+        this.globalSocket = webSocket;
+        this.globalSocket.onerror = this.handleError;
+        this.globalSocket.onclose = this.handleClosed;
+        this.globalSocket.onopen = this.handleOpen;
+        this.globalSocket.onmessage = this.handleMessage;
+
+        this.handleOpen();
+      }).catch(() => {
+        this.reconnect();
+      });
+  }
+
+  private reconnect() {
+    setTimeout(() => {
+      this.globalSocket.close();
+      this.connect();
+    }, 2000);
+  }
+
+  private getWebSocketConnection(startPort: number, endPort: number): Promise<WebSocket> {
+    const webSocketUrl = getWebsocketUrl(asperaDesktop.globals.desktopUrl);
+
+    const checkPort = (port: number): Promise<WebSocket> => {
+      return new Promise((resolve, reject) => {
+        const webSocket = new WebSocket(`${webSocketUrl}:${port}`);
+
+        webSocket.onopen = () => {
+          resolve(webSocket);
+        };
+
+        webSocket.onerror = () => {
+          reject(`Connection failed on port ${port}`);
+        };
+      });
+    };
+
+    return new Promise((resolve, reject) => {
+      let currentPort = startPort;
+
+      const connectPort = () => {
+        if (currentPort > endPort) {
+          return reject('No available WebSocket connection found');
+        }
+
+        checkPort(currentPort)
+          .then(ws => resolve(ws))
+          .catch(() => {
+            currentPort++;
+            connectPort();
+          });
+      };
+
+      connectPort();
+    });
   }
 
   private notifyEvent(event: WebsocketEvents) {
     if (typeof this.eventListener === 'function') {
       this.eventListener(event);
     }
+  }
+
+  private updateRPCPort() {
+    const url = new URL(this.globalSocket.url);
+
+    asperaDesktop.globals.rpcPort = Number(url.port);
   }
 }
 

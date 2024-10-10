@@ -78,7 +78,7 @@ export const initDragDrop = (): Promise<boolean> => {
 export const initDesktop = (appId?: string, sessionId?: string): Promise<any> => {
   if (asperaDesktop.globals.desktopVerified) {
     return new Promise((_, reject) => {
-      reject('This app has already initialized the SDK');
+      reject('The Desktop SDK has already been initialized');
     });
   }
 

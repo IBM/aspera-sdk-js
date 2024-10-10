@@ -144,11 +144,11 @@
           generateObjectText();
         }, 1000)
       }
-      function init() {
+      function init(sessionId) {
         console.log('INITIALIZING...');
 
         const id = document.querySelector('#app-id').value;
-        asperaDesktop.initDesktop(id).then(() => {
+        asperaDesktop.initDesktop(id, sessionId).then(() => {
           console.log('INIT SUCCESS');
 
           asperaDesktop.getAllTransfers().then(response => {
@@ -351,6 +351,15 @@
           console.log('Safari extension status changed to:', status);
         });
       }
+
+      function randomUUID() {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+          const r = Math.random() * 16 | 0;
+          const v = c === 'x' ? r : (r & 0x3 | 0x8);
+          
+          return v.toString(16);
+        });
+      }
     </script>
   </head>
   <body>
@@ -358,6 +367,7 @@
     <a href="/aspera-desktop-sdk-js/docs/index.html" class="docs" target="_blank">Documentation</a>
     <div class="test-buttons">
       <button onclick="init()" type="button">Init SDK</button>
+      <button onclick="init(randomUUID())" type="button">Init SDK with session</button>
       <button onclick="testServer()" type="button">Test desktop</button>
       <button onclick="getInfo()" type="button">Get Info</button>
       <button onclick="transfer()" type="button">Start transfer</button>

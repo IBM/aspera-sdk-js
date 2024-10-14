@@ -40,14 +40,15 @@ describe('request', () => {
   });
 
   const fakeData = {data: 'testing'};
+  const rpcServerURL = `${asperaDesktop.globals.desktopUrl}:${asperaDesktop.globals.rpcPort}`;
 
   test('POST with no params should call url with no params', () => {
     httpClient.request('fake');
-    expect(fetch).toHaveBeenCalledWith(asperaDesktop.globals.desktopUrl, getExpectedRequest('fake'));
+    expect(fetch).toHaveBeenCalledWith(rpcServerURL, getExpectedRequest('fake'));
   });
 
   test('POST with params should call url with params', () => {
     httpClient.request('fake', fakeData);
-    expect(fetch).toHaveBeenCalledWith(asperaDesktop.globals.desktopUrl, getExpectedRequest('fake', fakeData));
+    expect(fetch).toHaveBeenCalledWith(rpcServerURL, getExpectedRequest('fake', fakeData));
   });
 });

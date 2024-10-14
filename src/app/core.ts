@@ -70,7 +70,8 @@ export const initDragDrop = (): Promise<boolean> => {
  * will be associated with this ID. It is recommended to use a unique ID to keep transfer
  * information private from other websites.
  *
- * @param userSession whether or not to use user session (defaults to false).
+ * @param userSession whether or not to use multiple user sessions (defaults to false). This is
+ * useful to handle multiple user sessions in the same device.
  *
  * @returns a promise that resolves if IBM Aspera Desktop is running properly or
  * rejects if unable to connect

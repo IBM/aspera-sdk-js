@@ -142,20 +142,21 @@
         document.querySelector('#test-output').value = text;
         setTimeout(() => {
           generateObjectText();
-        }, 1000)
+        }, 1000);
       }
-      function init(sessionId) {
+
+      function init(userSession) {
         console.log('INITIALIZING...');
 
         const id = document.querySelector('#app-id').value;
-        asperaDesktop.initDesktop(id, sessionId).then(() => {
+        asperaDesktop.initDesktop(id, userSession).then(() => {
           console.log('INIT SUCCESS');
 
           asperaDesktop.getAllTransfers().then(response => {
             monitorTransfers({ transfers: response });
           }).catch(error => {
             console.log('GET ALL TRANSFERS FAIL', error);
-          })
+          });
         }).catch(error => {
           console.log('INIT FAIL', error);
         })
@@ -219,7 +220,7 @@
           console.log('GET ALL TRANSFERS SUCCESS', response);
         }).catch(error => {
           console.log('GET ALL TRANSFERS FAIL', error);
-        })
+        });
       }
 
       function getTransfer(id) {
@@ -227,7 +228,7 @@
           console.log('GET TRANSFER SUCCESS', response);
         }).catch(error => {
           console.log('GET TRANSFER FAIL', error);
-        })
+        });
       }
 
       function showDirectory(id) {
@@ -235,7 +236,7 @@
           console.log('SHOW DIRECTORY SUCCESS', response);
         }).catch(error => {
           console.log('SHOW DIRECTORY FAIL', error);
-        })
+        });
       }
 
       function showSelectFileDialog() {
@@ -243,7 +244,7 @@
           console.log('SHOW FILE DIALOG SUCCESS', response);
         }).catch(error => {
           console.log('SHOW FILE DIALOG FAIL', error);
-        })
+        });
       }
 
       function showSelectFolderDialog() {
@@ -251,7 +252,7 @@
           console.log('SHOW FOLDER DIALOG SUCCESS', response);
         }).catch(error => {
           console.log('SHOW FOLDER DIALOG FAIL', error);
-        })
+        });
       }
 
       function openPreferences() {
@@ -259,7 +260,7 @@
           console.log('SHOW PREFERENCES SUCCESS', response);
         }).catch(error => {
           console.log('SHOW PREFERENCES FAIL', error);
-        })
+        });
       }
 
       function modifyTransfer(id) {
@@ -271,7 +272,7 @@
           console.log('MODIFY TRANSFER SUCCESS', response);
         }).catch(error => {
           console.log('MODIFY TRANSFER FAIL', error);
-        })
+        });
       }
 
       function testDrop() {
@@ -351,23 +352,14 @@
           console.log('Safari extension status changed to:', status);
         });
       }
-
-      function randomUUID() {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-          const r = Math.random() * 16 | 0;
-          const v = c === 'x' ? r : (r & 0x3 | 0x8);
-          
-          return v.toString(16);
-        });
-      }
     </script>
   </head>
   <body>
     <h1>Desktop SDK Test Server</h1>
     <a href="/aspera-desktop-sdk-js/docs/index.html" class="docs" target="_blank">Documentation</a>
     <div class="test-buttons">
-      <button onclick="init()" type="button">Init SDK</button>
-      <button onclick="init(randomUUID())" type="button">Init SDK with session</button>
+      <button onclick="init(false)" type="button">Init SDK</button>
+      <button onclick="init(true)" type="button">Init SDK with session</button>
       <button onclick="testServer()" type="button">Test desktop</button>
       <button onclick="getInfo()" type="button">Get Info</button>
       <button onclick="transfer()" type="button">Start transfer</button>

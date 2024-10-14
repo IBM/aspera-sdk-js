@@ -70,12 +70,12 @@ export const initDragDrop = (): Promise<boolean> => {
  * will be associated with this ID. It is recommended to use a unique ID to keep transfer
  * information private from other websites.
  *
- * @param sessionId the unique session ID for the current user.
+ * @param userSession whether or not to use user session (defaults to false).
  *
  * @returns a promise that resolves if IBM Aspera Desktop is running properly or
  * rejects if unable to connect
  */
-export const initDesktop = (appId?: string, sessionId?: string): Promise<any> => {
+export const initDesktop = (appId?: string, userSession?: boolean): Promise<any> => {
   if (asperaDesktop.globals.desktopVerified) {
     return new Promise((_, reject) => {
       reject('The Desktop SDK has already been initialized');
@@ -83,7 +83,10 @@ export const initDesktop = (appId?: string, sessionId?: string): Promise<any> =>
   }
 
   asperaDesktop.globals.appId = appId ? appId : randomUUID();
-  asperaDesktop.globals.sessionId = sessionId;
+
+  if (userSession !== undefined && userSession) {
+    asperaDesktop.globals.sessionId = randomUUID();
+  }
 
   return asperaDesktop.activityTracking.setup()
     .then(() => testDesktopConnection())

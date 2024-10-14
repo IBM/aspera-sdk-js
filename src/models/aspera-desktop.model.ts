@@ -307,7 +307,7 @@ export class Desktop {
   /** Activity tracking for watching transfers */
   activityTracking: ActivityTracking = new ActivityTracking();
   /** Function to initialize IBM Aspera Desktop */
-  initDesktop: (appId: string) => Promise<any>;
+  initDesktop: (appId: string, useSession?: boolean) => Promise<any>;
   /** Function to test the IBM Aspera Desktop status */
   testDesktopConnection: () => Promise<any>;
   /** Function to initiate a transfer */

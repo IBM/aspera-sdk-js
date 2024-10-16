@@ -17,7 +17,7 @@ import {
   DesktopStyleFile,
   DesktopTransfer,
   FileDialogOptions,
-  FolderDialogOptions,
+  FolderDialogOptions, InitOptions,
   ModifyTransferOptions,
   ResumeTransferOptions,
   SafariExtensionEvents,
@@ -66,26 +66,31 @@ export const initDragDrop = (): Promise<boolean> => {
  * Initialize IBM Aspera Desktop client. If client cannot (reject/catch), then
  * client should attempt fixing server URL or trying again. If still fails disable UI elements.
  *
- * @param appId the unique ID for the website. Transfers initiated during this session
+ * @param options initialization options:
+ *
+ * - `appId` the unique ID for the website. Transfers initiated during this session
  * will be associated with this ID. It is recommended to use a unique ID to keep transfer
  * information private from other websites.
  *
- * @param userSession whether or not to use multiple user sessions (defaults to false). This is
- * useful to handle multiple user sessions in the same device.
+ * - `supportMultipleUsers` when enabled (defaults to false), the SDK will iterate over a port
+ * range and generate a session id to determine the running instance of the desktop app for the
+ * current user. This is needed when multiple users may be logged into the same machine
+ * simultaneously, for example on a Windows Server.
  *
  * @returns a promise that resolves if IBM Aspera Desktop is running properly or
  * rejects if unable to connect
  */
-export const initDesktop = (appId?: string, userSession?: boolean): Promise<any> => {
+export const init = (options?: InitOptions): Promise<any> => {
+  const appId = options?.appId ?? randomUUID();
+  const supportMultipleUsers = options?.supportMultipleUsers ?? false;
+
   if (asperaDesktop.globals.desktopVerified) {
-    return new Promise((_, reject) => {
-      reject('The Desktop SDK has already been initialized');
-    });
+    return throwError(messages.sdkAlreadyInitialized);
   }
 
-  asperaDesktop.globals.appId = appId ? appId : randomUUID();
+  asperaDesktop.globals.appId = appId;
 
-  if (userSession !== undefined && userSession) {
+  if (supportMultipleUsers) {
     asperaDesktop.globals.sessionId = randomUUID();
   }
 
@@ -97,6 +102,21 @@ export const initDesktop = (appId?: string, userSession?: boolean): Promise<any>
       asperaDesktop.globals.desktopVerified = false;
       throw generateErrorBody(messages.serverError, error);
     });
+};
+
+/**
+ * Initialize IBM Aspera Desktop client. If client cannot (reject/catch), then
+ * client should attempt fixing server URL or trying again. If still fails disable UI elements.
+ *
+ * @param appId the unique ID for the website. Transfers initiated during this session
+ * will be associated with this ID. It is recommended to use a unique ID to keep transfer
+ * information private from other websites.
+ *
+ * @returns a promise that resolves if IBM Aspera Desktop is running properly or
+ * rejects if unable to connect
+ */
+export const initDesktop = (appId?: string): Promise<any> => {
+  return init({appId});
 };
 
 /**

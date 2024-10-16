@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <script src="aspera-desktop-sdk.js"></script>
+    <script src="aspera-browser-sdk.js"></script>
     <title>Desktop SDK Test Server</title>
     <style>
       body {
@@ -145,11 +145,13 @@
         }, 1000);
       }
 
-      function init(userSession) {
+      function init(supportMultipleUsers) {
         console.log('INITIALIZING...');
 
-        const id = document.querySelector('#app-id').value;
-        asperaDesktop.initDesktop(id, userSession).then(() => {
+        const appId = document.querySelector('#app-id').value;
+        const options = {appId, supportMultipleUsers};
+
+        asperaDesktop.init(options).then(() => {
           console.log('INIT SUCCESS');
 
           asperaDesktop.getAllTransfers().then(response => {
@@ -356,7 +358,7 @@
   </head>
   <body>
     <h1>Desktop SDK Test Server</h1>
-    <a href="/aspera-desktop-sdk-js/docs/index.html" class="docs" target="_blank">Documentation</a>
+    <a href="/aspera-browser-sdk-js/docs/index.html" class="docs" target="_blank">Documentation</a>
     <div class="test-buttons">
       <button onclick="init(false)" type="button">Init SDK</button>
       <button onclick="init(true)" type="button">Init SDK with session</button>

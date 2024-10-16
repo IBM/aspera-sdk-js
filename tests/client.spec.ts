@@ -1,6 +1,6 @@
 import {mockFetch} from './mocks';
-import {asperaDesktop} from '../src';
 import {httpClient} from '../src/helpers/client/http-client';
+import {getRpcServerUrl} from '../src/helpers/helpers';
 
 let id = 0;
 
@@ -34,13 +34,12 @@ const getExpectedRequest = (method: string, params: any = {}) => {
 };
 
 describe('request', () => {
-
   beforeEach(() => {
     (<any>global).fetch = mockFetch({});
   });
 
   const fakeData = {data: 'testing'};
-  const rpcServerURL = `${asperaDesktop.globals.desktopUrl}:${asperaDesktop.globals.rpcPort}`;
+  const rpcServerURL = getRpcServerUrl();
 
   test('POST with no params should call url with no params', () => {
     httpClient.request('fake');

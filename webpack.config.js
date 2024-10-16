@@ -15,7 +15,7 @@ module.exports = {
   devtool: 'source-map',
   output: {
     path: path.resolve(__dirname, 'dist/js'),
-    filename: 'aspera-desktop-sdk.js'
+    filename: 'aspera-browser-sdk.js'
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js', '.json']
@@ -40,11 +40,11 @@ module.exports = {
         directory: './src',
       },
       {
-        publicPath: '/aspera-desktop-sdk-js/docs',
+        publicPath: '/aspera-browser-sdk-js/docs',
         directory: './dist/js/docs',
       },
     ],
-    host: 'desktop-sdk.aspera.us',
+    host: 'browser-sdk.aspera.us',
     port: 4205
   },
   plugins: [

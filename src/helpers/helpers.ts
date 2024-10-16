@@ -1,3 +1,4 @@
+import {asperaDesktop} from '../index';
 import {ErrorResponse, PromiseObject, TransferSpec} from '../models/models';
 
 /**
@@ -20,7 +21,7 @@ export const generatePromiseObjects = (): PromiseObject => {
 };
 
 /**
- * Log errors from Aspera Desktop SDK
+ * Log errors from Aspera Browser SDK
  *
  * @param message the message indicating the error encountered
  * @param debugData the data with useful debugging information
@@ -41,7 +42,7 @@ export const errorLog = (message: string, debugData?: any): void => {
     (<any>window).asperaDesktopLogs.push({message, debugData});
   }
 
-  console.warn(`Aspera Desktop SDK: ${message}`, debugData);
+  console.warn(`Aspera Browser SDK: ${message}`, debugData);
 };
 
 /**
@@ -184,6 +185,10 @@ export const isValidURL = (url: string): boolean => {
 export const isSafari = (): boolean => {
   // eslint-disable-next-line
   return /^((?!chrome|android).)*safari/i.test(navigator.userAgent) && !(window as any).MSStream;
+};
+
+export const getRpcServerUrl = (): string => {
+  return `${asperaDesktop.globals.desktopUrl}:${asperaDesktop.globals.rpcPort}`;
 };
 
 export default {

@@ -26,4 +26,5 @@ export const messages = {
   websocketClosedError: 'The websocket was closed due to an error',
   websocketClosedUnexpect: 'The websocket was closed unexpectedly',
   websocketNotReady: 'The websocket is not ready. Run init first',
+  sdkAlreadyInitialized: 'The Desktop SDK has already been initialized',
 };

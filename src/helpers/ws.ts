@@ -32,7 +32,7 @@ export class WebsocketService {
     }
 
     this.isConnected = true;
-    this.updateRPCPort();
+    this.updateRpcPort();
     this.notifyEvent('RECONNECT');
   };
 
@@ -195,7 +195,7 @@ export class WebsocketService {
     }
   }
 
-  private updateRPCPort() {
+  private updateRpcPort() {
     const url = new URL(this.globalSocket.url);
 
     asperaDesktop.globals.rpcPort = Number(url.port);

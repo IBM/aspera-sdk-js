@@ -1,22 +1,8 @@
-import {
-  CustomBrandingOptions,
-  DataTransferResponse,
-  DesktopSpec,
-  DesktopTransfer,
-  FileDialogOptions,
-  FolderDialogOptions,
-  InstallerInfoResponse,
-  InstallerOptions,
-  ModifyTransferOptions,
-  ResumeTransferOptions,
-  SafariExtensionEvents,
-  TransferSpec,
-  WebsocketEvents
-} from './models';
+import {CustomBrandingOptions, DataTransferResponse, DesktopSpec, DesktopTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvents, TransferSpec, WebsocketEvents} from './models';
 import {hiddenStyleList, protocol} from '../constants/constants';
 import {messages} from '../constants/messages';
 import {safariClient} from '../helpers/client/safari-client';
-import {errorLog, getWebsocketUrl, isSafari} from '../helpers/helpers';
+import {errorLog, isSafari} from '../helpers/helpers';
 import {websocketService} from '../helpers/ws';
 import {asperaDesktop} from '../index';
 
@@ -34,7 +20,7 @@ class DesktopGlobals {
   /** The unique ID for the website */
   appId: string;
   /** The session ID for the current user */
-  sessionId: string;
+  sessionId?: string;
   /** Map of drop zones created by querySelector */
   dropZonesCreated: Map<string, {event: string; callback: (event: any) => void}[]> = new Map();
 
@@ -306,8 +292,10 @@ export class Desktop {
   globals: DesktopGlobals = new DesktopGlobals();
   /** Activity tracking for watching transfers */
   activityTracking: ActivityTracking = new ActivityTracking();
+  /** Function to initialize IBM Aspera Desktop with options */
+  init: (options: InitOptions) => Promise<any>;
   /** Function to initialize IBM Aspera Desktop */
-  initDesktop: (appId: string, useSession?: boolean) => Promise<any>;
+  initDesktop: (appId: string) => Promise<any>;
   /** Function to test the IBM Aspera Desktop status */
   testDesktopConnection: () => Promise<any>;
   /** Function to initiate a transfer */

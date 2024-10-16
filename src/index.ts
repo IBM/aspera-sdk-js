@@ -8,6 +8,7 @@ import {
   getAllTransfers,
   getInfo,
   getTransfer,
+  init,
   initDesktop,
   initDragDrop,
   modifyTransfer,
@@ -32,6 +33,7 @@ import {isSafari} from './helpers/helpers';
 
 export const asperaDesktop: Desktop = new Desktop();
 
+asperaDesktop.init = init;
 asperaDesktop.initDesktop = initDesktop;
 asperaDesktop.testDesktopConnection = testDesktopConnection;
 asperaDesktop.startTransfer = startTransfer;
@@ -70,6 +72,7 @@ if (typeof (<any>window) === 'object') {
 
 export {
   isSafari,
+  init,
   initDesktop,
   testDesktopConnection,
   startTransfer,
@@ -101,6 +104,7 @@ export {
 
 export default {
   isSafari,
+  init,
   initDesktop,
   testDesktopConnection,
   startTransfer,

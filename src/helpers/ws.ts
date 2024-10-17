@@ -146,8 +146,11 @@ export class WebsocketService {
   }
 
   private reconnect() {
-    setTimeout(() => {
+    if (this.globalSocket) {
       this.globalSocket.close();
+    }
+
+    setTimeout(() => {
       this.connect();
     }, 2000);
   }
@@ -196,6 +199,10 @@ export class WebsocketService {
   }
 
   private updateRpcPort() {
+    if (!this.globalSocket) {
+      return;
+    }
+
     const url = new URL(this.globalSocket.url);
 
     asperaDesktop.globals.rpcPort = Number(url.port);

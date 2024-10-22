@@ -13,7 +13,7 @@ import {
   TransferSpec,
   WebsocketEvents
 } from './models';
-import {hiddenStyleList, protocol} from '../constants/constants';
+import {hiddenStyleList, installerUrl, protocol} from '../constants/constants';
 import {messages} from '../constants/messages';
 import {safariClient} from '../helpers/client/safari-client';
 import {errorLog, getWebsocketUrl, isSafari} from '../helpers/helpers';
@@ -24,7 +24,7 @@ class BrowserGlobals {
   /** The URL of the IBM Aspera Browser HTTP server to use with the SDK */
   browserUrl = 'http://127.0.0.1:33024';
   /** The default URL to check for latest Aspera Browser installers */
-  installerUrl = 'https://d3gcli72yxqn2z.cloudfront.net/downloads/desktop/latest/stable';
+  installerUrl = installerUrl;
   /** Browser info */
   DesktopInfo: DesktopInfo;
   /** Indication that the server has been verified as working */

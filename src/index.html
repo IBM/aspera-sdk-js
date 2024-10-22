@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <script src="aspera-desktop-sdk.js"></script>
-    <title>Desktop SDK Test Server</title>
+    <script src="aspera-browser-sdk.js"></script>
+    <title>Browser SDK Test Server</title>
     <style>
       body {
         padding: 30px;
@@ -138,7 +138,7 @@
       }
 
       function generateObjectText() {
-        const text = JSON.stringify(asperaDesktop, undefined, 2);
+        const text = JSON.stringify(asperaBrowser, undefined, 2);
         document.querySelector('#test-output').value = text;
         setTimeout(() => {
           generateObjectText();
@@ -148,10 +148,10 @@
         console.log('INITIALIZING...');
 
         const id = document.querySelector('#app-id').value;
-        asperaDesktop.initDesktop(id).then(() => {
+        asperaBrowser.initBrowser(id).then(() => {
           console.log('INIT SUCCESS');
 
-          asperaDesktop.getAllTransfers().then(response => {
+          asperaBrowser.getAllTransfers().then(response => {
             monitorTransfers({ transfers: response });
           }).catch(error => {
             console.log('GET ALL TRANSFERS FAIL', error);
@@ -162,7 +162,7 @@
       }
 
       function testServer() {
-        asperaDesktop.testDesktopConnection().then(response => {
+        asperaBrowser.testBrowserConnection().then(response => {
           console.log('TEST SUCCESS', response);
         }).catch(error => {
           console.log('TEST FAIL', error);
@@ -170,7 +170,7 @@
       }
 
       function getInfo() {
-        asperaDesktop.getInfo().then(response => {
+        asperaBrowser.getInfo().then(response => {
           console.log('GET INFO SUCCESS', response);
         }).catch(error => {
           console.log('GET INFO FAIL', error);
@@ -178,19 +178,24 @@
       }
 
       function transfer() {
-        const desktopSpec = {
+        const browserSpec = {
           use_absolute_destination_path: false
         };
-        const transferSpec = JSON.parse(document.querySelector('#test-input').value);
-        asperaDesktop.startTransfer(transferSpec, desktopSpec).then(response => {
-          console.log('TRANSFER SUCCESS', response);
-        }).catch(error => {
-          console.log('TRANSFER FAIL', error);
-        })
+
+        try {
+          const transferSpec = JSON.parse(document.querySelector('#test-input').value);
+          asperaBrowser.startTransfer(transferSpec, browserSpec).then(response => {
+            console.log('TRANSFER SUCCESS', response);
+          }).catch(error => {
+            console.log('TRANSFER FAIL', error);
+          })
+        } catch (error) {
+          console.log('Unable to parse transferSpec', error);
+        }
       }
 
       function remove(id) {
-        asperaDesktop.removeTransfer(id).then(response => {
+        asperaBrowser.removeTransfer(id).then(response => {
           console.log('REMOVE SUCCESS', response);
         }).catch(error => {
           console.log('REMOVE FAIL', error);
@@ -198,7 +203,7 @@
       }
 
       function stopTransfer(id) {
-        asperaDesktop.stopTransfer(id).then(response => {
+        asperaBrowser.stopTransfer(id).then(response => {
           console.log('STOP SUCCESS', response);
         }).catch(error => {
           console.log('STOP FAIL', error);
@@ -206,16 +211,20 @@
       }
 
       function resumeTransfer(id) {
-        const transferSpec = JSON.parse(document.querySelector('#test-input').value);
-        asperaDesktop.resumeTransfer(id, transferSpec).then(response => {
-          console.log('RESUME SUCCESS', response);
-        }).catch(error => {
-          console.log('RESUME FAIL', error);
-        })
+        try {
+          const transferSpec = JSON.parse(document.querySelector('#test-input').value);
+          asperaBrowser.resumeTransfer(id, transferSpec).then(response => {
+            console.log('RESUME SUCCESS', response);
+          }).catch(error => {
+            console.log('RESUME FAIL', error);
+          })
+        } catch (error) {
+          console.log('Unable to parse transferSpec for resume', error);
+        }
       }
 
       function getAllTransfers() {
-        asperaDesktop.getAllTransfers().then(response => {
+        asperaBrowser.getAllTransfers().then(response => {
           console.log('GET ALL TRANSFERS SUCCESS', response);
         }).catch(error => {
           console.log('GET ALL TRANSFERS FAIL', error);
@@ -223,7 +232,7 @@
       }
 
       function getTransfer(id) {
-        asperaDesktop.getTransfer(id).then(response => {
+        asperaBrowser.getTransfer(id).then(response => {
           console.log('GET TRANSFER SUCCESS', response);
         }).catch(error => {
           console.log('GET TRANSFER FAIL', error);
@@ -231,7 +240,7 @@
       }
 
       function showDirectory(id) {
-        asperaDesktop.showDirectory(id).then(response => {
+        asperaBrowser.showDirectory(id).then(response => {
           console.log('SHOW DIRECTORY SUCCESS', response);
         }).catch(error => {
           console.log('SHOW DIRECTORY FAIL', error);
@@ -239,7 +248,7 @@
       }
 
       function showSelectFileDialog() {
-        asperaDesktop.showSelectFileDialog().then(response => {
+        asperaBrowser.showSelectFileDialog().then(response => {
           console.log('SHOW FILE DIALOG SUCCESS', response);
         }).catch(error => {
           console.log('SHOW FILE DIALOG FAIL', error);
@@ -247,7 +256,7 @@
       }
 
       function showSelectFolderDialog() {
-        asperaDesktop.showSelectFolderDialog().then(response => {
+        asperaBrowser.showSelectFolderDialog().then(response => {
           console.log('SHOW FOLDER DIALOG SUCCESS', response);
         }).catch(error => {
           console.log('SHOW FOLDER DIALOG FAIL', error);
@@ -255,7 +264,7 @@
       }
 
       function openPreferences() {
-        asperaDesktop.showPreferences().then(response => {
+        asperaBrowser.showPreferences().then(response => {
           console.log('SHOW PREFERENCES SUCCESS', response);
         }).catch(error => {
           console.log('SHOW PREFERENCES FAIL', error);
@@ -267,7 +276,7 @@
           target_rate_kbps: 10,
         };
 
-        asperaDesktop.modifyTransfer(id, options).then(response => {
+        asperaBrowser.modifyTransfer(id, options).then(response => {
           console.log('MODIFY TRANSFER SUCCESS', response);
         }).catch(error => {
           console.log('MODIFY TRANSFER FAIL', error);
@@ -279,11 +288,11 @@
           console.log('DROP ZONE CALLBACK', files);
         }
 
-        asperaDesktop.createDropzone(callback, '#drop-area');
+        asperaBrowser.createDropzone(callback, '#drop-area');
       }
 
       function getInstallerInfo() {
-        asperaDesktop.getInstallerInfo().then(response => {
+        asperaBrowser.getInstallerInfo().then(response => {
           console.log('INSTALLER INFO SUCCESS', response);
         }).catch(error => {
           console.log('INSTALLER INFO FAIL', error);
@@ -328,37 +337,37 @@
       }
 
       function launch() {
-        asperaDesktop.launch();
+        asperaBrowser.launch();
       }
 
       function initDragDrop() {
-        asperaDesktop.initDragDrop();
+        asperaBrowser.initDragDrop();
       }
 
       setTimeout(() => {
         generateObjectText();
       }, 3000);
 
-      asperaDesktop.registerActivityCallback(monitorTransfers);
-      asperaDesktop.registerRemovedCallback(monitorRemovedTransfers);
+      asperaBrowser.registerActivityCallback(monitorTransfers);
+      asperaBrowser.registerRemovedCallback(monitorRemovedTransfers);
 
-      asperaDesktop.registerStatusCallback((status) => {
+      asperaBrowser.registerStatusCallback((status) => {
         console.log('Websocket status changed to:', status);
       });
 
-      if (asperaDesktop.isSafari()) {
-        asperaDesktop.registerSafariExtensionStatusCallback((status) => {
+      if (asperaBrowser.isSafari()) {
+        asperaBrowser.registerSafariExtensionStatusCallback((status) => {
           console.log('Safari extension status changed to:', status);
         });
       }
     </script>
   </head>
   <body>
-    <h1>Desktop SDK Test Server</h1>
-    <a href="/aspera-desktop-sdk-js/docs/index.html" class="docs" target="_blank">Documentation</a>
+    <h1>Browser SDK Test Server</h1>
+    <a href="/aspera-browser-sdk-js/docs/index.html" class="docs" target="_blank">Documentation</a>
     <div class="test-buttons">
       <button onclick="init()" type="button">Init SDK</button>
-      <button onclick="testServer()" type="button">Test desktop</button>
+      <button onclick="testServer()" type="button">Test browser</button>
       <button onclick="getInfo()" type="button">Get Info</button>
       <button onclick="transfer()" type="button">Start transfer</button>
       <button onclick="getAllTransfers()" type="button">Get transfers</button>
@@ -376,7 +385,7 @@
         <input type="text" id="app-id" value="test1"></input>
         <label for="test-input">transferSpec for download/upload</label>
         <textarea id="test-input"></textarea>
-        <label for="test-output">Current values in asperaDesktop</label>
+        <label for="test-output">Current values in asperaBrowser</label>
         <textarea id="test-output" readonly></textarea>
       </div>
       <div id="transfer-monitor" class="transfer-monitor">

@@ -1,5 +1,5 @@
 import {mockFetch} from './mocks';
-import {asperaDesktop} from '../src';
+import {asperaBrowser} from '../src';
 import {httpClient} from '../src/helpers/client/http-client';
 
 let id = 0;
@@ -43,11 +43,11 @@ describe('request', () => {
 
   test('POST with no params should call url with no params', () => {
     httpClient.request('fake');
-    expect(fetch).toHaveBeenCalledWith(asperaDesktop.globals.desktopUrl, getExpectedRequest('fake'));
+    expect(fetch).toHaveBeenCalledWith(asperaBrowser.globals.browserUrl, getExpectedRequest('fake'));
   });
 
   test('POST with params should call url with params', () => {
     httpClient.request('fake', fakeData);
-    expect(fetch).toHaveBeenCalledWith(asperaDesktop.globals.desktopUrl, getExpectedRequest('fake', fakeData));
+    expect(fetch).toHaveBeenCalledWith(asperaBrowser.globals.browserUrl, getExpectedRequest('fake', fakeData));
   });
 });

@@ -1,4 +1,4 @@
-import {Desktop} from './models/aspera-desktop.model';
+import {Browser} from './models/aspera-browser.model';
 import {
   createDropzone,
   deregisterActivityCallback,
@@ -8,7 +8,7 @@ import {
   getAllTransfers,
   getInfo,
   getTransfer,
-  initDesktop,
+  initBrowser,
   initDragDrop,
   modifyTransfer,
   registerActivityCallback,
@@ -25,53 +25,53 @@ import {
   showSelectFolderDialog,
   startTransfer,
   stopTransfer,
-  testDesktopConnection,
+  testBrowserConnection,
 } from './app/core';
 import {getInstallerInfo} from './app/installer';
 import {isSafari} from './helpers/helpers';
 
-export const asperaDesktop: Desktop = new Desktop();
+export const asperaBrowser: Browser = new Browser();
 
-asperaDesktop.initDesktop = initDesktop;
-asperaDesktop.testDesktopConnection = testDesktopConnection;
-asperaDesktop.startTransfer = startTransfer;
-asperaDesktop.registerActivityCallback = registerActivityCallback;
-asperaDesktop.deregisterActivityCallback = deregisterActivityCallback;
-asperaDesktop.removeTransfer = removeTransfer;
-asperaDesktop.showDirectory = showDirectory;
-asperaDesktop.stopTransfer = stopTransfer;
-asperaDesktop.resumeTransfer = resumeTransfer;
-asperaDesktop.getAllTransfers = getAllTransfers;
-asperaDesktop.getTransfer = getTransfer;
-asperaDesktop.registerRemovedCallback = registerRemovedCallback;
-asperaDesktop.deregisterRemovedCallback = deregisterRemovedCallback;
-asperaDesktop.showSelectFileDialog = showSelectFileDialog;
-asperaDesktop.showSelectFolderDialog = showSelectFolderDialog;
-asperaDesktop.showPreferences = showPreferences;
-asperaDesktop.modifyTransfer = modifyTransfer;
-asperaDesktop.createDropzone = createDropzone;
-asperaDesktop.removeDropzone = removeDropzone;
-asperaDesktop.getInstallerInfo = getInstallerInfo;
-asperaDesktop.registerStatusCallback = registerStatusCallback;
-asperaDesktop.deregisterStatusCallback = deregisterStatusCallback;
-asperaDesktop.registerSafariExtensionStatusCallback = registerSafariExtensionStatusCallback;
-asperaDesktop.deregisterSafariExtensionStatusCallback = deregisterSafariExtensionStatusCallback;
-asperaDesktop.initDragDrop = initDragDrop;
-asperaDesktop.setBranding = setBranding;
-asperaDesktop.getInfo = getInfo;
-asperaDesktop.isSafari = isSafari;
+asperaBrowser.initBrowser = initBrowser;
+asperaBrowser.testBrowserConnection = testBrowserConnection;
+asperaBrowser.startTransfer = startTransfer;
+asperaBrowser.registerActivityCallback = registerActivityCallback;
+asperaBrowser.deregisterActivityCallback = deregisterActivityCallback;
+asperaBrowser.removeTransfer = removeTransfer;
+asperaBrowser.showDirectory = showDirectory;
+asperaBrowser.stopTransfer = stopTransfer;
+asperaBrowser.resumeTransfer = resumeTransfer;
+asperaBrowser.getAllTransfers = getAllTransfers;
+asperaBrowser.getTransfer = getTransfer;
+asperaBrowser.registerRemovedCallback = registerRemovedCallback;
+asperaBrowser.deregisterRemovedCallback = deregisterRemovedCallback;
+asperaBrowser.showSelectFileDialog = showSelectFileDialog;
+asperaBrowser.showSelectFolderDialog = showSelectFolderDialog;
+asperaBrowser.showPreferences = showPreferences;
+asperaBrowser.modifyTransfer = modifyTransfer;
+asperaBrowser.createDropzone = createDropzone;
+asperaBrowser.removeDropzone = removeDropzone;
+asperaBrowser.getInstallerInfo = getInstallerInfo;
+asperaBrowser.registerStatusCallback = registerStatusCallback;
+asperaBrowser.deregisterStatusCallback = deregisterStatusCallback;
+asperaBrowser.registerSafariExtensionStatusCallback = registerSafariExtensionStatusCallback;
+asperaBrowser.deregisterSafariExtensionStatusCallback = deregisterSafariExtensionStatusCallback;
+asperaBrowser.initDragDrop = initDragDrop;
+asperaBrowser.setBranding = setBranding;
+asperaBrowser.getInfo = getInfo;
+asperaBrowser.isSafari = isSafari;
 
-const launch = asperaDesktop.globals.launch;
-asperaDesktop.launch = launch;
+const launch = asperaBrowser.globals.launch;
+asperaBrowser.launch = launch;
 
 if (typeof (<any>window) === 'object') {
-  (<any>window).asperaDesktop = asperaDesktop;
+  (<any>window).asperaBrowser = asperaBrowser;
 }
 
 export {
   isSafari,
-  initDesktop,
-  testDesktopConnection,
+  initBrowser,
+  testBrowserConnection,
   startTransfer,
   launch,
   registerActivityCallback,
@@ -101,8 +101,8 @@ export {
 
 export default {
   isSafari,
-  initDesktop,
-  testDesktopConnection,
+  initBrowser,
+  testBrowserConnection,
   startTransfer,
   launch,
   registerActivityCallback,

@@ -1,10 +1,10 @@
-import {TransferResponse} from '../models/aspera-desktop.model';
+import {TransferResponse} from '../models/aspera-browser.model';
 import {WebsocketEvents, WebsocketMessage, WebsocketTopics} from '../models/models';
 import {messages} from '../constants/messages';
 import {errorLog, generatePromiseObjects} from './helpers';
 
 export class WebsocketService {
-  /** The main websocket connection to Aspera Desktop */
+  /** The main websocket connection to Aspera Browser */
   private globalSocket: WebSocket;
   /** The app ID of transfers we want to receive notifications for */
   private appId: string;
@@ -68,10 +68,16 @@ export class WebsocketService {
    * This function handles messages received from the websocket
    */
   private handleMessage = (message: MessageEvent<string>): void => {
-    const data: WebsocketMessage = JSON.parse(message.data);
+    let data: WebsocketMessage|undefined;
+
+    try {
+      data = JSON.parse(message.data);
+    } catch (error) {
+      errorLog('Unable to parse Websocket message', {error, message});
+    }
 
     // Message we get on subscription
-    if (data.id === 1) {
+    if (data && data.id === 1) {
       this.initPromise.resolver(data);
 
       return;

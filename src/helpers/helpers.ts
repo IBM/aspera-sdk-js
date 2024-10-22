@@ -20,7 +20,7 @@ export const generatePromiseObjects = (): PromiseObject => {
 };
 
 /**
- * Log errors from Aspera Desktop SDK
+ * Log errors from Aspera Browser SDK
  *
  * @param message the message indicating the error encountered
  * @param debugData the data with useful debugging information
@@ -35,13 +35,13 @@ export const errorLog = (message: string, debugData?: any): void => {
   }
 
   if (typeof (<any>window) === 'object') {
-    if (!Array.isArray((<any>window).asperaDesktopLogs)) {
-      (<any>window).asperaDesktopLogs = [];
+    if (!Array.isArray((<any>window).asperaBrowserLogs)) {
+      (<any>window).asperaBrowserLogs = [];
     }
-    (<any>window).asperaDesktopLogs.push({message, debugData});
+    (<any>window).asperaBrowserLogs.push({message, debugData});
   }
 
-  console.warn(`Aspera Desktop SDK: ${message}`, debugData);
+  console.warn(`Aspera Browser SDK: ${message}`, debugData);
 };
 
 /**

@@ -1,5 +1,5 @@
 import {mockFetch} from './mocks';
-import {initDesktop} from '../src';
+import {initBrowser} from '../src';
 
 describe('initHttpGateway', () => {
 
@@ -8,7 +8,7 @@ describe('initHttpGateway', () => {
   });
 
   test('calls default URL', async () => {
-    initDesktop('fake').catch(() => {});
+    initBrowser('fake').catch(() => {});
     // expect(fetch).toBeCalled();
   });
 });

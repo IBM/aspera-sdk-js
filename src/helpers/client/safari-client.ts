@@ -95,16 +95,35 @@ export class SafariClient implements Client {
    * @returns A Promise that resolves with the response from the extension.
    */
   public monitorTransferActivity(): Promise<unknown> {
-    const promise = this.dispatchPromiseEvent(
-      SafariExtensionEventType.Monitor,
-      'subscribe_transfer_activity',
-      [asperaDesktop.globals.appId]
-    );
+    const dispatchMonitorEvent = (): Promise<unknown> => {
+      const promise =  this.dispatchPromiseEvent(
+        SafariExtensionEventType.Monitor,
+        'subscribe_transfer_activity',
+        [asperaDesktop.globals.appId]
+      );
 
-    return promise
-      .then(() => {
+      return promise.then(() => {
         this.subscribedTransferActivity = true;
       });
+    };
+
+    if (!this.safariExtensionEnabled) {
+      return new Promise((resolve, reject) => {
+        const extensionInterval = setInterval(() => {
+          if (!this.safariExtensionEnabled) {
+            return;
+          }
+
+          dispatchMonitorEvent()
+            .then(resolve)
+            .catch(reject);
+
+          clearInterval(extensionInterval);
+        }, 1000);
+      });
+    }
+
+    return dispatchMonitorEvent();
   }
 
   /**

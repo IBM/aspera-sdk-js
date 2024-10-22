@@ -39,7 +39,7 @@ export class WebsocketService {
   /**
    * This function handles completed subscription
    */
-  private handleClosed = (): void => {
+  private handleClose = (): void => {
     if (this.isConnected) {
       this.isConnected = false;
       this.notifyEvent('CLOSED');
@@ -135,7 +135,7 @@ export class WebsocketService {
       .then((webSocket) => {
         this.globalSocket = webSocket;
         this.globalSocket.onerror = this.handleError;
-        this.globalSocket.onclose = this.handleClosed;
+        this.globalSocket.onclose = this.handleClose;
         this.globalSocket.onopen = this.handleOpen;
         this.globalSocket.onmessage = this.handleMessage;
 
@@ -152,7 +152,7 @@ export class WebsocketService {
 
     setTimeout(() => {
       this.connect();
-    }, 2000);
+    }, 1000);
   }
 
   private getWebSocketConnection(startPort: number, endPort: number): Promise<WebSocket> {
@@ -173,22 +173,19 @@ export class WebsocketService {
     };
 
     return new Promise((resolve, reject) => {
-      let currentPort = startPort;
-
-      const connectPort = () => {
-        if (currentPort > endPort) {
+      const connectPort = (port: number) => {
+        if (port > endPort) {
           return reject('No available WebSocket connection found');
         }
 
-        checkPort(currentPort)
+        checkPort(port)
           .then(ws => resolve(ws))
-          .catch(() => {
-            currentPort++;
-            connectPort();
+          .catch((error) => {
+            connectPort(port + 1);
           });
       };
 
-      connectPort();
+      connectPort(startPort);
     });
   }
 

@@ -9,7 +9,7 @@ import {
   throwError
 } from '../helpers/helpers';
 import {asperaBrowser} from '../index';
-import {BrowserInfo, TransferResponse} from '../models/aspera-browser.model';
+import {DesktopInfo, TransferResponse} from '../models/aspera-browser.model';
 import {
   CustomBrandingOptions,
   DataTransferResponse,
@@ -33,8 +33,8 @@ import {
  */
 export const testBrowserConnection = (): Promise<any> => {
   return client.request('get_info')
-    .then((data: BrowserInfo) => {
-      asperaBrowser.globals.browserInfo = data;
+    .then((data: DesktopInfo) => {
+      asperaBrowser.globals.DesktopInfo = data;
       asperaBrowser.globals.browserVerified = true;
       return data;
     });
@@ -605,12 +605,12 @@ export const removeDropzone = (elementSelector: string): void => {
  *
  * @returns a promise that returns information about the user's IBM Aspera Browser installation.
  */
-export const getInfo = (): Promise<BrowserInfo> => {
+export const getInfo = (): Promise<DesktopInfo> => {
   if (!asperaBrowser.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
   return new Promise((resolve, _) => {
-    resolve(asperaBrowser.globals.browserInfo);
+    resolve(asperaBrowser.globals.DesktopInfo);
   });
 };

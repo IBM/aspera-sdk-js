@@ -1,6 +1,6 @@
 {
   "name": "@ibm-aspera/browser-sdk",
-  "version": "0.1.36",
+  "version": "0.2.0",
   "author": "IBM Aspera",
   "main": "dist/commonjs/index.js",
   "types": "dist/commonjs/index.d.ts",

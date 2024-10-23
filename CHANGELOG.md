@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.2.0](https://github.com/IBM/aspera-browser-sdk-js/compare/v0.1.36...v0.2.0) (2024-10-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* **#38:** old desktop-sdk-js is no longer used. Move to @ibm-aspera/browser-sdk-js
+
+* fix: undo desktop specific and URL
+
+* fix: unit tests for installer URL change
+
+### Features
+
+* **#38:** migrate to aspera browser naming instead of desktop ([#40](https://github.com/IBM/aspera-browser-sdk-js/issues/40)) ([8770121](https://github.com/IBM/aspera-browser-sdk-js/commit/87701218e6f63c034ef334059abece2402bb6e5c)), closes [#38](https://github.com/IBM/aspera-browser-sdk-js/issues/38) [#38](https://github.com/IBM/aspera-browser-sdk-js/issues/38)
+* notify last event on callback registration ([#34](https://github.com/IBM/aspera-browser-sdk-js/issues/34)) ([08fd161](https://github.com/IBM/aspera-browser-sdk-js/commit/08fd1612408ae6a66dd39f597b2ee340dfa88ace))
+
+
+### Bug Fixes
+
+* **#38:** remove JS from npm name ([#41](https://github.com/IBM/aspera-browser-sdk-js/issues/41)) ([b18a20f](https://github.com/IBM/aspera-browser-sdk-js/commit/b18a20f9d2610d1725b237da57e345434110ff33)), closes [#38](https://github.com/IBM/aspera-browser-sdk-js/issues/38)
+* dependabot alerts ([#35](https://github.com/IBM/aspera-browser-sdk-js/issues/35)) ([126417c](https://github.com/IBM/aspera-browser-sdk-js/commit/126417c9665d6103cc81e409a7d128d4d28aacf0))
+* safari extension status ([#33](https://github.com/IBM/aspera-browser-sdk-js/issues/33)) ([5d7c915](https://github.com/IBM/aspera-browser-sdk-js/commit/5d7c9156cfaf4f6d10c0d0ac741c520c0f6d7c68))
+
 ### [0.1.36](https://github.com/IBM/aspera-browser-sdk-js/compare/v0.1.35...v0.1.36) (2024-09-26)
 
 

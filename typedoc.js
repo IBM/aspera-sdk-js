@@ -12,6 +12,6 @@ module.exports = {
   suppressExcessPropertyErrors: 'true',
   suppressImplicitAnyIndexErrors: 'true',
   module: 'commonjs',
-  name: 'IBM Aspera Desktop JavaScript Library',
+  name: 'IBM Aspera Browser JavaScript Library',
   hideGenerator: true
 };

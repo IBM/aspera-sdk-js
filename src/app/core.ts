@@ -1,21 +1,21 @@
 import {messages} from '../constants/messages';
 import {client} from '../helpers/client/client';
 import {errorLog, generateErrorBody, generatePromiseObjects, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
-import {asperaDesktop} from '../index';
-import {DesktopInfo, TransferResponse} from '../models/aspera-desktop.model';
-import {CustomBrandingOptions, DataTransferResponse, DesktopSpec, DesktopStyleFile, DesktopTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvents, TransferSpec, WebsocketEvents} from '../models/models';
+import {asperaBrowser} from '../index';
+import {BrowserInfo, TransferResponse} from '../models/aspera-browser.model';
+import {CustomBrandingOptions, DataTransferResponse, BrowserSpec, BrowserStyleFile, BrowserTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvents, TransferSpec, WebsocketEvents} from '../models/models';
 
 /**
- * Check if IBM Aspera Desktop connection works. This function is called by init
+ * Check if IBM Aspera Browser connection works. This function is called by init
  * when initializing the SDK. This function can be used at any point for checking.
  *
  * @returns a promise that resolves if server can connect or rejects if not
  */
-export const testDesktopConnection = (): Promise<any> => {
+export const testBrowserConnection = (): Promise<any> => {
   return client.request('get_info')
-    .then((data: DesktopInfo) => {
-      asperaDesktop.globals.desktopInfo = data;
-      asperaDesktop.globals.desktopVerified = true;
+    .then((data: BrowserInfo) => {
+      asperaBrowser.globals.browserInfo = data;
+      asperaBrowser.globals.browserVerified = true;
       return data;
     });
 };
@@ -26,7 +26,7 @@ export const testDesktopConnection = (): Promise<any> => {
  * @returns a promise that resolves if the initialization was successful or not
  */
 export const initDragDrop = (): Promise<boolean> => {
-  if (!asperaDesktop.isReady) {
+  if (!asperaBrowser.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -43,7 +43,7 @@ export const initDragDrop = (): Promise<boolean> => {
 };
 
 /**
- * Initialize IBM Aspera Desktop client. If client cannot (reject/catch), then
+ * Initialize IBM Aspera Browser client. If client cannot (reject/catch), then
  * client should attempt fixing server URL or trying again. If still fails disable UI elements.
  *
  * @param options initialization options:
@@ -64,38 +64,38 @@ export const init = (options?: InitOptions): Promise<any> => {
   const appId = options?.appId ?? randomUUID();
   const supportMultipleUsers = options?.supportMultipleUsers ?? false;
 
-  if (asperaDesktop.globals.desktopVerified) {
+  if (asperaBrowser.globals.browserVerified) {
     return throwError(messages.sdkAlreadyInitialized);
   }
 
-  asperaDesktop.globals.appId = appId;
+  asperaBrowser.globals.appId = appId;
 
   if (supportMultipleUsers) {
-    asperaDesktop.globals.sessionId = randomUUID();
+    asperaBrowser.globals.sessionId = randomUUID();
   }
 
-  return asperaDesktop.activityTracking.setup()
-    .then(() => testDesktopConnection())
+  return asperaBrowser.activityTracking.setup()
+    .then(() => testBrowserConnection())
     .then(() => initDragDrop())
     .catch(error => {
       errorLog(messages.serverError, error);
-      asperaDesktop.globals.desktopVerified = false;
+      asperaBrowser.globals.browserVerified = false;
       throw generateErrorBody(messages.serverError, error);
     });
 };
 
 /**
- * Initialize IBM Aspera Desktop client. If client cannot (reject/catch), then
+ * Initialize IBM Aspera Browser client. If client cannot (reject/catch), then
  * client should attempt fixing server URL or trying again. If still fails disable UI elements.
  *
  * @param appId the unique ID for the website. Transfers initiated during this session
  * will be associated with this ID. It is recommended to use a unique ID to keep transfer
  * information private from other websites.
  *
- * @returns a promise that resolves if IBM Aspera Desktop is running properly or
+ * @returns a promise that resolves if IBM Aspera Browser is running properly or
  * rejects if unable to connect
  */
-export const initDesktop = (appId?: string): Promise<any> => {
+export const initBrowser = (appId?: string): Promise<any> => {
   return init({appId});
 };
 
@@ -103,12 +103,12 @@ export const initDesktop = (appId?: string): Promise<any> => {
  * Start a transfer
  *
  * @param transferSpec standard transferSpec for transfer
- * @param desktopSpec IBM Aspera Desktop settings when starting a transfer
+ * @param browserSpec IBM Aspera Browser settings when starting a transfer
  *
  * @returns a promise that resolves if transfer initiation is successful and rejects if transfer cannot be started
  */
-export const startTransfer = (transferSpec: TransferSpec, desktopSpec: DesktopSpec): Promise<DesktopTransfer> => {
-  if (!asperaDesktop.isReady) {
+export const startTransfer = (transferSpec: TransferSpec, browserSpec: BrowserSpec): Promise<BrowserTransfer> => {
+  if (!asperaBrowser.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -120,8 +120,8 @@ export const startTransfer = (transferSpec: TransferSpec, desktopSpec: DesktopSp
 
   const payload = {
     transfer_spec: transferSpec,
-    desktop_spec: desktopSpec,
-    app_id: asperaDesktop.globals.appId,
+    browser_spec: browserSpec,
+    app_id: asperaBrowser.globals.appId,
   };
 
   client.request('start_transfer', payload)
@@ -142,7 +142,7 @@ export const startTransfer = (transferSpec: TransferSpec, desktopSpec: DesktopSp
  * @returns ID representing the callback for deregistration purposes
  */
 export const registerActivityCallback = (callback: (transfers: TransferResponse) => void): string => {
-  return asperaDesktop.activityTracking.setCallback(callback);
+  return asperaBrowser.activityTracking.setCallback(callback);
 };
 
 /**
@@ -151,20 +151,20 @@ export const registerActivityCallback = (callback: (transfers: TransferResponse)
  * @param id the ID returned by `registerActivityCallback`
  */
 export const deregisterActivityCallback = (id: string): void => {
-  asperaDesktop.activityTracking.removeCallback(id);
+  asperaBrowser.activityTracking.removeCallback(id);
 };
 
 /**
  * Register a callback event for when a user removes or cancels a transfer
- * directly from IBM Aspera Desktop. This may also be called if IBM Aspera Desktop
+ * directly from IBM Aspera Browser. This may also be called if IBM Aspera Browser
  * is configured to automatically remove completed transfers.
  *
  * @param callback callback function to receive transfers
  *
  * @returns ID representing the callback for deregistration purposes
  */
-export const registerRemovedCallback = (callback: (transfer: DesktopTransfer) => void): string => {
-  return asperaDesktop.activityTracking.setRemovedCallback(callback);
+export const registerRemovedCallback = (callback: (transfer: BrowserTransfer) => void): string => {
+  return asperaBrowser.activityTracking.setRemovedCallback(callback);
 };
 
 /**
@@ -173,22 +173,22 @@ export const registerRemovedCallback = (callback: (transfer: DesktopTransfer) =>
  * @param id the ID returned by `registerRemovedCallback`
  */
 export const deregisterRemovedCallback = (id: string): void => {
-  asperaDesktop.activityTracking.removeRemovedCallback(id);
+  asperaBrowser.activityTracking.removeRemovedCallback(id);
 };
 
 /**
- * Register a callback for getting updates about the connection status of IBM Aspera Desktop.
+ * Register a callback for getting updates about the connection status of IBM Aspera Browser.
  *
  * For example, to be notified of when the SDK loses connection with the application or connection
- * is re-established. This can be useful if you want to handle the case where the user quits IBM Aspera Desktop
- * after `initDesktop` has already been called, and want to prompt the user to relaunch the application.
+ * is re-established. This can be useful if you want to handle the case where the user quits IBM Aspera Browser
+ * after `initBrowser` has already been called, and want to prompt the user to relaunch the application.
  *
  * @param callback callback function to receive events
  *
  * @returns ID representing the callback for deregistration purposes
  */
 export const registerStatusCallback = (callback: (status: WebsocketEvents) => void): string => {
-  return asperaDesktop.activityTracking.setWebSocketEventCallback(callback);
+  return asperaBrowser.activityTracking.setWebSocketEventCallback(callback);
 };
 
 /**
@@ -197,7 +197,7 @@ export const registerStatusCallback = (callback: (status: WebsocketEvents) => vo
  * @param id the ID returned by `registerStatusCallback`
  */
 export const deregisterStatusCallback = (id: string): void => {
-  asperaDesktop.activityTracking.removeWebSocketEventCallback(id);
+  asperaBrowser.activityTracking.removeWebSocketEventCallback(id);
 };
 
 /**
@@ -210,7 +210,7 @@ export const deregisterStatusCallback = (id: string): void => {
  * @returns ID representing the callback for deregistration purposes
  */
 export const registerSafariExtensionStatusCallback = (callback: (status: SafariExtensionEvents) => void): string => {
-  return asperaDesktop.activityTracking.setSafariExtensionEventCallback(callback);
+  return asperaBrowser.activityTracking.setSafariExtensionEventCallback(callback);
 };
 
 /**
@@ -219,7 +219,7 @@ export const registerSafariExtensionStatusCallback = (callback: (status: SafariE
  * @param id the ID returned by `registerStatusCallback`
  */
 export const deregisterSafariExtensionStatusCallback = (id: string): void => {
-  asperaDesktop.activityTracking.removeSafariExtensionEventCallback(id);
+  asperaBrowser.activityTracking.removeSafariExtensionEventCallback(id);
 };
 
 /**
@@ -230,7 +230,7 @@ export const deregisterSafariExtensionStatusCallback = (id: string): void => {
  * @returns a promise that resolves if transfer is removed and rejects if transfer cannot be removed
  */
 export const removeTransfer = (id: string): Promise<any> => {
-  if (!asperaDesktop.isReady) {
+  if (!asperaBrowser.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -258,7 +258,7 @@ export const removeTransfer = (id: string): Promise<any> => {
  * @returns a promise that resolves if transfer is stopped and rejects if transfer cannot be stopped
  */
 export const stopTransfer = (id: string): Promise<any> => {
-  if (!asperaDesktop.isReady) {
+  if (!asperaBrowser.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -286,8 +286,8 @@ export const stopTransfer = (id: string): Promise<any> => {
  *
  * @returns a promise that resolves with the new transfer object if transfer is resumed
  */
-export const resumeTransfer = (id: string, options?: ResumeTransferOptions): Promise<DesktopTransfer> => {
-  if (!asperaDesktop.isReady) {
+export const resumeTransfer = (id: string, options?: ResumeTransferOptions): Promise<BrowserTransfer> => {
+  if (!asperaBrowser.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -299,7 +299,7 @@ export const resumeTransfer = (id: string, options?: ResumeTransferOptions): Pro
   };
 
   client.request('resume_transfer', payload)
-    .then((data: DesktopTransfer) => promiseInfo.resolver(data))
+    .then((data: BrowserTransfer) => promiseInfo.resolver(data))
     .catch(error => {
       errorLog(messages.resumeTransferFailed, error);
       promiseInfo.rejecter(generateErrorBody(messages.resumeTransferFailed, error));
@@ -316,7 +316,7 @@ export const resumeTransfer = (id: string, options?: ResumeTransferOptions): Pro
  * @returns a promise that resolves with the selected file(s) and rejects if user cancels dialog
  */
 export const showSelectFileDialog = (options?: FileDialogOptions): Promise<DataTransferResponse> => {
-  if (!asperaDesktop.isReady) {
+  if (!asperaBrowser.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -324,7 +324,7 @@ export const showSelectFileDialog = (options?: FileDialogOptions): Promise<DataT
 
   const payload = {
     options: options || {},
-    app_id: asperaDesktop.globals.appId,
+    app_id: asperaBrowser.globals.appId,
   };
 
   client.request('show_file_dialog', payload)
@@ -345,7 +345,7 @@ export const showSelectFileDialog = (options?: FileDialogOptions): Promise<DataT
  * @returns a promise that resolves with the selected folder(s) and rejects if user cancels dialog
  */
 export const showSelectFolderDialog = (options?: FolderDialogOptions): Promise<DataTransferResponse> => {
-  if (!asperaDesktop.isReady) {
+  if (!asperaBrowser.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -353,7 +353,7 @@ export const showSelectFolderDialog = (options?: FolderDialogOptions): Promise<D
 
   const payload = {
     options: options || {},
-    app_id: asperaDesktop.globals.appId,
+    app_id: asperaBrowser.globals.appId,
   };
 
   client.request('show_folder_dialog', payload)
@@ -367,12 +367,12 @@ export const showSelectFolderDialog = (options?: FolderDialogOptions): Promise<D
 };
 
 /**
- * Opens the IBM Aspera Desktop preferences page.
+ * Opens the IBM Aspera Browser preferences page.
  *
  * @returns a promise that resolves when the preferences page is opened.
  */
 export const showPreferences = (): Promise<any> => {
-  if (!asperaDesktop.isReady) {
+  if (!asperaBrowser.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -393,19 +393,19 @@ export const showPreferences = (): Promise<any> => {
  *
  * @returns a promise that resolves with an array of transfers.
  */
-export const getAllTransfers = (): Promise<DesktopTransfer[]> => {
-  if (!asperaDesktop.isReady) {
+export const getAllTransfers = (): Promise<BrowserTransfer[]> => {
+  if (!asperaBrowser.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
   const promiseInfo = generatePromiseObjects();
 
   const payload = {
-    app_id: asperaDesktop.globals.appId,
+    app_id: asperaBrowser.globals.appId,
   };
 
   client.request('get_all_transfers', payload)
-    .then((data: DesktopTransfer[]) => promiseInfo.resolver(data))
+    .then((data: BrowserTransfer[]) => promiseInfo.resolver(data))
     .catch(error => {
       errorLog(messages.getAllTransfersFailed, error);
       promiseInfo.rejecter(generateErrorBody(messages.getAllTransfersFailed, error));
@@ -421,8 +421,8 @@ export const getAllTransfers = (): Promise<DesktopTransfer[]> => {
  *
  * @returns a promise that resolves with the transfer.
  */
-export const getTransfer = (id: string): Promise<DesktopTransfer> => {
-  if (!asperaDesktop.isReady) {
+export const getTransfer = (id: string): Promise<BrowserTransfer> => {
+  if (!asperaBrowser.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -433,7 +433,7 @@ export const getTransfer = (id: string): Promise<DesktopTransfer> => {
   };
 
   client.request('get_transfer', payload)
-    .then((data: DesktopTransfer) => promiseInfo.resolver(data))
+    .then((data: BrowserTransfer) => promiseInfo.resolver(data))
     .catch(error => {
       errorLog(messages.getTransferFailed, error);
       promiseInfo.rejecter(generateErrorBody(messages.getTransferFailed, error));
@@ -451,7 +451,7 @@ export const getTransfer = (id: string): Promise<DesktopTransfer> => {
  * @returns a promise that resolves if the file can be shown and rejects if not
  */
 export const showDirectory = (id: string): Promise<any> => {
-  if (!asperaDesktop.isReady) {
+  if (!asperaBrowser.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -479,8 +479,8 @@ export const showDirectory = (id: string): Promise<any> => {
  *
  * @returns a promise that resolves if the transfer rate can be modified and rejects if not
  */
-export const modifyTransfer = (id: string, options: ModifyTransferOptions): Promise<DesktopTransfer> => {
-  if (!asperaDesktop.isReady) {
+export const modifyTransfer = (id: string, options: ModifyTransferOptions): Promise<BrowserTransfer> => {
+  if (!asperaBrowser.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -502,7 +502,7 @@ export const modifyTransfer = (id: string, options: ModifyTransferOptions): Prom
 };
 
 /**
- * Set the custom branding template to be used by IBM Aspera Desktop. If the app is already
+ * Set the custom branding template to be used by IBM Aspera Browser. If the app is already
  * configured to use a different branding, then the branding template you specify will be
  * stored by the app, allowing the end user to switch at any point.
  *
@@ -512,7 +512,7 @@ export const modifyTransfer = (id: string, options: ModifyTransferOptions): Prom
  * @returns a promise that resolves if the branding was properly set.
  */
 export const setBranding = (id: string, options: CustomBrandingOptions): Promise<any> => {
-  if (!asperaDesktop.isReady) {
+  if (!asperaBrowser.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -560,7 +560,7 @@ export const createDropzone = (
 
   const dropEvent = (event: any) => {
     event.preventDefault();
-    const files: DesktopStyleFile[] = [];
+    const files: BrowserStyleFile[] = [];
     if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length && event.dataTransfer.files[0]) {
       for (let i = 0; i < event.dataTransfer.files.length; i++) {
         const file = event.dataTransfer.files[i];
@@ -574,7 +574,7 @@ export const createDropzone = (
 
       const payload = {
         files,
-        app_id: asperaDesktop.globals.appId,
+        app_id: asperaBrowser.globals.appId,
       };
 
       client.request('dropped_files', payload)
@@ -588,7 +588,7 @@ export const createDropzone = (
   elements.forEach(element => {
     element.addEventListener('dragover', dragEvent);
     element.addEventListener('drop', dropEvent);
-    asperaDesktop.globals.dropZonesCreated.set(elementSelector, [{event: 'dragover', callback: dragEvent}, {event: 'drop', callback: dropEvent}]);
+    asperaBrowser.globals.dropZonesCreated.set(elementSelector, [{event: 'dragover', callback: dragEvent}, {event: 'drop', callback: dropEvent}]);
   });
 };
 
@@ -598,7 +598,7 @@ export const createDropzone = (
  * @param elementSelector the selector of the element on the page that should remove
  */
 export const removeDropzone = (elementSelector: string): void => {
-  const foundDropzone = asperaDesktop.globals.dropZonesCreated.get(elementSelector);
+  const foundDropzone = asperaBrowser.globals.dropZonesCreated.get(elementSelector);
 
   if (foundDropzone) {
     foundDropzone.forEach(data => {
@@ -614,16 +614,16 @@ export const removeDropzone = (elementSelector: string): void => {
 };
 
 /**
- * Get metadata about the IBM Aspera Desktop installation.
+ * Get metadata about the IBM Aspera Browser installation.
  *
- * @returns a promise that returns information about the user's IBM Aspera Desktop installation.
+ * @returns a promise that returns information about the user's IBM Aspera Browser installation.
  */
-export const getInfo = (): Promise<DesktopInfo> => {
-  if (!asperaDesktop.isReady) {
+export const getInfo = (): Promise<BrowserInfo> => {
+  if (!asperaBrowser.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
   return new Promise((resolve, _) => {
-    resolve(asperaDesktop.globals.desktopInfo);
+    resolve(asperaBrowser.globals.browserInfo);
   });
 };

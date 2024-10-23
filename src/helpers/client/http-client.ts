@@ -64,7 +64,7 @@ class JSONRPCHttpClient {
 }
 
 /**
- * Client used for making requests to Aspera Desktop.
+ * Client used for making requests to Aspera Browser.
  */
 class HttpClient implements Client {
   /** HTTP client used to make requests */

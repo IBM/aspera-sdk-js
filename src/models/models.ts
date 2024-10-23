@@ -32,21 +32,21 @@ export interface FolderDialogOptions {
 }
 
 /**
- * Options related to fetching the latest Aspera for Desktop installer information.
+ * Options related to fetching the latest Aspera Browser installer information.
  *
  * These options allow clients to customize where the installer information is fetched from
  * (e.g. when self-hosting) as well as which installer information is returned back to the caller.
  */
 export interface InstallerOptions {
   /**
-   * Custom URL to fetch Aspera for Desktop installers from. Generally this is only
+   * Custom URL to fetch Aspera Browser installers from. Generally this is only
    * needed when self-hosting the installers rather than using the installers
    * hosted on CloudFront.
    *
    * This URL should point to the directory containing the `latest.json` file that
    * contains the installer information.
    *
-   * Example: `https://example.com/aspera/desktop/downloads`
+   * Example: `https://example.com/aspera/browser/downloads`
    */
   endpoint?: string;
   /**
@@ -59,11 +59,11 @@ export interface InstallerOptions {
 /** Data response containing the file(s) and folder(s) selected or dropped by the user. */
 export interface DataTransferResponse {
   dataTransfer: {
-    files: DesktopStyleFile[];
+    files: BrowserStyleFile[];
   };
 }
 
-export interface DesktopStyleFile {
+export interface BrowserStyleFile {
   /** Last modified date of the file in milliseconds since the UNIX epoch */
   lastModified: number;
   /** Absolute path of the file */
@@ -132,7 +132,7 @@ export interface CustomBrandingOptions {
   theme: CustomTheme;
 }
 
-export interface DesktopSpec {
+export interface BrowserSpec {
   /**
    * By default, the destination of a download is relative to the user's download directory setting.
    * Setting this value to `true` overrides this behavior, using absolute paths instead. This is useful
@@ -140,7 +140,7 @@ export interface DesktopSpec {
    */
   use_absolute_destination_path?: boolean;
   /**
-   * Base64 encoded preview image for the transfer. This image is displayed in the IBM Aspera Desktop transfer monitor
+   * Base64 encoded preview image for the transfer. This image is displayed in the IBM Aspera Browser transfer monitor
    * alongside the transfer.
    */
   preview_base64?: string;
@@ -208,7 +208,7 @@ export interface TransferSpec {
   delete_before_transfer?: boolean;
   /**
    * The transfer destination file path. If destinations are specified in `paths`, this value is prepended to each destination.
-   * Note that the download destination paths are relative to the user's Aspera Desktop download directory setting.
+   * Note that the download destination paths are relative to the user's Aspera Browser download directory setting.
    */
   destination_root?: string;
   /** Root ID at the destination */
@@ -277,7 +277,7 @@ export interface TransferSpec {
    * @default 0 (no files are split)
    */
   multi_session_threshold?: number;
-  // min_rate_kbps?: number; // FIXME: This is not a valid field in desktop
+  // min_rate_kbps?: number; // FIXME: This is not a valid field in browser
   /**
    * Overwrite destination files with the source files of the same name.
    *
@@ -399,13 +399,13 @@ export interface TransferSpec {
 
 export type TransferStatus = 'failed'|'completed'|'running'|'queued'|'removed'|'canceled'|'orphaned'|'paused';
 
-export interface DesktopTransfer {
+export interface BrowserTransfer {
   /** The ID of the transfer */
   uuid: string;
   /** The transferSpec that started the transfer (secrets redacted) */
   transfer_spec: TransferSpec;
   /** ISO date string when transfer was started */
-  // add_time: string; // FIXME: Not yet added in desktop
+  // add_time: string; // FIXME: Not yet added in browser
   /** The name of the current file being transferred */
   current_file: string;
   /** The count of files being transferred */
@@ -421,7 +421,7 @@ export interface DesktopTransfer {
   };
   /** ISO date string when transfer finished (empty string if not finished) */
   end_time: string;
-  /** The path opened in Explorer/Finder when user clicks 'Open Containing Folder' in the desktop application */
+  /** The path opened in Explorer/Finder when user clicks 'Open Containing Folder' in the browser application */
   explorer_path: string;
   /** The status of the transfer */
   status: TransferStatus;
@@ -440,7 +440,7 @@ export interface DesktopTransfer {
   /** The percentage of the transfer 0 - 1 (0.6 = 60%) */
   percentage: number;
   /** Remaining time in microseconds */
-  // remaining_usec: number; // FIXME: Not yet added in desktop
+  // remaining_usec: number; // FIXME: Not yet added in browser
   /** The title of the transfer */
   title: string;
 }

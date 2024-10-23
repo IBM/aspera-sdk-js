@@ -1,11 +1,11 @@
 import {errorLog, generatePromiseObjects, getWebsocketUrl} from './helpers';
 import {messages} from '../constants/messages';
-import {asperaDesktop} from '../index';
-import {TransferResponse} from '../models/aspera-desktop.model';
+import {asperaBrowser} from '../index';
+import {TransferResponse} from '../models/aspera-browser.model';
 import {WebsocketEvents, WebsocketMessage, WebsocketTopics} from '../models/models';
 
 export class WebsocketService {
-  /** The main websocket connection to Aspera Desktop */
+  /** The main websocket connection to Aspera Browser */
   private globalSocket: WebSocket;
   /** The app ID of transfers we want to receive notifications for */
   private appId: string;
@@ -64,10 +64,16 @@ export class WebsocketService {
    * This function handles messages received from the websocket
    */
   private handleMessage = (message: MessageEvent<string>): void => {
-    const data: WebsocketMessage = JSON.parse(message.data);
+    let data: WebsocketMessage|undefined;
+
+    try {
+      data = JSON.parse(message.data);
+    } catch (error) {
+      errorLog('Unable to parse Websocket message', {error, message});
+    }
 
     // Message we get on subscription
-    if (data.id === 1) {
+    if (data && data.id === 1) {
       this.initPromise.resolver(data);
 
       return;
@@ -156,7 +162,7 @@ export class WebsocketService {
   }
 
   private getWebSocketConnection(startPort: number, endPort: number): Promise<WebSocket> {
-    const webSocketUrl = getWebsocketUrl(asperaDesktop.globals.desktopUrl);
+    const webSocketUrl = getWebsocketUrl(asperaBrowser.globals.browserUrl);
 
     const checkPort = (port: number): Promise<WebSocket> => {
       return new Promise((resolve, reject) => {
@@ -202,7 +208,7 @@ export class WebsocketService {
 
     const url = new URL(this.globalSocket.url);
 
-    asperaDesktop.globals.rpcPort = Number(url.port);
+    asperaBrowser.globals.rpcPort = Number(url.port);
   }
 }
 

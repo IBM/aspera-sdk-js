@@ -36,10 +36,10 @@ export const errorLog = (message: string, debugData?: any): void => {
   }
 
   if (typeof (<any>window) === 'object') {
-    if (!Array.isArray((<any>window).asperaDesktopLogs)) {
-      (<any>window).asperaDesktopLogs = [];
+    if (!Array.isArray((<any>window).asperaBrowserLogs)) {
+      (<any>window).asperaBrowserLogs = [];
     }
-    (<any>window).asperaDesktopLogs.push({message, debugData});
+    (<any>window).asperaBrowserLogs.push({message, debugData});
   }
 
   console.warn(`Aspera Browser SDK: ${message}`, debugData);

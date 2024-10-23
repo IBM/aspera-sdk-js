@@ -1,4 +1,4 @@
-import {CustomBrandingOptions, DataTransferResponse, BrowserSpec, BrowserTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvents, TransferSpec, WebsocketEvents} from './models';
+import {CustomBrandingOptions, DataTransferResponse, BrowserSpec, BrowserTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent} from './models';
 import {hiddenStyleList, installerUrl, protocol} from '../constants/constants';
 import {messages} from '../constants/messages';
 import {safariClient} from '../helpers/client/safari-client';
@@ -79,9 +79,9 @@ export class ActivityTracking {
   private safari_extension_callbacks: Map<string, Function> = new Map();
 
   /** Keep track of the last WebSocket event **/
-  private lastWebSocketEvent: WebsocketEvents = 'CLOSED';
+  private lastWebSocketEvent: WebsocketEvent = 'CLOSED';
   /** Keep track of the last Safari extension event **/
-  private lastSafariExtensionEvent: SafariExtensionEvents = 'DISABLED';
+  private lastSafariExtensionEvent: SafariExtensionEvent = 'DISABLED';
 
   /**
    * Notify all consumers when a message is received from the websocket
@@ -112,7 +112,7 @@ export class ActivityTracking {
    *
    * @param webSocketEvent the event type.
    */
-  handleWebSocketEvents(webSocketEvent: WebsocketEvents): void {
+  handleWebSocketEvents(webSocketEvent: WebsocketEvent): void {
     if (this.lastWebSocketEvent === webSocketEvent) {
       return;
     }
@@ -131,7 +131,7 @@ export class ActivityTracking {
    *
    * @param safariExtensionEvent the event type.
    */
-  handleSafariExtensionEvents(safariExtensionEvent: SafariExtensionEvents): void {
+  handleSafariExtensionEvents(safariExtensionEvent: SafariExtensionEvent): void {
     if (this.lastSafariExtensionEvent === safariExtensionEvent) {
       return;
     }
@@ -226,7 +226,7 @@ export class ActivityTracking {
    *
    * @returns the ID of the callback index
    */
-  setWebSocketEventCallback(callback: (status: WebsocketEvents) => void): string {
+  setWebSocketEventCallback(callback: (status: WebsocketEvent) => void): string {
     if (typeof callback !== 'function') {
       errorLog(messages.callbackIsNotFunction);
       return;
@@ -253,7 +253,7 @@ export class ActivityTracking {
    *
    * @returns the ID of the callback index
    */
-  setSafariExtensionEventCallback(callback: (status: SafariExtensionEvents) => void): string {
+  setSafariExtensionEventCallback(callback: (status: SafariExtensionEvent) => void): string {
     if (typeof callback !== 'function') {
       errorLog(messages.callbackIsNotFunction);
       return;
@@ -307,11 +307,11 @@ export class Browser {
   /** Deregister callback to remove it from the callbacks getting removed transfer data */
   deregisterRemovedCallback: (id: string) => void;
   /** Register callback for connection status events from the app */
-  registerStatusCallback: (callback: (status: WebsocketEvents) => void) => string;
+  registerStatusCallback: (callback: (status: WebsocketEvent) => void) => string;
   /** Deregister callback to remove it from the callbacks getting connection events */
   deregisterStatusCallback: (id: string) => void;
   /** Register callback for Safari extension status events */
-  registerSafariExtensionStatusCallback: (callback: (status: SafariExtensionEvents) => void) => string;
+  registerSafariExtensionStatusCallback: (callback: (status: SafariExtensionEvent) => void) => string;
   /** Deregister callback to remove it from the callbacks getting Safari extension events */
   deregisterSafariExtensionStatusCallback: (id: string) => void;
   /** Function to remove a transfer */

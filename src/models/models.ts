@@ -464,8 +464,8 @@ export interface InstallerInfoResponse {
 }
 
 export type WebsocketTopics = 'subscribe_transfer_activity' | 'transfer_activity';
-export type WebsocketEvents = 'CLOSED' | 'RECONNECT';
-export type SafariExtensionEvents = 'ENABLED' | 'DISABLED';
+export type WebsocketEvent = 'CLOSED' | 'RECONNECT';
+export type SafariExtensionEvent = 'ENABLED' | 'DISABLED';
 
 export interface WebsocketMessage {
   jsonrpc: '2.0';

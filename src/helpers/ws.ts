@@ -2,7 +2,7 @@ import {errorLog, generatePromiseObjects, getWebsocketUrl} from './helpers';
 import {messages} from '../constants/messages';
 import {asperaBrowser} from '../index';
 import {TransferResponse} from '../models/aspera-browser.model';
-import {WebsocketEvents, WebsocketMessage, WebsocketTopics} from '../models/models';
+import {WebsocketEvent, WebsocketMessage, WebsocketTopics} from '../models/models';
 
 export class WebsocketService {
   /** The main websocket connection to Aspera Browser */
@@ -195,7 +195,7 @@ export class WebsocketService {
     });
   }
 
-  private notifyEvent(event: WebsocketEvents) {
+  private notifyEvent(event: WebsocketEvent) {
     if (typeof this.eventListener === 'function') {
       this.eventListener(event);
     }

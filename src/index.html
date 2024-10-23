@@ -151,7 +151,7 @@
         const appId = document.querySelector('#app-id').value;
         const options = {appId, supportMultipleUsers};
 
-        asperaDesktop.init(options).then(() => {
+        asperaBrowser.init(options).then(() => {
           console.log('INIT SUCCESS');
 
           asperaBrowser.getAllTransfers().then(response => {

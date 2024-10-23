@@ -1,4 +1,4 @@
-import {asperaDesktop} from '../index';
+import {asperaBrowser} from '../index';
 import {ErrorResponse, PromiseObject, TransferSpec} from '../models/models';
 
 /**
@@ -188,7 +188,7 @@ export const isSafari = (): boolean => {
 };
 
 export const getRpcServerUrl = (): string => {
-  return `${asperaDesktop.globals.desktopUrl}:${asperaDesktop.globals.rpcPort}`;
+  return `${asperaBrowser.globals.browserUrl}:${asperaBrowser.globals.rpcPort}`;
 };
 
 export default {

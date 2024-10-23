@@ -13,8 +13,8 @@ Enables web applications to utilize Aspera file-transfer capabilities using the 
 ### Build
 
 ```shell
-$ git clone https://github.com/IBM/aspera-browser-sdk-js.git
-$ cd aspera-browser-sdk-js
+$ git clone https://github.com/IBM/aspera-desktop-sdk-js.git
+$ cd aspera-desktop-sdk-js
 $ npm install
 $ npm run build
 ```

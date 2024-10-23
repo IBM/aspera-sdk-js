@@ -1,4 +1,4 @@
-# IBM Aspera for Browser JavaScript SDK
+# IBM Aspera Browser JavaScript SDK
 This JavaScript SDK allows web applications to integrate with IBM Aspera to perform high-speed Aspera file transfers.
 
 Documentation is available on [GitHub Pages](https://ibm.github.io/aspera-browser-sdk-js/docs/)
@@ -7,7 +7,7 @@ Documentation is available on [GitHub Pages](https://ibm.github.io/aspera-browse
 Install via npm:
 
 ```shell
-$ npm install --save @ibm-aspera/browser-sdk-js
+$ npm install --save @ibm-aspera/browser-sdk
 ```
 
 Install from source:

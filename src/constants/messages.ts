@@ -7,7 +7,7 @@ export const messages = {
   getAllTransfersFailed: 'Unable to get all transfers',
   getTransferFailed: 'Unable to get transfer',
   invalidEndpoint: 'The specified endpoint is not a valid URL',
-  loadingProtocol: 'Launching IBM Aspera for Browser',
+  loadingProtocol: 'Launching IBM Aspera',
   notValidTransferSpec: 'The supplied transferSpec is not valid',
   removeTransferFailed: 'Unable to remove transfer',
   serverError: 'Unable to connect to IBM Aspera Browser server',

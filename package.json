@@ -1,5 +1,5 @@
 {
-  "name": "@ibm-aspera/browser-sdk-js",
+  "name": "@ibm-aspera/browser-sdk",
   "version": "0.1.36",
   "author": "IBM Aspera",
   "main": "dist/commonjs/index.js",

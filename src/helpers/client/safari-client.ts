@@ -151,7 +151,7 @@ export class SafariClient implements Client {
       detail: request ?? {}
     };
 
-    document.dispatchEvent(new CustomEvent(`AsperaBrowser.${type}`, payload));
+    document.dispatchEvent(new CustomEvent(`AsperaDesktop.${type}`, payload));
   }
 
   /**
@@ -203,7 +203,7 @@ export class SafariClient implements Client {
   }
 
   /**
-   * Listens for 'AsperaBrowser.Response' events.
+   * Listens for 'AsperaDesktop.Response' events.
    */
   private listenResponseEvents() {
     document.addEventListener('AsperaDesktop.Response', (event: CustomEvent<JSONRPCResponse>) => {
@@ -212,7 +212,7 @@ export class SafariClient implements Client {
   }
 
   /**
-   * Listens for 'AsperaBrowser.TransferActivity' events.
+   * Listens for 'AsperaDesktop.TransferActivity' events.
    */
   private listenTransferActivityEvents() {
     document.addEventListener('AsperaDesktop.TransferActivity', (event: any) => {
@@ -221,7 +221,7 @@ export class SafariClient implements Client {
   }
 
   /**
-   * Listens for 'AsperaBrowser.Status' events.
+   * Listens for 'AsperaDesktop.Status' events.
    */
   private listenStatusEvents() {
     document.addEventListener('AsperaDesktop.Status', (event: any) => {
@@ -230,7 +230,7 @@ export class SafariClient implements Client {
   }
 
   /**
-   * Listens for 'AsperaBrowser.Pong' events.
+   * Listens for 'AsperaDesktop.Pong' events.
    */
   private listenPongEvents() {
     document.addEventListener('AsperaDesktop.Pong', () => {

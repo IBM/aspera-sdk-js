@@ -2,7 +2,7 @@
 
 First off, thank you for your interest!
 
-The Aspera for Browser SDK for JavaScript is an **open source** project at IBM. We pride ourselves in open and inclusive development. If you're wondering more about our contribution process, you're in the right place.
+The Aspera Browser SDK for JavaScript is an **open source** project at IBM. We pride ourselves in open and inclusive development. If you're wondering more about our contribution process, you're in the right place.
 
 ## Code of conduct
 
@@ -12,7 +12,7 @@ We value all of our community members, and thus want to foster a positive contri
 
 Anyone! The one and only requirement is you'll need a [public GitHub account](https://github.com/join), as all our assets live on GitHub.
 
-- **Bug Reports:** Found an issue? Feel free to [open a bug report](https://github.com/IBM/aspera-browser-sdk-js/issues) to notify us of a potential issue, but please include as much detailed information as possible, such as the version of the Aspera for Browser SDK, configuration options, browser version, etc.
+- **Bug Reports:** Found an issue? Feel free to [open a bug report](https://github.com/IBM/aspera-browser-sdk-js/issues) to notify us of a potential issue, but please include as much detailed information as possible, such as the version of the Aspera  Browser SDK, configuration options, browser version, etc.
 - **Development:** If coding is your thing, you can help us by contributing bug fixes or new features.
 - **Documentation:** Our documentation is just as important as the code itself, and anyone is welcome contribute to our documentation to make sure it stays correct and up-to-date.
 
@@ -24,7 +24,7 @@ Before contributing, check out [DEVELOPMENT](../docs/DEVELOPMENT.md#prerequisite
 
 ### 1. Fork the repo:
 
-Go to the [Aspera for Browser SDK](https://github.com/IBM/aspera-browser-sdk-js) repository in GitHub and click the `Fork` button in the top-right corner. This will create a copy repo of the Aspera for Browser SDK associated with your account.
+Go to the [Aspera Browser SDK](https://github.com/IBM/aspera-browser-sdk-js) repository in GitHub and click the `Fork` button in the top-right corner. This will create a copy repo of the Aspera Browser SDK associated with your account.
 
 ### 2. Clone your fork:
 
@@ -140,7 +140,7 @@ Write a title and description then click `Create pull request`
 
 ### 9. Updating a pull request
 
-Stay up to date with the activity in your pull request. Maintainers from the Aspera for Browser SDK team will be reviewing your work and making comments, asking questions and suggesting changes to be made before they merge your code.
+Stay up to date with the activity in your pull request. Maintainers from the Aspera Browser SDK team will be reviewing your work and making comments, asking questions and suggesting changes to be made before they merge your code.
 
 When you need to make a change, use the same method detailed above except you no longer need to run `git push -u origin { YOUR_BRANCH_NAME }` just `git push`.
 

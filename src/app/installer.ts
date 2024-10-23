@@ -12,7 +12,7 @@ import {messages} from '../constants/messages';
 import {InstallerInfoResponse, InstallerOptions} from '../models/models';
 
 /**
- * Get the latest Aspera for Browser installer information such as download URL and version.
+ * Get the latest Aspera Browser installer information such as download URL and version.
  *
  * @param options Installer info options
  *

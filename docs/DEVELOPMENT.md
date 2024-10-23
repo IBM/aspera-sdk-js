@@ -1,6 +1,6 @@
-# IBM Aspera for Browser TypeScript SDK
+# IBM Aspera Browser TypeScript SDK
 
-Enables web applications to utilize Aspera file-transfer capabilities using the IBM Aspera for browsers.
+Enables web applications to utilize Aspera file-transfer capabilities using IBM Aspera via the browser.
 
 ## Development
 

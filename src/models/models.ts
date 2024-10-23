@@ -32,14 +32,14 @@ export interface FolderDialogOptions {
 }
 
 /**
- * Options related to fetching the latest Aspera for Browser installer information.
+ * Options related to fetching the latest Aspera Browser installer information.
  *
  * These options allow clients to customize where the installer information is fetched from
  * (e.g. when self-hosting) as well as which installer information is returned back to the caller.
  */
 export interface InstallerOptions {
   /**
-   * Custom URL to fetch Aspera for Browser installers from. Generally this is only
+   * Custom URL to fetch Aspera Browser installers from. Generally this is only
    * needed when self-hosting the installers rather than using the installers
    * hosted on CloudFront.
    *

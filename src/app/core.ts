@@ -1,40 +1,20 @@
 import {messages} from '../constants/messages';
 import {client} from '../helpers/client/client';
-import {
-  errorLog,
-  generateErrorBody,
-  generatePromiseObjects,
-  isValidTransferSpec,
-  randomUUID,
-  throwError
-} from '../helpers/helpers';
+import {errorLog, generateErrorBody, generatePromiseObjects, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
 import {asperaBrowser} from '../index';
-import {DesktopInfo, TransferResponse} from '../models/aspera-browser.model';
-import {
-  CustomBrandingOptions,
-  DataTransferResponse,
-  BrowserSpec,
-  BrowserStyleFile,
-  BrowserTransfer,
-  FileDialogOptions,
-  FolderDialogOptions,
-  ModifyTransferOptions,
-  ResumeTransferOptions,
-  SafariExtensionEvents,
-  TransferSpec,
-  WebsocketEvents
-} from '../models/models';
+import {BrowserInfo, TransferResponse} from '../models/aspera-browser.model';
+import {CustomBrandingOptions, DataTransferResponse, BrowserSpec, BrowserStyleFile, BrowserTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvents, TransferSpec, WebsocketEvents} from '../models/models';
 
 /**
- * Check if IBM Aspera Browser connection works. This function is called by init
+ * Check if IBM Aspera for Desktop connection works. This function is called by init
  * when initializing the SDK. This function can be used at any point for checking.
  *
  * @returns a promise that resolves if server can connect or rejects if not
  */
-export const testBrowserConnection = (): Promise<any> => {
+export const testConnection = (): Promise<any> => {
   return client.request('get_info')
-    .then((data: DesktopInfo) => {
-      asperaBrowser.globals.DesktopInfo = data;
+    .then((data: BrowserInfo) => {
+      asperaBrowser.globals.browserInfo = data;
       asperaBrowser.globals.browserVerified = true;
       return data;
     });
@@ -66,18 +46,36 @@ export const initDragDrop = (): Promise<boolean> => {
  * Initialize IBM Aspera Browser client. If client cannot (reject/catch), then
  * client should attempt fixing server URL or trying again. If still fails disable UI elements.
  *
- * @param appId the unique ID for the website. Transfers initiated during this session
+ * @param options initialization options:
+ *
+ * - `appId` the unique ID for the website. Transfers initiated during this session
  * will be associated with this ID. It is recommended to use a unique ID to keep transfer
  * information private from other websites.
  *
- * @returns a promise that resolves if IBM Aspera Browser is running properly or
+ * - `supportMultipleUsers` when enabled (defaults to false), the SDK will iterate over a port
+ * range and generate a session id to determine the running instance of the desktop app for the
+ * current user. This is needed when multiple users may be logged into the same machine
+ * simultaneously, for example on a Windows Server.
+ *
+ * @returns a promise that resolves if IBM Aspera Desktop is running properly or
  * rejects if unable to connect
  */
-export const initBrowser = (appId?: string): Promise<any> => {
-  asperaBrowser.globals.appId = appId ? appId : randomUUID();
+export const init = (options?: InitOptions): Promise<any> => {
+  const appId = options?.appId ?? randomUUID();
+  const supportMultipleUsers = options?.supportMultipleUsers ?? false;
 
-  return asperaBrowser.activityTracking.setup(asperaBrowser.globals.appId)
-    .then(() => testBrowserConnection())
+  if (asperaBrowser.globals.browserVerified) {
+    return throwError(messages.sdkAlreadyInitialized);
+  }
+
+  asperaBrowser.globals.appId = appId;
+
+  if (supportMultipleUsers) {
+    asperaBrowser.globals.sessionId = randomUUID();
+  }
+
+  return asperaBrowser.activityTracking.setup()
+    .then(() => testConnection())
     .then(() => initDragDrop())
     .catch(error => {
       errorLog(messages.serverError, error);
@@ -168,7 +166,7 @@ export const deregisterRemovedCallback = (id: string): void => {
  *
  * For example, to be notified of when the SDK loses connection with the application or connection
  * is re-established. This can be useful if you want to handle the case where the user quits IBM Aspera Browser
- * after `initBrowser` has already been called, and want to prompt the user to relaunch the application.
+ * after `init` has already been called, and want to prompt the user to relaunch the application.
  *
  * @param callback callback function to receive events
  *
@@ -575,7 +573,7 @@ export const createDropzone = (
   elements.forEach(element => {
     element.addEventListener('dragover', dragEvent);
     element.addEventListener('drop', dropEvent);
-    asperaBrowser.globals.dropzonesCreated.set(elementSelector, [{event: 'dragover', callback: dragEvent}, {event: 'drop', callback: dropEvent}]);
+    asperaBrowser.globals.dropZonesCreated.set(elementSelector, [{event: 'dragover', callback: dragEvent}, {event: 'drop', callback: dropEvent}]);
   });
 };
 
@@ -585,7 +583,7 @@ export const createDropzone = (
  * @param elementSelector the selector of the element on the page that should remove
  */
 export const removeDropzone = (elementSelector: string): void => {
-  const foundDropzone = asperaBrowser.globals.dropzonesCreated.get(elementSelector);
+  const foundDropzone = asperaBrowser.globals.dropZonesCreated.get(elementSelector);
 
   if (foundDropzone) {
     foundDropzone.forEach(data => {
@@ -605,12 +603,12 @@ export const removeDropzone = (elementSelector: string): void => {
  *
  * @returns a promise that returns information about the user's IBM Aspera Browser installation.
  */
-export const getInfo = (): Promise<DesktopInfo> => {
+export const getInfo = (): Promise<BrowserInfo> => {
   if (!asperaBrowser.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
   return new Promise((resolve, _) => {
-    resolve(asperaBrowser.globals.DesktopInfo);
+    resolve(asperaBrowser.globals.browserInfo);
   });
 };

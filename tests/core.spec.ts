@@ -1,14 +1,13 @@
 import {mockFetch} from './mocks';
-import {initBrowser} from '../src';
+import {init} from '../src';
 
 describe('initHttpGateway', () => {
-
   beforeEach(() => {
     (<any>global).fetch = mockFetch({});
   });
 
   test('calls default URL', async () => {
-    initBrowser('fake').catch(() => {});
+    init({appId: 'fake'}).catch(() => {});
     // expect(fetch).toBeCalled();
   });
 });

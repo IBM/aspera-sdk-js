@@ -662,3 +662,8 @@ export interface CustomTheme {
   g100: CustomThemeItems;
   disableLightDarkMode?: boolean;
 }
+
+export interface InitOptions {
+  appId?: string;
+  supportMultipleUsers?: boolean;
+}

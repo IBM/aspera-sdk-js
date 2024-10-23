@@ -1,6 +1,6 @@
 import {mockFetch} from './mocks';
-import {asperaBrowser} from '../src';
 import {httpClient} from '../src/helpers/client/http-client';
+import {getRpcServerUrl} from '../src/helpers/helpers';
 
 let id = 0;
 
@@ -34,20 +34,20 @@ const getExpectedRequest = (method: string, params: any = {}) => {
 };
 
 describe('request', () => {
-
   beforeEach(() => {
     (<any>global).fetch = mockFetch({});
   });
 
   const fakeData = {data: 'testing'};
+  const rpcServerURL = getRpcServerUrl();
 
   test('POST with no params should call url with no params', () => {
     httpClient.request('fake');
-    expect(fetch).toHaveBeenCalledWith(asperaBrowser.globals.browserUrl, getExpectedRequest('fake'));
+    expect(fetch).toHaveBeenCalledWith(rpcServerURL, getExpectedRequest('fake'));
   });
 
   test('POST with params should call url with params', () => {
     httpClient.request('fake', fakeData);
-    expect(fetch).toHaveBeenCalledWith(asperaBrowser.globals.browserUrl, getExpectedRequest('fake', fakeData));
+    expect(fetch).toHaveBeenCalledWith(rpcServerURL, getExpectedRequest('fake', fakeData));
   });
 });

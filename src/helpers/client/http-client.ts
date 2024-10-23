@@ -1,7 +1,6 @@
 import {JSONRPCClient, JSONRPCRequest} from 'json-rpc-2.0';
 import Client from './client';
-import {generatePromiseObjects} from '../helpers';
-import {asperaBrowser} from '../../index';
+import {generatePromiseObjects, getRpcServerUrl} from '../helpers';
 
 /**
  * Wraps a promise like object and returns a promise that supports catch.
@@ -48,7 +47,9 @@ class JSONRPCHttpClient {
       body: JSON.stringify(request),
     };
 
-    return fetch(asperaBrowser.globals.browserUrl, options).then(response => {
+    const rpcServerURL = getRpcServerUrl();
+
+    return fetch(rpcServerURL, options).then(response => {
       if (response.ok) {
         return response.json().then(rpcResponse => this.client.receive(rpcResponse));
       } else if (request.id !== undefined) {

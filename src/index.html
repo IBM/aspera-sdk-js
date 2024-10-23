@@ -142,20 +142,23 @@
         document.querySelector('#test-output').value = text;
         setTimeout(() => {
           generateObjectText();
-        }, 1000)
+        }, 1000);
       }
-      function init() {
+
+      function init(supportMultipleUsers) {
         console.log('INITIALIZING...');
 
-        const id = document.querySelector('#app-id').value;
-        asperaBrowser.initBrowser(id).then(() => {
+        const appId = document.querySelector('#app-id').value;
+        const options = {appId, supportMultipleUsers};
+
+        asperaBrowser.init(options).then(() => {
           console.log('INIT SUCCESS');
 
           asperaBrowser.getAllTransfers().then(response => {
             monitorTransfers({ transfers: response });
           }).catch(error => {
             console.log('GET ALL TRANSFERS FAIL', error);
-          })
+          });
         }).catch(error => {
           console.log('INIT FAIL', error);
         })
@@ -228,7 +231,7 @@
           console.log('GET ALL TRANSFERS SUCCESS', response);
         }).catch(error => {
           console.log('GET ALL TRANSFERS FAIL', error);
-        })
+        });
       }
 
       function getTransfer(id) {
@@ -236,7 +239,7 @@
           console.log('GET TRANSFER SUCCESS', response);
         }).catch(error => {
           console.log('GET TRANSFER FAIL', error);
-        })
+        });
       }
 
       function showDirectory(id) {
@@ -244,7 +247,7 @@
           console.log('SHOW DIRECTORY SUCCESS', response);
         }).catch(error => {
           console.log('SHOW DIRECTORY FAIL', error);
-        })
+        });
       }
 
       function showSelectFileDialog() {
@@ -252,7 +255,7 @@
           console.log('SHOW FILE DIALOG SUCCESS', response);
         }).catch(error => {
           console.log('SHOW FILE DIALOG FAIL', error);
-        })
+        });
       }
 
       function showSelectFolderDialog() {
@@ -260,7 +263,7 @@
           console.log('SHOW FOLDER DIALOG SUCCESS', response);
         }).catch(error => {
           console.log('SHOW FOLDER DIALOG FAIL', error);
-        })
+        });
       }
 
       function openPreferences() {
@@ -268,7 +271,7 @@
           console.log('SHOW PREFERENCES SUCCESS', response);
         }).catch(error => {
           console.log('SHOW PREFERENCES FAIL', error);
-        })
+        });
       }
 
       function modifyTransfer(id) {
@@ -280,7 +283,7 @@
           console.log('MODIFY TRANSFER SUCCESS', response);
         }).catch(error => {
           console.log('MODIFY TRANSFER FAIL', error);
-        })
+        });
       }
 
       function testDrop() {
@@ -366,8 +369,9 @@
     <h1>Browser SDK Test Server</h1>
     <a href="/aspera-browser-sdk-js/docs/index.html" class="docs" target="_blank">Documentation</a>
     <div class="test-buttons">
-      <button onclick="init()" type="button">Init SDK</button>
-      <button onclick="testServer()" type="button">Test browser</button>
+      <button onclick="init(false)" type="button">Init SDK</button>
+      <button onclick="init(true)" type="button">Init SDK with session</button>
+      <button onclick="testServer()" type="button">Test desktop</button>
       <button onclick="getInfo()" type="button">Get Info</button>
       <button onclick="transfer()" type="button">Start transfer</button>
       <button onclick="getAllTransfers()" type="button">Get transfers</button>

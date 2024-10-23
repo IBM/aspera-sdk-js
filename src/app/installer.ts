@@ -1,12 +1,5 @@
 import {asperaBrowser} from '../index';
-import {
-  errorLog,
-  generateErrorBody,
-  generatePromiseObjects,
-  getCurrentPlatform,
-  isValidURL,
-  throwError
-} from '../helpers/helpers';
+import {errorLog, generateErrorBody, generatePromiseObjects, getCurrentPlatform, isValidURL, throwError} from '../helpers/helpers';
 import {apiGet} from '../helpers/http';
 import {messages} from '../constants/messages';
 import {InstallerInfoResponse, InstallerOptions} from '../models/models';

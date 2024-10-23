@@ -95,16 +95,35 @@ export class SafariClient implements Client {
    * @returns A Promise that resolves with the response from the extension.
    */
   public monitorTransferActivity(): Promise<unknown> {
-    const promise = this.dispatchPromiseEvent(
-      SafariExtensionEventType.Monitor,
-      'subscribe_transfer_activity',
-      [asperaBrowser.globals.appId]
-    );
+    const dispatchMonitorEvent = (): Promise<unknown> => {
+      const promise =  this.dispatchPromiseEvent(
+        SafariExtensionEventType.Monitor,
+        'subscribe_transfer_activity',
+        [asperaBrowser.globals.appId]
+      );
 
-    return promise
-      .then(() => {
+      return promise.then(() => {
         this.subscribedTransferActivity = true;
       });
+    };
+
+    if (!this.safariExtensionEnabled) {
+      return new Promise((resolve, reject) => {
+        const extensionInterval = setInterval(() => {
+          if (!this.safariExtensionEnabled) {
+            return;
+          }
+
+          dispatchMonitorEvent()
+            .then(resolve)
+            .catch(reject);
+
+          clearInterval(extensionInterval);
+        }, 1000);
+      });
+    }
+
+    return dispatchMonitorEvent();
   }
 
   /**
@@ -132,7 +151,7 @@ export class SafariClient implements Client {
       detail: request ?? {}
     };
 
-    document.dispatchEvent(new CustomEvent(`AsperaBrowser.${type}`, payload));
+    document.dispatchEvent(new CustomEvent(`AsperaDesktop.${type}`, payload));
   }
 
   /**
@@ -184,7 +203,7 @@ export class SafariClient implements Client {
   }
 
   /**
-   * Listens for 'AsperaBrowser.Response' events.
+   * Listens for 'AsperaDesktop.Response' events.
    */
   private listenResponseEvents() {
     document.addEventListener('AsperaDesktop.Response', (event: CustomEvent<JSONRPCResponse>) => {
@@ -193,7 +212,7 @@ export class SafariClient implements Client {
   }
 
   /**
-   * Listens for 'AsperaBrowser.TransferActivity' events.
+   * Listens for 'AsperaDesktop.TransferActivity' events.
    */
   private listenTransferActivityEvents() {
     document.addEventListener('AsperaDesktop.TransferActivity', (event: any) => {
@@ -202,7 +221,7 @@ export class SafariClient implements Client {
   }
 
   /**
-   * Listens for 'AsperaBrowser.Status' events.
+   * Listens for 'AsperaDesktop.Status' events.
    */
   private listenStatusEvents() {
     document.addEventListener('AsperaDesktop.Status', (event: any) => {
@@ -211,7 +230,7 @@ export class SafariClient implements Client {
   }
 
   /**
-   * Listens for 'AsperaBrowser.Pong' events.
+   * Listens for 'AsperaDesktop.Pong' events.
    */
   private listenPongEvents() {
     document.addEventListener('AsperaDesktop.Pong', () => {

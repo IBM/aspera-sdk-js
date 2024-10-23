@@ -1,3 +1,4 @@
+import {asperaBrowser} from '../index';
 import {ErrorResponse, PromiseObject, TransferSpec} from '../models/models';
 
 /**
@@ -184,6 +185,10 @@ export const isValidURL = (url: string): boolean => {
 export const isSafari = (): boolean => {
   // eslint-disable-next-line
   return /^((?!chrome|android).)*safari/i.test(navigator.userAgent) && !(window as any).MSStream;
+};
+
+export const getRpcServerUrl = (): string => {
+  return `${asperaBrowser.globals.browserUrl}:${asperaBrowser.globals.rpcPort}`;
 };
 
 export default {

@@ -1,7 +1,8 @@
+import {errorLog, generatePromiseObjects, getWebsocketUrl} from './helpers';
+import {messages} from '../constants/messages';
+import {asperaBrowser} from '../index';
 import {TransferResponse} from '../models/aspera-browser.model';
 import {WebsocketEvents, WebsocketMessage, WebsocketTopics} from '../models/models';
-import {messages} from '../constants/messages';
-import {errorLog, generatePromiseObjects} from './helpers';
 
 export class WebsocketService {
   /** The main websocket connection to Aspera Browser */
@@ -14,8 +15,6 @@ export class WebsocketService {
   private eventListener: Function;
   /** Indicator if the websocket is already connected */
   private isConnected = false;
-  /** The websocket URL to use */
-  private websocketUrl: string;
   /** Global promise object that resolves when init completes */
   private initPromise = generatePromiseObjects();
 
@@ -33,13 +32,14 @@ export class WebsocketService {
     }
 
     this.isConnected = true;
+    this.updateRpcPort();
     this.notifyEvent('RECONNECT');
   };
 
   /**
    * This function handles completed subscription
    */
-  private handleClosed = (): void => {
+  private handleClose = (): void => {
     if (this.isConnected) {
       this.isConnected = false;
       this.notifyEvent('CLOSED');
@@ -50,11 +50,7 @@ export class WebsocketService {
       return;
     }
 
-    // Try to reconnect
-    setTimeout(() => {
-      this.globalSocket.close();
-      this.init(this.websocketUrl, this.appId);
-    }, 3000);
+    this.reconnect();
   };
 
   /**
@@ -132,29 +128,87 @@ export class WebsocketService {
   /**
    * This function starts the websocket subscription with the websocket provider
    *
-   * @param socketUrl - the websocket URL to use
-   * @param appId - the App ID
-   *
    * @returns a promise that resolves when the websocket connection is established
    */
-  init(socketUrl: string, appId: string): Promise<unknown> {
-    this.websocketUrl = socketUrl;
-    this.appId = appId;
-
-    this.globalSocket = new WebSocket(this.websocketUrl);
-
-    this.globalSocket.onerror = this.handleError;
-    this.globalSocket.onclose = this.handleClosed;
-    this.globalSocket.onopen = this.handleOpen;
-    this.globalSocket.onmessage = this.handleMessage;
+  init(): Promise<unknown> {
+    this.connect();
 
     return this.initPromise.promise;
+  }
+
+  private connect() {
+    this.getWebSocketConnection(33024, 33029)
+      .then((webSocket) => {
+        this.globalSocket = webSocket;
+        this.globalSocket.onerror = this.handleError;
+        this.globalSocket.onclose = this.handleClose;
+        this.globalSocket.onopen = this.handleOpen;
+        this.globalSocket.onmessage = this.handleMessage;
+
+        this.handleOpen();
+      }).catch(() => {
+        this.reconnect();
+      });
+  }
+
+  private reconnect() {
+    if (this.globalSocket) {
+      this.globalSocket.close();
+    }
+
+    setTimeout(() => {
+      this.connect();
+    }, 1000);
+  }
+
+  private getWebSocketConnection(startPort: number, endPort: number): Promise<WebSocket> {
+    const webSocketUrl = getWebsocketUrl(asperaBrowser.globals.browserUrl);
+
+    const checkPort = (port: number): Promise<WebSocket> => {
+      return new Promise((resolve, reject) => {
+        const webSocket = new WebSocket(`${webSocketUrl}:${port}`);
+
+        webSocket.onopen = () => {
+          resolve(webSocket);
+        };
+
+        webSocket.onerror = () => {
+          reject(`Connection failed on port ${port}`);
+        };
+      });
+    };
+
+    return new Promise((resolve, reject) => {
+      const connectPort = (port: number) => {
+        if (port > endPort) {
+          return reject('No available WebSocket connection found');
+        }
+
+        checkPort(port)
+          .then(ws => resolve(ws))
+          .catch((error) => {
+            connectPort(port + 1);
+          });
+      };
+
+      connectPort(startPort);
+    });
   }
 
   private notifyEvent(event: WebsocketEvents) {
     if (typeof this.eventListener === 'function') {
       this.eventListener(event);
     }
+  }
+
+  private updateRpcPort() {
+    if (!this.globalSocket) {
+      return;
+    }
+
+    const url = new URL(this.globalSocket.url);
+
+    asperaBrowser.globals.rpcPort = Number(url.port);
   }
 }
 

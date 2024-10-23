@@ -6,12 +6,12 @@ import {BrowserInfo, TransferResponse} from '../models/aspera-browser.model';
 import {CustomBrandingOptions, DataTransferResponse, BrowserSpec, BrowserStyleFile, BrowserTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvents, TransferSpec, WebsocketEvents} from '../models/models';
 
 /**
- * Check if IBM Aspera Browser connection works. This function is called by init
+ * Check if IBM Aspera for Desktop connection works. This function is called by init
  * when initializing the SDK. This function can be used at any point for checking.
  *
  * @returns a promise that resolves if server can connect or rejects if not
  */
-export const testBrowserConnection = (): Promise<any> => {
+export const testConnection = (): Promise<any> => {
   return client.request('get_info')
     .then((data: BrowserInfo) => {
       asperaBrowser.globals.browserInfo = data;
@@ -75,28 +75,13 @@ export const init = (options?: InitOptions): Promise<any> => {
   }
 
   return asperaBrowser.activityTracking.setup()
-    .then(() => testBrowserConnection())
+    .then(() => testConnection())
     .then(() => initDragDrop())
     .catch(error => {
       errorLog(messages.serverError, error);
       asperaBrowser.globals.browserVerified = false;
       throw generateErrorBody(messages.serverError, error);
     });
-};
-
-/**
- * Initialize IBM Aspera Browser client. If client cannot (reject/catch), then
- * client should attempt fixing server URL or trying again. If still fails disable UI elements.
- *
- * @param appId the unique ID for the website. Transfers initiated during this session
- * will be associated with this ID. It is recommended to use a unique ID to keep transfer
- * information private from other websites.
- *
- * @returns a promise that resolves if IBM Aspera Browser is running properly or
- * rejects if unable to connect
- */
-export const initBrowser = (appId?: string): Promise<any> => {
-  return init({appId});
 };
 
 /**
@@ -181,7 +166,7 @@ export const deregisterRemovedCallback = (id: string): void => {
  *
  * For example, to be notified of when the SDK loses connection with the application or connection
  * is re-established. This can be useful if you want to handle the case where the user quits IBM Aspera Browser
- * after `initBrowser` has already been called, and want to prompt the user to relaunch the application.
+ * after `init` has already been called, and want to prompt the user to relaunch the application.
  *
  * @param callback callback function to receive events
  *

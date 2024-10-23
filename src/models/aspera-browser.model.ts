@@ -290,12 +290,10 @@ export class Browser {
   globals: BrowserGlobals = new BrowserGlobals();
   /** Activity tracking for watching transfers */
   activityTracking: ActivityTracking = new ActivityTracking();
-  /** Function to initialize IBM Aspera Browser with options */
-  init: (options: InitOptions) => Promise<any>;
   /** Function to initialize IBM Aspera Browser */
-  initBrowser: (appId: string) => Promise<any>;
+  init: (options: InitOptions) => Promise<any>;
   /** Function to test the IBM Aspera Browser status */
-  testBrowserConnection: () => Promise<any>;
+  testConnection: () => Promise<any>;
   /** Function to initiate a transfer */
   startTransfer: (transferSpec: TransferSpec, browserSpec: BrowserSpec) => Promise<BrowserTransfer>;
   /** Function to launch IBM Aspera Browser */

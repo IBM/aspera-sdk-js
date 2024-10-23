@@ -1,41 +1,12 @@
 import {Browser} from './models/aspera-browser.model';
-import {
-  createDropzone,
-  deregisterActivityCallback,
-  deregisterRemovedCallback,
-  deregisterSafariExtensionStatusCallback,
-  deregisterStatusCallback,
-  getAllTransfers,
-  getInfo,
-  getTransfer,
-  init,
-  initBrowser,
-  initDragDrop,
-  modifyTransfer,
-  registerActivityCallback,
-  registerRemovedCallback,
-  registerSafariExtensionStatusCallback,
-  registerStatusCallback,
-  removeDropzone,
-  removeTransfer,
-  resumeTransfer,
-  setBranding,
-  showDirectory,
-  showPreferences,
-  showSelectFileDialog,
-  showSelectFolderDialog,
-  startTransfer,
-  stopTransfer,
-  testBrowserConnection,
-} from './app/core';
+import {createDropzone, deregisterActivityCallback, deregisterRemovedCallback, deregisterSafariExtensionStatusCallback, deregisterStatusCallback, getAllTransfers, getInfo, getTransfer, init, initDragDrop, modifyTransfer, registerActivityCallback, registerRemovedCallback, registerSafariExtensionStatusCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showDirectory, showPreferences, showSelectFileDialog, showSelectFolderDialog, startTransfer, stopTransfer, testConnection,} from './app/core';
 import {getInstallerInfo} from './app/installer';
 import {isSafari} from './helpers/helpers';
 
 export const asperaBrowser: Browser = new Browser();
 
 asperaBrowser.init = init;
-asperaBrowser.initBrowser = initBrowser;
-asperaBrowser.testBrowserConnection = testBrowserConnection;
+asperaBrowser.testConnection = testConnection;
 asperaBrowser.startTransfer = startTransfer;
 asperaBrowser.registerActivityCallback = registerActivityCallback;
 asperaBrowser.deregisterActivityCallback = deregisterActivityCallback;
@@ -73,8 +44,7 @@ if (typeof (<any>window) === 'object') {
 export {
   isSafari,
   init,
-  initBrowser,
-  testBrowserConnection,
+  testConnection,
   startTransfer,
   launch,
   registerActivityCallback,
@@ -105,8 +75,7 @@ export {
 export default {
   isSafari,
   init,
-  initBrowser,
-  testBrowserConnection,
+  testConnection,
   startTransfer,
   launch,
   registerActivityCallback,

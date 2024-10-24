@@ -107,23 +107,23 @@ export class SafariClient implements Client {
       });
     };
 
-    if (!this.safariExtensionEnabled) {
-      return new Promise((resolve, reject) => {
-        const extensionInterval = setInterval(() => {
-          if (!this.safariExtensionEnabled) {
-            return;
-          }
-
-          dispatchMonitorEvent()
-            .then(resolve)
-            .catch(reject);
-
-          clearInterval(extensionInterval);
-        }, 1000);
-      });
+    if (this.safariExtensionEnabled) {
+      return dispatchMonitorEvent();
     }
 
-    return dispatchMonitorEvent();
+    return new Promise((resolve, reject) => {
+      const extensionInterval = setInterval(() => {
+        if (!this.safariExtensionEnabled) {
+          return;
+        }
+
+        dispatchMonitorEvent()
+          .then(resolve)
+          .catch(reject);
+
+        clearInterval(extensionInterval);
+      }, 1000);
+    });
   }
 
   /**
@@ -287,6 +287,8 @@ export class SafariClient implements Client {
         resumeTransferActivity();
       }
     } else {
+      asperaBrowser.activityTracking.handleWebSocketEvents('CLOSED');
+
       this.promiseExecutors.forEach((promiseExecutor) => {
         promiseExecutor.reject('The Safari extension is disabled or unresponsive (extension status)');
       });
@@ -303,7 +305,7 @@ export class SafariClient implements Client {
   private checkSafariExtensionStatus() {
     const pingPongDiff = this.lastPong - this.lastPing;
 
-    if (this.lastPong == null || this.lastPing > this.lastPong || pingPongDiff < 0 || pingPongDiff > 500) {
+    if (this.lastPong == null || pingPongDiff < 0 || pingPongDiff > 500) {
       this.safariExtensionStatusChanged(false);
     }
   }

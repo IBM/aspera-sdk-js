@@ -3,7 +3,7 @@ import {client} from '../helpers/client/client';
 import {errorLog, generateErrorBody, generatePromiseObjects, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
 import {asperaBrowser} from '../index';
 import {BrowserInfo, TransferResponse} from '../models/aspera-browser.model';
-import {CustomBrandingOptions, DataTransferResponse, BrowserSpec, BrowserStyleFile, BrowserTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvents, TransferSpec, WebsocketEvents} from '../models/models';
+import {CustomBrandingOptions, DataTransferResponse, BrowserSpec, BrowserStyleFile, BrowserTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent} from '../models/models';
 
 /**
  * Check if IBM Aspera for Desktop connection works. This function is called by init
@@ -172,7 +172,7 @@ export const deregisterRemovedCallback = (id: string): void => {
  *
  * @returns ID representing the callback for deregistration purposes
  */
-export const registerStatusCallback = (callback: (status: WebsocketEvents) => void): string => {
+export const registerStatusCallback = (callback: (status: WebsocketEvent) => void): string => {
   return asperaBrowser.activityTracking.setWebSocketEventCallback(callback);
 };
 
@@ -194,7 +194,7 @@ export const deregisterStatusCallback = (id: string): void => {
  *
  * @returns ID representing the callback for deregistration purposes
  */
-export const registerSafariExtensionStatusCallback = (callback: (status: SafariExtensionEvents) => void): string => {
+export const registerSafariExtensionStatusCallback = (callback: (status: SafariExtensionEvent) => void): string => {
   return asperaBrowser.activityTracking.setSafariExtensionEventCallback(callback);
 };
 

@@ -5,7 +5,7 @@ import {messages} from '../constants/messages';
 import {InstallerInfoResponse, InstallerOptions} from '../models/models';
 
 /**
- * Get the latest Aspera installer information such as download URL and version.
+ * Get the latest Aspera SDK installer information such as download URL and version.
  *
  * @param options Installer info options
  *

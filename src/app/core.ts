@@ -64,10 +64,6 @@ export const init = (options?: InitOptions): Promise<any> => {
   const appId = options?.appId ?? randomUUID();
   const supportMultipleUsers = options?.supportMultipleUsers ?? false;
 
-  if (asperaBrowser.globals.browserVerified) {
-    return throwError(messages.sdkAlreadyInitialized);
-  }
-
   asperaBrowser.globals.appId = appId;
 
   if (supportMultipleUsers) {

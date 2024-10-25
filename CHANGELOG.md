@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.1](https://github.com/IBM/aspera-browser-sdk-js/compare/v0.2.0...v0.2.1) (2024-10-25)
+
+
+### Features
+
+* initial multiple user session implementation ([#37](https://github.com/IBM/aspera-browser-sdk-js/issues/37)) ([338f058](https://github.com/IBM/aspera-browser-sdk-js/commit/338f058597b00f3121ff9a1d9f53b561818e8107))
+
+
+### Bug Fixes
+
+* use desktop_spec for payload ([c516649](https://github.com/IBM/aspera-browser-sdk-js/commit/c51664904b01a4200cba6bdef665b108567123b4))
+
 ## [0.2.0](https://github.com/IBM/aspera-browser-sdk-js/compare/v0.1.36...v0.2.0) (2024-10-23)
 
 

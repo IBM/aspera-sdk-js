@@ -2,7 +2,7 @@
 
 First off, thank you for your interest!
 
-The Aspera SDK for JavaScript is an **open source** project at IBM. We pride ourselves in open and inclusive development. If you're wondering more about our contribution process, you're in the right place.
+The Aspera JavaScript SDK is an **open source** project at IBM. We pride ourselves in open and inclusive development. If you're wondering more about our contribution process, you're in the right place.
 
 ## Code of conduct
 

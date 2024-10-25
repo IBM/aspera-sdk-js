@@ -21,7 +21,7 @@ describe('generatePromiseObjects', () => {
 describe('errorLog', () => {
 
   beforeEach(() => {
-    (<any>window).asperaBrowserLogs = undefined;
+    (<any>window).asperaSdkLogs = undefined;
     jest.spyOn(global.console, 'warn');
   });
 
@@ -29,20 +29,20 @@ describe('errorLog', () => {
     const consoleWarnCall = jest.fn();
     console.warn = consoleWarnCall;
     const testMessage = 'Test message';
-    expect((<any>window).asperaBrowserLogs).toBe(undefined);
+    expect((<any>window).asperaSdkLogs).toBe(undefined);
     errorLog(testMessage);
     expect(console.warn).toBeCalled();
-    expect((<any>window).asperaBrowserLogs[0].message).toBe(testMessage);
-    expect((<any>window).asperaBrowserLogs[0].debugData).toBe(undefined);
+    expect((<any>window).asperaSdkLogs[0].message).toBe(testMessage);
+    expect((<any>window).asperaSdkLogs[0].debugData).toBe(undefined);
   });
 
   test('with message and debug data should store in array and console', () => {
     const testMessage = 'Test message';
-    expect((<any>window).asperaBrowserLogs).toBe(undefined);
+    expect((<any>window).asperaSdkLogs).toBe(undefined);
     errorLog(testMessage, {error: true});
     expect(console.warn).toBeCalled();
-    expect((<any>window).asperaBrowserLogs[0].message).toBe(testMessage);
-    expect((<any>window).asperaBrowserLogs[0].debugData.error).toBe(true);
+    expect((<any>window).asperaSdkLogs[0].message).toBe(testMessage);
+    expect((<any>window).asperaSdkLogs[0].debugData.error).toBe(true);
   });
 });
 
@@ -100,12 +100,12 @@ describe('isValidURL', () => {
     'http://www.aspera.us',
     'https://www.aspera.us',
     'https://aspera.us',
-    'https://aspera.us/aspera/browser/latest.json',
-    'https://aspera.us///aspera/browser',
+    'https://aspera.us/aspera/sdk/latest.json',
+    'https://aspera.us///aspera/sdk',
   ];
   const invalidUrls = [
     'aspera.us',
-    '/aspera/browser',
+    '/aspera/sdk',
     'aspera',
   ];
 

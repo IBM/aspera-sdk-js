@@ -1,6 +1,6 @@
 import Client from './client';
 import {randomUUID} from '../helpers';
-import {asperaBrowser} from '../../index';
+import {asperaSdk} from '../../index';
 
 /**
  * Enum defining different types of Safari extension events.
@@ -99,7 +99,7 @@ export class SafariClient implements Client {
       const promise =  this.dispatchPromiseEvent(
         SafariExtensionEventType.Monitor,
         'subscribe_transfer_activity',
-        [asperaBrowser.globals.appId]
+        [asperaSdk.globals.appId]
       );
 
       return promise.then(() => {
@@ -216,7 +216,7 @@ export class SafariClient implements Client {
    */
   private listenTransferActivityEvents() {
     document.addEventListener('AsperaDesktop.TransferActivity', (event: any) => {
-      asperaBrowser.activityTracking.handleTransferActivity(event.detail);
+      asperaSdk.activityTracking.handleTransferActivity(event.detail);
     });
   }
 
@@ -225,7 +225,7 @@ export class SafariClient implements Client {
    */
   private listenStatusEvents() {
     document.addEventListener('AsperaDesktop.Status', (event: any) => {
-      asperaBrowser.activityTracking.handleWebSocketEvents(event.detail);
+      asperaSdk.activityTracking.handleWebSocketEvents(event.detail);
     });
   }
 
@@ -287,7 +287,7 @@ export class SafariClient implements Client {
         resumeTransferActivity();
       }
     } else {
-      asperaBrowser.activityTracking.handleWebSocketEvents('CLOSED');
+      asperaSdk.activityTracking.handleWebSocketEvents('CLOSED');
 
       this.promiseExecutors.forEach((promiseExecutor) => {
         promiseExecutor.reject('The Safari extension is disabled or unresponsive (extension status)');
@@ -296,7 +296,7 @@ export class SafariClient implements Client {
       this.promiseExecutors.clear();
     }
 
-    asperaBrowser.activityTracking.handleSafariExtensionEvents(this.safariExtensionEnabled ? 'ENABLED' : 'DISABLED');
+    asperaSdk.activityTracking.handleSafariExtensionEvents(this.safariExtensionEnabled ? 'ENABLED' : 'DISABLED');
   }
 
   /**

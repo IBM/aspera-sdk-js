@@ -6,6 +6,6 @@ export const mockFetch = (data: any) =>  {
     return Promise.resolve({
       ok: true,
       json:() => returnPromise.catch(() => {}),
-    })
+    });
   });
 };

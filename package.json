@@ -1,5 +1,5 @@
 {
-  "name": "@ibm-aspera/browser-sdk",
+  "name": "@ibm-aspera/sdk",
   "version": "0.2.1",
   "author": "IBM Aspera",
   "main": "dist/commonjs/index.js",
@@ -13,12 +13,12 @@
     "release": "standard-version",
     "lint": "eslint -c .eslintrc.js --ext .ts ./src",
     "docs": "typedoc src/index.ts --out ./sdk-docs",
-    "set:hosts": "if ! hostile list | grep \"127.0.0.1 browser-sdk.aspera.us\" >/dev/null; then sudo hostile set 127.0.0.1 browser-sdk.aspera.us; fi",
+    "set:hosts": "if ! hostile list | grep \"127.0.0.1 js-sdk.aspera.us\" >/dev/null; then sudo hostile set 127.0.0.1 js-sdk.aspera.us; fi",
     "build:demo": "npm run build && npm run docs && cp src/index.html dist/js && cp -R sdk-docs dist/js/docs"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:IBM/aspera-browser-sdk-js.git"
+    "url": "git@github.com:IBM/aspera-sdk-js.git"
   },
   "standard-version": {
     "message": "chore(release): %s\n\n[ci skip]",

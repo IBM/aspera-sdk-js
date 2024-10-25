@@ -1,6 +1,5 @@
 import {mockFetch} from './mocks';
-import {httpClient} from '../src/helpers/client/http-client';
-import {getRpcServerUrl} from '../src/helpers/helpers';
+import {httpClient, getRpcServerUrl} from '../src/helpers/client/http-client';
 
 let id = 0;
 

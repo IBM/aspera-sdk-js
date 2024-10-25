@@ -1,11 +1,11 @@
 import {errorLog, generatePromiseObjects, getWebsocketUrl} from './helpers';
 import {messages} from '../constants/messages';
-import {asperaBrowser} from '../index';
-import {TransferResponse} from '../models/aspera-browser.model';
+import {asperaSdk} from '../index';
+import {TransferResponse} from '../models/aspera-sdk.model';
 import {WebsocketEvent, WebsocketMessage, WebsocketTopics} from '../models/models';
 
 export class WebsocketService {
-  /** The main websocket connection to Aspera Browser */
+  /** The main websocket connection to Aspera App*/
   private globalSocket: WebSocket;
   /** A map of requested subscription names and the callback for them */
   private sockets: Map<WebsocketTopics, Function> = new Map();
@@ -93,7 +93,7 @@ export class WebsocketService {
       return false;
     }
 
-    this.globalSocket.send(JSON.stringify({jsonrpc: '2.0', method: 'subscribe_transfer_activity', params: [asperaBrowser.globals.appId], id: 1}));
+    this.globalSocket.send(JSON.stringify({jsonrpc: '2.0', method: 'subscribe_transfer_activity', params: [asperaSdk.globals.appId], id: 1}));
 
     return true;
   }
@@ -160,7 +160,7 @@ export class WebsocketService {
   }
 
   private getWebSocketConnection(startPort: number, endPort: number): Promise<WebSocket> {
-    const webSocketUrl = getWebsocketUrl(asperaBrowser.globals.browserUrl);
+    const webSocketUrl = getWebsocketUrl(asperaSdk.globals.asperaAppUrl);
 
     const checkPort = (port: number): Promise<WebSocket> => {
       return new Promise((resolve, reject) => {
@@ -206,7 +206,7 @@ export class WebsocketService {
 
     const url = new URL(this.globalSocket.url);
 
-    asperaBrowser.globals.rpcPort = Number(url.port);
+    asperaSdk.globals.rpcPort = Number(url.port);
   }
 }
 

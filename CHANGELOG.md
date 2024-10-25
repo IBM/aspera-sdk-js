@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.2](https://github.com/IBM/aspera-sdk-js/compare/v0.2.1...v0.2.2) (2024-10-25)
+
+
+### Features
+
+* rename to aspera SDK ([#47](https://github.com/IBM/aspera-sdk-js/issues/47)) ([680e891](https://github.com/IBM/aspera-sdk-js/commit/680e8914f04ad3edafeae54af7ab115c5fa63045))
+
+
+### Bug Fixes
+
+* ws read appid from global ([#46](https://github.com/IBM/aspera-sdk-js/issues/46)) ([576ecea](https://github.com/IBM/aspera-sdk-js/commit/576ecea5d1a050edcac188c21779267a88f335d6))
+
 ### [0.2.1](https://github.com/IBM/aspera-sdk-js/compare/v0.2.0...v0.2.1) (2024-10-25)
 
 

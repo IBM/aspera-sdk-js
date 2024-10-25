@@ -105,7 +105,7 @@ export const startTransfer = (transferSpec: TransferSpec, browserSpec: BrowserSp
 
   const payload = {
     transfer_spec: transferSpec,
-    browser_spec: browserSpec,
+    desktop_spec: browserSpec,
     app_id: asperaBrowser.globals.appId,
   };
 

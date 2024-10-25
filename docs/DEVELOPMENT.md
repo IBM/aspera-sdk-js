@@ -1,6 +1,6 @@
 # IBM Aspera TypeScript SDK
 
-Enables web applications to utilize Aspera file-transfer capabilities using IBM Aspera via JavaScript.
+This JavaScript SDK enables web applications to utilize Aspera file-transfer capabilities via the IBM Aspera App for Desktop.
 
 ## Development
 

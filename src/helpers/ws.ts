@@ -5,7 +5,7 @@ import {TransferResponse} from '../models/aspera-sdk.model';
 import {WebsocketEvent, WebsocketMessage, WebsocketTopics} from '../models/models';
 
 export class WebsocketService {
-  /** The main websocket connection to Aspera */
+  /** The main websocket connection to Aspera App*/
   private globalSocket: WebSocket;
   /** A map of requested subscription names and the callback for them */
   private sockets: Map<WebsocketTopics, Function> = new Map();

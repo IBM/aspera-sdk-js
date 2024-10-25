@@ -7,8 +7,6 @@ import {WebsocketEvent, WebsocketMessage, WebsocketTopics} from '../models/model
 export class WebsocketService {
   /** The main websocket connection to Aspera Browser */
   private globalSocket: WebSocket;
-  /** The app ID of transfers we want to receive notifications for */
-  private appId: string;
   /** A map of requested subscription names and the callback for them */
   private sockets: Map<WebsocketTopics, Function> = new Map();
   /** The callback for websocket events */
@@ -95,7 +93,7 @@ export class WebsocketService {
       return false;
     }
 
-    this.globalSocket.send(JSON.stringify({jsonrpc: '2.0', method: 'subscribe_transfer_activity', params: [this.appId], id: 1}));
+    this.globalSocket.send(JSON.stringify({jsonrpc: '2.0', method: 'subscribe_transfer_activity', params: [asperaBrowser.globals.appId], id: 1}));
 
     return true;
   }

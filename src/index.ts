@@ -1,44 +1,44 @@
-import {Browser} from './models/aspera-browser.model';
+import {AsperaSdk} from './models/aspera-sdk.model';
 import {createDropzone, deregisterActivityCallback, deregisterRemovedCallback, deregisterSafariExtensionStatusCallback, deregisterStatusCallback, getAllTransfers, getInfo, getTransfer, init, initDragDrop, modifyTransfer, registerActivityCallback, registerRemovedCallback, registerSafariExtensionStatusCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showDirectory, showPreferences, showSelectFileDialog, showSelectFolderDialog, startTransfer, stopTransfer, testConnection,} from './app/core';
 import {getInstallerInfo} from './app/installer';
 import {isSafari} from './helpers/helpers';
 
-export const asperaBrowser: Browser = new Browser();
+export const asperaSdk: AsperaSdk = new AsperaSdk();
 
-asperaBrowser.init = init;
-asperaBrowser.testConnection = testConnection;
-asperaBrowser.startTransfer = startTransfer;
-asperaBrowser.registerActivityCallback = registerActivityCallback;
-asperaBrowser.deregisterActivityCallback = deregisterActivityCallback;
-asperaBrowser.removeTransfer = removeTransfer;
-asperaBrowser.showDirectory = showDirectory;
-asperaBrowser.stopTransfer = stopTransfer;
-asperaBrowser.resumeTransfer = resumeTransfer;
-asperaBrowser.getAllTransfers = getAllTransfers;
-asperaBrowser.getTransfer = getTransfer;
-asperaBrowser.registerRemovedCallback = registerRemovedCallback;
-asperaBrowser.deregisterRemovedCallback = deregisterRemovedCallback;
-asperaBrowser.showSelectFileDialog = showSelectFileDialog;
-asperaBrowser.showSelectFolderDialog = showSelectFolderDialog;
-asperaBrowser.showPreferences = showPreferences;
-asperaBrowser.modifyTransfer = modifyTransfer;
-asperaBrowser.createDropzone = createDropzone;
-asperaBrowser.removeDropzone = removeDropzone;
-asperaBrowser.getInstallerInfo = getInstallerInfo;
-asperaBrowser.registerStatusCallback = registerStatusCallback;
-asperaBrowser.deregisterStatusCallback = deregisterStatusCallback;
-asperaBrowser.registerSafariExtensionStatusCallback = registerSafariExtensionStatusCallback;
-asperaBrowser.deregisterSafariExtensionStatusCallback = deregisterSafariExtensionStatusCallback;
-asperaBrowser.initDragDrop = initDragDrop;
-asperaBrowser.setBranding = setBranding;
-asperaBrowser.getInfo = getInfo;
-asperaBrowser.isSafari = isSafari;
+asperaSdk.init = init;
+asperaSdk.testConnection = testConnection;
+asperaSdk.startTransfer = startTransfer;
+asperaSdk.registerActivityCallback = registerActivityCallback;
+asperaSdk.deregisterActivityCallback = deregisterActivityCallback;
+asperaSdk.removeTransfer = removeTransfer;
+asperaSdk.showDirectory = showDirectory;
+asperaSdk.stopTransfer = stopTransfer;
+asperaSdk.resumeTransfer = resumeTransfer;
+asperaSdk.getAllTransfers = getAllTransfers;
+asperaSdk.getTransfer = getTransfer;
+asperaSdk.registerRemovedCallback = registerRemovedCallback;
+asperaSdk.deregisterRemovedCallback = deregisterRemovedCallback;
+asperaSdk.showSelectFileDialog = showSelectFileDialog;
+asperaSdk.showSelectFolderDialog = showSelectFolderDialog;
+asperaSdk.showPreferences = showPreferences;
+asperaSdk.modifyTransfer = modifyTransfer;
+asperaSdk.createDropzone = createDropzone;
+asperaSdk.removeDropzone = removeDropzone;
+asperaSdk.getInstallerInfo = getInstallerInfo;
+asperaSdk.registerStatusCallback = registerStatusCallback;
+asperaSdk.deregisterStatusCallback = deregisterStatusCallback;
+asperaSdk.registerSafariExtensionStatusCallback = registerSafariExtensionStatusCallback;
+asperaSdk.deregisterSafariExtensionStatusCallback = deregisterSafariExtensionStatusCallback;
+asperaSdk.initDragDrop = initDragDrop;
+asperaSdk.setBranding = setBranding;
+asperaSdk.getInfo = getInfo;
+asperaSdk.isSafari = isSafari;
 
-const launch = asperaBrowser.globals.launch;
-asperaBrowser.launch = launch;
+const launch = asperaSdk.globals.launch;
+asperaSdk.launch = launch;
 
 if (typeof (<any>window) === 'object') {
-  (<any>window).asperaBrowser = asperaBrowser;
+  (<any>window).asperaSdk = asperaSdk;
 }
 
 export {

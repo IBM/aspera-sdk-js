@@ -8,14 +8,14 @@ if (packageFile.version) {
   version = `v${packageFile.version}`;
 }
 
-const banner = `IBM Aspera Browser SDK ${version}\nLicensed Materials – Property of IBM\n© Copyright IBM Corp. 2024\nU.S. Government Users Restricted Rights: Use, duplication or disclosure restricted by\nGSA ADP Schedule Contract with IBM Corp.`;
+const banner = `IBM Aspera SDK ${version}\nLicensed Materials – Property of IBM\n© Copyright IBM Corp. 2024\nU.S. Government Users Restricted Rights: Use, duplication or disclosure restricted by\nGSA ADP Schedule Contract with IBM Corp.`;
 
 module.exports = {
   entry: './src/index.ts',
   devtool: 'source-map',
   output: {
     path: path.resolve(__dirname, 'dist/js'),
-    filename: 'aspera-browser-sdk.js'
+    filename: 'aspera-sdk.js'
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js', '.json']
@@ -40,11 +40,11 @@ module.exports = {
         directory: './src',
       },
       {
-        publicPath: '/aspera-browser-sdk-js/docs',
+        publicPath: '/aspera-sdk-js/docs',
         directory: './dist/js/docs',
       },
     ],
-    host: 'browser-sdk.aspera.us',
+    host: 'js-sdk.aspera.us',
     port: 4205
   },
   plugins: [

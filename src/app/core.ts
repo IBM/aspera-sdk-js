@@ -1,9 +1,9 @@
 import {messages} from '../constants/messages';
 import {client} from '../helpers/client/client';
 import {errorLog, generateErrorBody, generatePromiseObjects, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
-import {asperaBrowser} from '../index';
-import {BrowserInfo, TransferResponse} from '../models/aspera-browser.model';
-import {CustomBrandingOptions, DataTransferResponse, BrowserSpec, BrowserStyleFile, BrowserTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent} from '../models/models';
+import {asperaSdk} from '../index';
+import {AsperaSdkInfo, TransferResponse} from '../models/aspera-sdk.model';
+import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent} from '../models/models';
 
 /**
  * Check if IBM Aspera for Desktop connection works. This function is called by init
@@ -13,9 +13,9 @@ import {CustomBrandingOptions, DataTransferResponse, BrowserSpec, BrowserStyleFi
  */
 export const testConnection = (): Promise<any> => {
   return client.request('get_info')
-    .then((data: BrowserInfo) => {
-      asperaBrowser.globals.browserInfo = data;
-      asperaBrowser.globals.browserVerified = true;
+    .then((data: AsperaSdkInfo) => {
+      asperaSdk.globals.AsperaSdkInfo = data;
+      asperaSdk.globals.asperaAppVerified = true;
       return data;
     });
 };
@@ -26,7 +26,7 @@ export const testConnection = (): Promise<any> => {
  * @returns a promise that resolves if the initialization was successful or not
  */
 export const initDragDrop = (): Promise<boolean> => {
-  if (!asperaBrowser.isReady) {
+  if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -43,7 +43,7 @@ export const initDragDrop = (): Promise<boolean> => {
 };
 
 /**
- * Initialize IBM Aspera Browser client. If client cannot (reject/catch), then
+ * Initialize IBM Aspera client. If client cannot (reject/catch), then
  * client should attempt fixing server URL or trying again. If still fails disable UI elements.
  *
  * @param options initialization options:
@@ -64,18 +64,18 @@ export const init = (options?: InitOptions): Promise<any> => {
   const appId = options?.appId ?? randomUUID();
   const supportMultipleUsers = options?.supportMultipleUsers ?? false;
 
-  asperaBrowser.globals.appId = appId;
+  asperaSdk.globals.appId = appId;
 
   if (supportMultipleUsers) {
-    asperaBrowser.globals.sessionId = randomUUID();
+    asperaSdk.globals.sessionId = randomUUID();
   }
 
-  return asperaBrowser.activityTracking.setup()
+  return asperaSdk.activityTracking.setup()
     .then(() => testConnection())
     .then(() => initDragDrop())
     .catch(error => {
       errorLog(messages.serverError, error);
-      asperaBrowser.globals.browserVerified = false;
+      asperaSdk.globals.asperaAppVerified = false;
       throw generateErrorBody(messages.serverError, error);
     });
 };
@@ -84,12 +84,12 @@ export const init = (options?: InitOptions): Promise<any> => {
  * Start a transfer
  *
  * @param transferSpec standard transferSpec for transfer
- * @param browserSpec IBM Aspera Browser settings when starting a transfer
+ * @param asperaSdkSpec IBM Aspera settings when starting a transfer
  *
  * @returns a promise that resolves if transfer initiation is successful and rejects if transfer cannot be started
  */
-export const startTransfer = (transferSpec: TransferSpec, browserSpec: BrowserSpec): Promise<BrowserTransfer> => {
-  if (!asperaBrowser.isReady) {
+export const startTransfer = (transferSpec: TransferSpec, asperaSdkSpec: AsperaSdkSpec): Promise<AsperaSdkTransfer> => {
+  if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -101,8 +101,8 @@ export const startTransfer = (transferSpec: TransferSpec, browserSpec: BrowserSp
 
   const payload = {
     transfer_spec: transferSpec,
-    desktop_spec: browserSpec,
-    app_id: asperaBrowser.globals.appId,
+    desktop_spec: asperaSdkSpec,
+    app_id: asperaSdk.globals.appId,
   };
 
   client.request('start_transfer', payload)
@@ -123,7 +123,7 @@ export const startTransfer = (transferSpec: TransferSpec, browserSpec: BrowserSp
  * @returns ID representing the callback for deregistration purposes
  */
 export const registerActivityCallback = (callback: (transfers: TransferResponse) => void): string => {
-  return asperaBrowser.activityTracking.setCallback(callback);
+  return asperaSdk.activityTracking.setCallback(callback);
 };
 
 /**
@@ -132,20 +132,20 @@ export const registerActivityCallback = (callback: (transfers: TransferResponse)
  * @param id the ID returned by `registerActivityCallback`
  */
 export const deregisterActivityCallback = (id: string): void => {
-  asperaBrowser.activityTracking.removeCallback(id);
+  asperaSdk.activityTracking.removeCallback(id);
 };
 
 /**
  * Register a callback event for when a user removes or cancels a transfer
- * directly from IBM Aspera Browser. This may also be called if IBM Aspera Browser
+ * directly from IBM Aspera. This may also be called if IBM Aspera
  * is configured to automatically remove completed transfers.
  *
  * @param callback callback function to receive transfers
  *
  * @returns ID representing the callback for deregistration purposes
  */
-export const registerRemovedCallback = (callback: (transfer: BrowserTransfer) => void): string => {
-  return asperaBrowser.activityTracking.setRemovedCallback(callback);
+export const registerRemovedCallback = (callback: (transfer: AsperaSdkTransfer) => void): string => {
+  return asperaSdk.activityTracking.setRemovedCallback(callback);
 };
 
 /**
@@ -154,14 +154,14 @@ export const registerRemovedCallback = (callback: (transfer: BrowserTransfer) =>
  * @param id the ID returned by `registerRemovedCallback`
  */
 export const deregisterRemovedCallback = (id: string): void => {
-  asperaBrowser.activityTracking.removeRemovedCallback(id);
+  asperaSdk.activityTracking.removeRemovedCallback(id);
 };
 
 /**
- * Register a callback for getting updates about the connection status of IBM Aspera Browser.
+ * Register a callback for getting updates about the connection status of IBM Aspera SDK.
  *
  * For example, to be notified of when the SDK loses connection with the application or connection
- * is re-established. This can be useful if you want to handle the case where the user quits IBM Aspera Browser
+ * is re-established. This can be useful if you want to handle the case where the user quits IBM Aspera
  * after `init` has already been called, and want to prompt the user to relaunch the application.
  *
  * @param callback callback function to receive events
@@ -169,7 +169,7 @@ export const deregisterRemovedCallback = (id: string): void => {
  * @returns ID representing the callback for deregistration purposes
  */
 export const registerStatusCallback = (callback: (status: WebsocketEvent) => void): string => {
-  return asperaBrowser.activityTracking.setWebSocketEventCallback(callback);
+  return asperaSdk.activityTracking.setWebSocketEventCallback(callback);
 };
 
 /**
@@ -178,7 +178,7 @@ export const registerStatusCallback = (callback: (status: WebsocketEvent) => voi
  * @param id the ID returned by `registerStatusCallback`
  */
 export const deregisterStatusCallback = (id: string): void => {
-  asperaBrowser.activityTracking.removeWebSocketEventCallback(id);
+  asperaSdk.activityTracking.removeWebSocketEventCallback(id);
 };
 
 /**
@@ -191,7 +191,7 @@ export const deregisterStatusCallback = (id: string): void => {
  * @returns ID representing the callback for deregistration purposes
  */
 export const registerSafariExtensionStatusCallback = (callback: (status: SafariExtensionEvent) => void): string => {
-  return asperaBrowser.activityTracking.setSafariExtensionEventCallback(callback);
+  return asperaSdk.activityTracking.setSafariExtensionEventCallback(callback);
 };
 
 /**
@@ -200,7 +200,7 @@ export const registerSafariExtensionStatusCallback = (callback: (status: SafariE
  * @param id the ID returned by `registerStatusCallback`
  */
 export const deregisterSafariExtensionStatusCallback = (id: string): void => {
-  asperaBrowser.activityTracking.removeSafariExtensionEventCallback(id);
+  asperaSdk.activityTracking.removeSafariExtensionEventCallback(id);
 };
 
 /**
@@ -211,7 +211,7 @@ export const deregisterSafariExtensionStatusCallback = (id: string): void => {
  * @returns a promise that resolves if transfer is removed and rejects if transfer cannot be removed
  */
 export const removeTransfer = (id: string): Promise<any> => {
-  if (!asperaBrowser.isReady) {
+  if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -239,7 +239,7 @@ export const removeTransfer = (id: string): Promise<any> => {
  * @returns a promise that resolves if transfer is stopped and rejects if transfer cannot be stopped
  */
 export const stopTransfer = (id: string): Promise<any> => {
-  if (!asperaBrowser.isReady) {
+  if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -267,8 +267,8 @@ export const stopTransfer = (id: string): Promise<any> => {
  *
  * @returns a promise that resolves with the new transfer object if transfer is resumed
  */
-export const resumeTransfer = (id: string, options?: ResumeTransferOptions): Promise<BrowserTransfer> => {
-  if (!asperaBrowser.isReady) {
+export const resumeTransfer = (id: string, options?: ResumeTransferOptions): Promise<AsperaSdkTransfer> => {
+  if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -280,7 +280,7 @@ export const resumeTransfer = (id: string, options?: ResumeTransferOptions): Pro
   };
 
   client.request('resume_transfer', payload)
-    .then((data: BrowserTransfer) => promiseInfo.resolver(data))
+    .then((data: AsperaSdkTransfer) => promiseInfo.resolver(data))
     .catch(error => {
       errorLog(messages.resumeTransferFailed, error);
       promiseInfo.rejecter(generateErrorBody(messages.resumeTransferFailed, error));
@@ -297,7 +297,7 @@ export const resumeTransfer = (id: string, options?: ResumeTransferOptions): Pro
  * @returns a promise that resolves with the selected file(s) and rejects if user cancels dialog
  */
 export const showSelectFileDialog = (options?: FileDialogOptions): Promise<DataTransferResponse> => {
-  if (!asperaBrowser.isReady) {
+  if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -305,7 +305,7 @@ export const showSelectFileDialog = (options?: FileDialogOptions): Promise<DataT
 
   const payload = {
     options: options || {},
-    app_id: asperaBrowser.globals.appId,
+    app_id: asperaSdk.globals.appId,
   };
 
   client.request('show_file_dialog', payload)
@@ -326,7 +326,7 @@ export const showSelectFileDialog = (options?: FileDialogOptions): Promise<DataT
  * @returns a promise that resolves with the selected folder(s) and rejects if user cancels dialog
  */
 export const showSelectFolderDialog = (options?: FolderDialogOptions): Promise<DataTransferResponse> => {
-  if (!asperaBrowser.isReady) {
+  if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -334,7 +334,7 @@ export const showSelectFolderDialog = (options?: FolderDialogOptions): Promise<D
 
   const payload = {
     options: options || {},
-    app_id: asperaBrowser.globals.appId,
+    app_id: asperaSdk.globals.appId,
   };
 
   client.request('show_folder_dialog', payload)
@@ -348,12 +348,12 @@ export const showSelectFolderDialog = (options?: FolderDialogOptions): Promise<D
 };
 
 /**
- * Opens the IBM Aspera Browser preferences page.
+ * Opens the IBM Aspera preferences page.
  *
  * @returns a promise that resolves when the preferences page is opened.
  */
 export const showPreferences = (): Promise<any> => {
-  if (!asperaBrowser.isReady) {
+  if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -374,19 +374,19 @@ export const showPreferences = (): Promise<any> => {
  *
  * @returns a promise that resolves with an array of transfers.
  */
-export const getAllTransfers = (): Promise<BrowserTransfer[]> => {
-  if (!asperaBrowser.isReady) {
+export const getAllTransfers = (): Promise<AsperaSdkTransfer[]> => {
+  if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
   const promiseInfo = generatePromiseObjects();
 
   const payload = {
-    app_id: asperaBrowser.globals.appId,
+    app_id: asperaSdk.globals.appId,
   };
 
   client.request('get_all_transfers', payload)
-    .then((data: BrowserTransfer[]) => promiseInfo.resolver(data))
+    .then((data: AsperaSdkTransfer[]) => promiseInfo.resolver(data))
     .catch(error => {
       errorLog(messages.getAllTransfersFailed, error);
       promiseInfo.rejecter(generateErrorBody(messages.getAllTransfersFailed, error));
@@ -402,8 +402,8 @@ export const getAllTransfers = (): Promise<BrowserTransfer[]> => {
  *
  * @returns a promise that resolves with the transfer.
  */
-export const getTransfer = (id: string): Promise<BrowserTransfer> => {
-  if (!asperaBrowser.isReady) {
+export const getTransfer = (id: string): Promise<AsperaSdkTransfer> => {
+  if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -414,7 +414,7 @@ export const getTransfer = (id: string): Promise<BrowserTransfer> => {
   };
 
   client.request('get_transfer', payload)
-    .then((data: BrowserTransfer) => promiseInfo.resolver(data))
+    .then((data: AsperaSdkTransfer) => promiseInfo.resolver(data))
     .catch(error => {
       errorLog(messages.getTransferFailed, error);
       promiseInfo.rejecter(generateErrorBody(messages.getTransferFailed, error));
@@ -432,7 +432,7 @@ export const getTransfer = (id: string): Promise<BrowserTransfer> => {
  * @returns a promise that resolves if the file can be shown and rejects if not
  */
 export const showDirectory = (id: string): Promise<any> => {
-  if (!asperaBrowser.isReady) {
+  if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -460,8 +460,8 @@ export const showDirectory = (id: string): Promise<any> => {
  *
  * @returns a promise that resolves if the transfer rate can be modified and rejects if not
  */
-export const modifyTransfer = (id: string, options: ModifyTransferOptions): Promise<BrowserTransfer> => {
-  if (!asperaBrowser.isReady) {
+export const modifyTransfer = (id: string, options: ModifyTransferOptions): Promise<AsperaSdkTransfer> => {
+  if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -483,7 +483,7 @@ export const modifyTransfer = (id: string, options: ModifyTransferOptions): Prom
 };
 
 /**
- * Set the custom branding template to be used by IBM Aspera Browser. If the app is already
+ * Set the custom branding template to be used by IBM Aspera. If the app is already
  * configured to use a different branding, then the branding template you specify will be
  * stored by the app, allowing the end user to switch at any point.
  *
@@ -493,7 +493,7 @@ export const modifyTransfer = (id: string, options: ModifyTransferOptions): Prom
  * @returns a promise that resolves if the branding was properly set.
  */
 export const setBranding = (id: string, options: CustomBrandingOptions): Promise<any> => {
-  if (!asperaBrowser.isReady) {
+  if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -555,7 +555,7 @@ export const createDropzone = (
 
       const payload = {
         files,
-        app_id: asperaBrowser.globals.appId,
+        app_id: asperaSdk.globals.appId,
       };
 
       client.request('dropped_files', payload)
@@ -569,7 +569,7 @@ export const createDropzone = (
   elements.forEach(element => {
     element.addEventListener('dragover', dragEvent);
     element.addEventListener('drop', dropEvent);
-    asperaBrowser.globals.dropZonesCreated.set(elementSelector, [{event: 'dragover', callback: dragEvent}, {event: 'drop', callback: dropEvent}]);
+    asperaSdk.globals.dropZonesCreated.set(elementSelector, [{event: 'dragover', callback: dragEvent}, {event: 'drop', callback: dropEvent}]);
   });
 };
 
@@ -579,7 +579,7 @@ export const createDropzone = (
  * @param elementSelector the selector of the element on the page that should remove
  */
 export const removeDropzone = (elementSelector: string): void => {
-  const foundDropzone = asperaBrowser.globals.dropZonesCreated.get(elementSelector);
+  const foundDropzone = asperaSdk.globals.dropZonesCreated.get(elementSelector);
 
   if (foundDropzone) {
     foundDropzone.forEach(data => {
@@ -595,16 +595,16 @@ export const removeDropzone = (elementSelector: string): void => {
 };
 
 /**
- * Get metadata about the IBM Aspera Browser installation.
+ * Get metadata about the IBM Aspera installation.
  *
- * @returns a promise that returns information about the user's IBM Aspera Browser installation.
+ * @returns a promise that returns information about the user's IBM Aspera installation.
  */
-export const getInfo = (): Promise<BrowserInfo> => {
-  if (!asperaBrowser.isReady) {
+export const getInfo = (): Promise<AsperaSdkInfo> => {
+  if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
   return new Promise((resolve, _) => {
-    resolve(asperaBrowser.globals.browserInfo);
+    resolve(asperaSdk.globals.AsperaSdkInfo);
   });
 };

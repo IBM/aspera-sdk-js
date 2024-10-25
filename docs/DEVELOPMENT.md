@@ -1,6 +1,6 @@
-# IBM Aspera Browser TypeScript SDK
+# IBM Aspera TypeScript SDK
 
-Enables web applications to utilize Aspera file-transfer capabilities using IBM Aspera via the browser.
+Enables web applications to utilize Aspera file-transfer capabilities using IBM Aspera via JavaScript.
 
 ## Development
 
@@ -13,8 +13,8 @@ Enables web applications to utilize Aspera file-transfer capabilities using IBM 
 ### Build
 
 ```shell
-$ git clone https://github.com/IBM/aspera-browser-sdk-js.git
-$ cd aspera-browser-sdk-js
+$ git clone https://github.com/IBM/aspera-sdk-js.git
+$ cd aspera-sdk-js
 $ npm install
 $ npm run build
 ```

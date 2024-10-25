@@ -1,6 +1,11 @@
 import {JSONRPCClient, JSONRPCRequest} from 'json-rpc-2.0';
 import Client from './client';
-import {generatePromiseObjects, getRpcServerUrl} from '../helpers';
+import {generatePromiseObjects} from '../helpers';
+import {asperaSdk} from '../../index';
+
+export const getRpcServerUrl = (): string => {
+  return `${asperaSdk.globals.asperaAppUrl}:${asperaSdk.globals.rpcPort}`;
+};
 
 /**
  * Wraps a promise like object and returns a promise that supports catch.
@@ -64,7 +69,7 @@ class JSONRPCHttpClient {
 }
 
 /**
- * Client used for making requests to Aspera Browser.
+ * Client used for making requests to Aspera.
  */
 class HttpClient implements Client {
   /** HTTP client used to make requests */

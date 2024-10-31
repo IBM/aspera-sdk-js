@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.3](https://github.com/IBM/aspera-sdk-js/compare/v0.2.2...v0.2.3) (2024-10-31)
+
+
+### Bug Fixes
+
+* **#48:** use download site instead of cloudfront ([#49](https://github.com/IBM/aspera-sdk-js/issues/49)) ([cc44ece](https://github.com/IBM/aspera-sdk-js/commit/cc44ecec186d8ca1fdb2797ddd0704c11c6abc0d)), closes [#48](https://github.com/IBM/aspera-sdk-js/issues/48)
+
 ### [0.2.2](https://github.com/IBM/aspera-sdk-js/compare/v0.2.1...v0.2.2) (2024-10-25)
 
 

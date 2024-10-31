@@ -13,28 +13,28 @@ describe('getInstallerInfo', () => {
           'platform': 'macos',
           'type': 'dmg',
           'arch': 'universal',
-          'url': 'https://d3gcli72yxqn2z.cloudfront.net/downloads/desktop/macos/1.2.0/stable/universal/ibm-aspera-sdk_1.2.0_macos.dmg'
+          'url': 'https://downloads.ibmaspera.com/downloads/desktop/macos/1.2.0/stable/universal/ibm-aspera-sdk_1.2.0_macos.dmg'
         },
         {
           'version': '1.2.0',
           'platform': 'windows',
           'type': 'msi',
           'arch': 'x64',
-          'url': 'https://d3gcli72yxqn2z.cloudfront.net/downloads/desktop/windows/1.2.0/stable/x64/ibm-aspera-sdk_1.2.0.msi'
+          'url': 'https://downloads.ibmaspera.com/downloads/desktop/windows/1.2.0/stable/x64/ibm-aspera-sdk_1.2.0.msi'
         },
         {
           'version': '1.1.9',
           'platform': 'linux',
           'type': 'rpm',
           'arch': 'x64',
-          'url': 'https://d3gcli72yxqn2z.cloudfront.net/downloads/desktop/linux/1.1.9/stable/x64/ibm-aspera-sdk_1.1.9.rpm'
+          'url': 'https://downloads.ibmaspera.com/downloads/desktop/linux/1.1.9/stable/x64/ibm-aspera-sdk_1.1.9.rpm'
         },
         {
           'version': '1.1.9',
           'platform': 'linux',
           'type': 'appimage',
           'arch': 'x64',
-          'url': 'https://d3gcli72yxqn2z.cloudfront.net/downloads/desktop/linux/1.1.9/stable/x64/ibm-aspera-sdk_1.1.9.AppImage'
+          'url': 'https://downloads.ibmaspera.com/downloads/desktop/linux/1.1.9/stable/x64/ibm-aspera-sdk_1.1.9.AppImage'
         }
       ]
     };
@@ -42,7 +42,7 @@ describe('getInstallerInfo', () => {
     console.warn = jest.fn();
   });
 
-  test('called with no options fetches from Amazon CloudFront by default', () => {
+  test('called with no options fetches from downloads server by default', () => {
     getInstallerInfo().catch(() => {});
     expect(fetch).toHaveBeenCalledWith(`${installerUrl}/latest.json`, defaultHeaders);
   });
@@ -55,7 +55,7 @@ describe('getInstallerInfo', () => {
         'platform': 'macos',
         'type': 'dmg',
         'arch': 'universal',
-        'url': 'https://d3gcli72yxqn2z.cloudfront.net/downloads/desktop/macos/1.2.0/stable/universal/ibm-aspera-sdk_1.2.0_macos.dmg'
+        'url': 'https://downloads.ibmaspera.com/downloads/desktop/macos/1.2.0/stable/universal/ibm-aspera-sdk_1.2.0_macos.dmg'
       }
     ];
     const data = await getInstallerInfo();

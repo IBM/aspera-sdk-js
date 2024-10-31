@@ -41,7 +41,7 @@ export interface InstallerOptions {
   /**
    * Custom URL to fetch Aspera installers from. Generally this is only
    * needed when self-hosting the installers rather than using the installers
-   * hosted on CloudFront.
+   * hosted by IBM.
    *
    * This URL should point to the directory containing the `latest.json` file that
    * contains the installer information.

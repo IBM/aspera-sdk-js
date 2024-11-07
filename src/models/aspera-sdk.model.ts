@@ -19,6 +19,8 @@ class AsperaSdkGlobals {
   asperaAppVerified = false;
   /** The unique ID for the website */
   appId: string;
+  /** Indicate if multiple session is supported */
+  supportMultipleUsers = false;
   /** The session ID for the current user */
   sessionId?: string;
   /** Map of drop zones created by querySelector */

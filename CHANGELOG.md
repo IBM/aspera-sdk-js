@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.4](https://github.com/IBM/aspera-sdk-js/compare/v0.2.3...v0.2.4) (2024-11-07)
+
+
+### Bug Fixes
+
+* websocket port scan opt in only ([#50](https://github.com/IBM/aspera-sdk-js/issues/50)) ([18ab7e1](https://github.com/IBM/aspera-sdk-js/commit/18ab7e19a9ba7ec8109d44ff20daf109d7759ba5))
+
 ### [0.2.3](https://github.com/IBM/aspera-sdk-js/compare/v0.2.2...v0.2.3) (2024-10-31)
 
 

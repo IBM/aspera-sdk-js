@@ -67,6 +67,7 @@ export const init = (options?: InitOptions): Promise<any> => {
   asperaSdk.globals.appId = appId;
 
   if (supportMultipleUsers) {
+    asperaSdk.globals.supportMultipleUsers = true;
     asperaSdk.globals.sessionId = randomUUID();
   }
 

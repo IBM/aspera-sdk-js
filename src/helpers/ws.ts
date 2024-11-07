@@ -135,7 +135,7 @@ export class WebsocketService {
   }
 
   private connect() {
-    this.getWebSocketConnection(33024, 33029)
+    this.getWebSocketConnection(33024, asperaSdk.globals.supportMultipleUsers ? 33024 : 33029)
       .then((webSocket) => {
         this.globalSocket = webSocket;
         this.globalSocket.onerror = this.handleError;

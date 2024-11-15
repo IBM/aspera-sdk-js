@@ -1,7 +1,7 @@
 import {AsperaSdk} from './models/aspera-sdk.model';
 import {createDropzone, deregisterActivityCallback, deregisterRemovedCallback, deregisterSafariExtensionStatusCallback, deregisterStatusCallback, getAllTransfers, getInfo, getTransfer, init, initDragDrop, modifyTransfer, registerActivityCallback, registerRemovedCallback, registerSafariExtensionStatusCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showDirectory, showPreferences, showSelectFileDialog, showSelectFolderDialog, startTransfer, stopTransfer, testConnection,} from './app/core';
 import {getInstallerInfo} from './app/installer';
-import {isSafari} from './helpers/helpers';
+import {getInstallerUrls, isSafari} from './helpers/helpers';
 
 export const asperaSdk: AsperaSdk = new AsperaSdk();
 
@@ -33,6 +33,7 @@ asperaSdk.initDragDrop = initDragDrop;
 asperaSdk.setBranding = setBranding;
 asperaSdk.getInfo = getInfo;
 asperaSdk.isSafari = isSafari;
+asperaSdk.getInstallerUrls = getInstallerUrls;
 
 const launch = asperaSdk.globals.launch;
 asperaSdk.launch = launch;
@@ -70,35 +71,7 @@ export {
   deregisterSafariExtensionStatusCallback,
   setBranding,
   getInfo,
+  getInstallerUrls,
 };
 
-export default {
-  isSafari,
-  init,
-  testConnection,
-  startTransfer,
-  launch,
-  registerActivityCallback,
-  deregisterActivityCallback,
-  removeTransfer,
-  showDirectory,
-  stopTransfer,
-  resumeTransfer,
-  getAllTransfers,
-  getTransfer,
-  registerRemovedCallback,
-  deregisterRemovedCallback,
-  showSelectFileDialog,
-  showSelectFolderDialog,
-  showPreferences,
-  modifyTransfer,
-  createDropzone,
-  removeDropzone,
-  getInstallerInfo,
-  registerStatusCallback,
-  deregisterStatusCallback,
-  registerSafariExtensionStatusCallback,
-  deregisterSafariExtensionStatusCallback,
-  setBranding,
-  getInfo,
-};
+export default asperaSdk;

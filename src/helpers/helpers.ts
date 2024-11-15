@@ -1,4 +1,5 @@
-import {ErrorResponse, PromiseObject, TransferSpec} from '../models/models';
+import {baseInstallerUrl, installerUrl} from '../constants/constants';
+import {ErrorResponse, InstallerUrlInfo, PromiseObject, TransferSpec} from '../models/models';
 
 /**
  * Generates promise object that can be resolved or rejected via functions
@@ -186,6 +187,18 @@ export const isSafari = (): boolean => {
   return /^((?!chrome|android).)*safari/i.test(navigator.userAgent) && !(window as any).MSStream;
 };
 
+/**
+ * Get the URLs for installer management.
+ *
+ * @returns Info on URLs where installers live
+ */
+export const getInstallerUrls = (): InstallerUrlInfo => {
+  return {
+    base: baseInstallerUrl,
+    latest: installerUrl,
+  };
+};
+
 export default {
   errorLog,
   generateErrorBody,
@@ -197,4 +210,5 @@ export default {
   isValidTransferSpec,
   randomUUID,
   throwError,
+  getInstallerUrls,
 };

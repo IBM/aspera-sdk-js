@@ -13,4 +13,7 @@ export const hiddenStyleList = `
 export const protocol = 'aspera://';
 
 /** @ignore */
-export const installerUrl = 'https://downloads.ibmaspera.com/downloads/desktop/latest/stable';
+export const baseInstallerUrl = 'https://downloads.ibmaspera.com/downloads/desktop';
+
+/** @ignore */
+export const installerUrl = `${baseInstallerUrl}/latest/stable`;

@@ -1,4 +1,4 @@
-import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent} from './models';
+import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, InstallerUrlInfo} from './models';
 import {hiddenStyleList, installerUrl, protocol} from '../constants/constants';
 import {messages} from '../constants/messages';
 import {safariClient} from '../helpers/client/safari-client';
@@ -350,6 +350,8 @@ export class AsperaSdk {
   getInfo: () => Promise<AsperaSdkInfo>;
   /** Function to get whether IBM Aspera is running on Safari */
   isSafari: () => boolean;
+  /** Function to get URLs for installer management. */
+  getInstallerUrls: () => InstallerUrlInfo;
 
   /**
    * Check if IBM Aspera is ready to be used and has been verified.

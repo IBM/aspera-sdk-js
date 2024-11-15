@@ -667,3 +667,10 @@ export interface InitOptions {
   appId?: string;
   supportMultipleUsers?: boolean;
 }
+
+export interface InstallerUrlInfo {
+  /** Base URL of the Desktop download server */
+  base: string;
+  /** URL to the latest installers (GA release) */
+  latest: string;
+}

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.5](https://github.com/IBM/aspera-sdk-js/compare/v0.2.4...v0.2.5) (2024-11-15)
+
+
+### Bug Fixes
+
+* URL export info ([#51](https://github.com/IBM/aspera-sdk-js/issues/51)) ([86fe712](https://github.com/IBM/aspera-sdk-js/commit/86fe712e7100bcf5fc04d0034879865198f55875))
+
 ### [0.2.4](https://github.com/IBM/aspera-sdk-js/compare/v0.2.3...v0.2.4) (2024-11-07)
 
 

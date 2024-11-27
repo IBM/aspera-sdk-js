@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.6](https://github.com/IBM/aspera-sdk-js/compare/v0.2.5...v0.2.6) (2024-11-27)
+
+
+### Bug Fixes
+
+* reverse multiple user number logic ([#52](https://github.com/IBM/aspera-sdk-js/issues/52)) ([24468a4](https://github.com/IBM/aspera-sdk-js/commit/24468a429a8d2fdd44b5ab0c50d6b914e5146d94))
+
 ### [0.2.5](https://github.com/IBM/aspera-sdk-js/compare/v0.2.4...v0.2.5) (2024-11-15)
 
 

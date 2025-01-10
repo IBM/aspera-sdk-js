@@ -48,11 +48,9 @@ let keepAliveTimeout: ReturnType<typeof setTimeout>;
  * Handles communication with the Safari extension using JSON-RPC over custom events.
  */
 export class SafariClient implements Client {
-  private statusInterval = 100;
   private keepAliveInterval = 1000;
   private promiseExecutors: Map<string, PromiseExecutor>;
 
-  private isFirstPing = true;
   private lastPing: number|null = null;
   private lastPong: number|null = null;
   private safariExtensionEnabled = false;
@@ -245,14 +243,6 @@ export class SafariClient implements Client {
   private keepAlive() {
     this.lastPing = Date.now();
     this.dispatchEvent(SafariExtensionEventType.Ping);
-
-    if (this.isFirstPing) {
-      this.isFirstPing = false;
-    } else {
-      setTimeout(() => {
-        this.checkSafariExtensionStatus();
-      }, this.statusInterval);
-    }
 
     keepAliveTimeout = setTimeout(() => {
       this.keepAlive();

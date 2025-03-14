@@ -141,6 +141,8 @@ export class ActivityTracking {
         callback(webSocketEvent);
       }
     });
+
+    this.lastNotifiedWebSocketEvent = webSocketEvent;
   }
 
   /**

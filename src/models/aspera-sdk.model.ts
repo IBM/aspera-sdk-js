@@ -82,6 +82,8 @@ export class ActivityTracking {
 
   /** Keep track of the last WebSocket event **/
   private lastWebSocketEvent: WebsocketEvent = 'CLOSED';
+  /** Keep track of the last notified WebSocket event **/
+  private lastNotifiedWebSocketEvent: WebsocketEvent = undefined;
   /** Keep track of the last Safari extension event **/
   private lastSafariExtensionEvent: SafariExtensionEvent = 'DISABLED';
 
@@ -109,7 +111,7 @@ export class ActivityTracking {
   }
 
   /**
-   * Notify all consumers when a connection webSocketEvent occurs. For example, when the SDK
+   * Handle and notify if needed when a connection webSocketEvent occurs. For example, when the SDK
    * websocket connection to IBM Aspera App is closed or reconnected.
    *
    * @param webSocketEvent the event type.
@@ -119,13 +121,44 @@ export class ActivityTracking {
       return;
     }
 
+    this.lastWebSocketEvent = webSocketEvent;
+
+    this.notifyWebSocketEvent(webSocketEvent);
+  }
+
+  /**
+   * Notify all consumers when a connection webSocketEvent occurs.
+   *
+   * @param webSocketEvent the event type.
+   */
+  private notifyWebSocketEvent(webSocketEvent: WebsocketEvent): void {
+    if (this.lastNotifiedWebSocketEvent === webSocketEvent) {
+      return;
+    }
+
     this.event_callbacks.forEach(callback => {
       if (typeof callback === 'function') {
         callback(webSocketEvent);
       }
     });
+  }
 
-    this.lastWebSocketEvent = webSocketEvent;
+  /**
+   * Notify all consumers when the client changes status. For example, when
+   * IBM Aspera App is launched or closed.
+   *
+   * @param running whether the client is running or not.
+   */
+  handleClientEvents(running: Boolean): void {
+    let webSocketEvent: WebsocketEvent;
+
+    if (!running) {
+      webSocketEvent = 'CLOSED';
+    } else {
+      webSocketEvent = this.lastWebSocketEvent;
+    }
+
+    this.notifyWebSocketEvent(webSocketEvent);
   }
 
   /**

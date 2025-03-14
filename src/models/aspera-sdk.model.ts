@@ -136,13 +136,13 @@ export class ActivityTracking {
       return;
     }
 
+    this.lastNotifiedWebSocketEvent = webSocketEvent;
+
     this.event_callbacks.forEach(callback => {
       if (typeof callback === 'function') {
         callback(webSocketEvent);
       }
     });
-
-    this.lastNotifiedWebSocketEvent = webSocketEvent;
   }
 
   /**
@@ -151,7 +151,7 @@ export class ActivityTracking {
    *
    * @param running whether the client is running or not.
    */
-  handleClientEvents(running: Boolean): void {
+  handleClientEvents(running: boolean): void {
     let webSocketEvent: WebsocketEvent;
 
     if (!running) {

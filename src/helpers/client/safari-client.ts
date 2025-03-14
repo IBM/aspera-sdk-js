@@ -229,7 +229,7 @@ export class SafariClient implements Client {
   }
 
   /**
-   * Listens for 'AsperaDesktop.ClientStatus' events.
+   * Listens for 'isAppAlive' events.
    */
   private listenClientStatusEvents() {
     document.addEventListener('isAppAlive', (event: any) => {

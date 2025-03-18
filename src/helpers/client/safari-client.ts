@@ -206,7 +206,7 @@ export class SafariClient implements Client {
    */
   private listenResponseEvents() {
     document.addEventListener('AsperaDesktop.Response', (event: CustomEvent<JSONRPCResponse>) => {
-      if (event.detail === undefined) {
+      if (!event.detail) {
         return;
       }
 
@@ -219,7 +219,7 @@ export class SafariClient implements Client {
    */
   private listenTransferActivityEvents() {
     document.addEventListener('AsperaDesktop.TransferActivity', (event: any) => {
-      if (event.detail === undefined) {
+      if (!event.detail) {
         return;
       }
 
@@ -232,7 +232,7 @@ export class SafariClient implements Client {
    */
   private listenStatusEvents() {
     document.addEventListener('AsperaDesktop.Status', (event: any) => {
-      if (event.detail === undefined) {
+      if (!event.detail) {
         return;
       }
 
@@ -245,7 +245,7 @@ export class SafariClient implements Client {
    */
   private listenClientStatusEvents() {
     document.addEventListener('isAppAlive', (event: any) => {
-      if (event.detail?.running === undefined) {
+      if (!event.detail?.running) {
         return;
       }
 

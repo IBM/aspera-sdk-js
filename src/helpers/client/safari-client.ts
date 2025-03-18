@@ -65,6 +65,7 @@ export class SafariClient implements Client {
     this.listenResponseEvents();
     this.listenTransferActivityEvents();
     this.listenStatusEvents();
+    this.listenClientStatusEvents();
     this.listenPongEvents();
 
     if (keepAliveTimeout) {
@@ -205,6 +206,10 @@ export class SafariClient implements Client {
    */
   private listenResponseEvents() {
     document.addEventListener('AsperaDesktop.Response', (event: CustomEvent<JSONRPCResponse>) => {
+      if (!event.detail) {
+        return;
+      }
+
       this.handleResponse(event.detail);
     });
   }
@@ -214,6 +219,10 @@ export class SafariClient implements Client {
    */
   private listenTransferActivityEvents() {
     document.addEventListener('AsperaDesktop.TransferActivity', (event: any) => {
+      if (!event.detail) {
+        return;
+      }
+
       asperaSdk.activityTracking.handleTransferActivity(event.detail);
     });
   }
@@ -223,7 +232,24 @@ export class SafariClient implements Client {
    */
   private listenStatusEvents() {
     document.addEventListener('AsperaDesktop.Status', (event: any) => {
+      if (!event.detail) {
+        return;
+      }
+
       asperaSdk.activityTracking.handleWebSocketEvents(event.detail);
+    });
+  }
+
+  /**
+   * Listens for 'isAppAlive' events. This was introduced in version 1.0.9.
+   */
+  private listenClientStatusEvents() {
+    document.addEventListener('isAppAlive', (event: any) => {
+      if (!event.detail?.running) {
+        return;
+      }
+
+      asperaSdk.activityTracking.handleClientEvents(event.detail.running);
     });
   }
 

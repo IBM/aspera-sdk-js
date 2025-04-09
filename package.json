@@ -14,7 +14,9 @@
     "lint": "eslint -c .eslintrc.js --ext .ts ./src",
     "docs": "typedoc src/index.ts --out ./sdk-docs",
     "set:hosts": "if ! hostile list | grep \"127.0.0.1 js-sdk.aspera.us\" >/dev/null; then sudo hostile set 127.0.0.1 js-sdk.aspera.us; fi",
-    "build:demo": "npm run build && npm run docs && cp src/index.html dist/js && cp -R sdk-docs dist/js/docs"
+    "build:demo": "npm run build && npm run docs && cp src/index.html dist/js && cp -R sdk-docs dist/js/docs",
+    "start:example": "npm --prefix ./example run start",
+    "postinstall": "npm --prefix ./example ci"
   },
   "repository": {
     "type": "git",

@@ -1,0 +1,40 @@
+.aspera-root {
+  height: 100vh;
+
+  .content-root {
+    position: absolute;
+    top: 3rem;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    overflow-y: auto;
+  }
+
+  .content-header {
+    .cds--tabs {
+      border-top: 1px solid var(--cds-border-subtle);
+      border-bottom: 1px solid var(--cds-border-subtle);
+      padding: 0 3rem;
+
+      .cds--tabs__nav-item {
+        min-width: 7rem;
+      }
+    }
+
+    h1 {
+      padding: 0;
+    }
+
+    &-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      padding: 2rem 3rem 1rem 3rem;
+      flex-wrap: wrap;
+    }
+  }
+
+  .route-root {
+    padding: 2rem 3rem;
+  }
+}

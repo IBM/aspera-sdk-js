@@ -64,6 +64,7 @@ export {
   modifyTransfer,
   createDropzone,
   removeDropzone,
+  initDragDrop,
   getInstallerInfo,
   registerStatusCallback,
   deregisterStatusCallback,

@@ -24,3 +24,5 @@ export default function AllTogether() {
     </div>
   );
 };
+
+console.log(AllTogether.toString());

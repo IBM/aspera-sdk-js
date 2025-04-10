@@ -1,7 +1,7 @@
 import './App.scss';
-import { init, launch, testConnection } from '@ibm-aspera/sdk';
+import { init, launch, testConnection, registerStatusCallback } from '@ibm-aspera/sdk';
 import { Header, HeaderGlobalAction, HeaderGlobalBar, HeaderName, Theme, Tab, TabList, Tabs, Button } from '@carbon/react';
-import { LogoGithub, Notification, NotificationOff } from '@carbon/icons-react';
+import { LogoGithub, Notification, NotificationOff, Sdk } from '@carbon/icons-react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router';
 import { useEffect, useState } from 'react';
 import hljs from 'highlight.js/lib/core';
@@ -35,6 +35,7 @@ export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
   hljs.registerLanguage('javascript', javascript);
+  let initialized = false;
 
   useEffect(() => {
     // Prevent drag and drop testing from reloading page
@@ -48,6 +49,10 @@ export default function App() {
 
   const openGithub = (): void => {
     window.open('https://github.com/IBM/aspera-sdk-js', '_blank', 'noopener,noreferrer');
+  };
+
+  const openSDKdocs = (): void => {
+    window.open('https://ibm.github.io/aspera-sdk-js/docs/', '_blank', 'noopener,noreferrer');
   };
 
   const toggleAlert = (): void => {
@@ -78,6 +83,9 @@ export default function App() {
         <HeaderGlobalAction aria-label="Github" tooltipAlignment="end" className="action-icons" onClick={openGithub}>
           <LogoGithub size={20} />
         </HeaderGlobalAction>
+        <HeaderGlobalAction aria-label="SDK Docs" tooltipAlignment="end" className="action-icons" onClick={openSDKdocs}>
+          <Sdk size={20} />
+        </HeaderGlobalAction>
       </HeaderGlobalBar>
     </Header>
   );
@@ -86,8 +94,14 @@ export default function App() {
     let testResolved = false;
 
     const initCallback = (): void => {
+      if (initialized) {
+        return;
+      }
+
       setTimeout(() => {
-        init({appId: 'my-application-unique-id'}).catch((error: unknown) => {
+        init({appId: 'my-application-unique-id'}).then(() => {
+          initialized = true;
+        }).catch((error: unknown) => {
           console.error('SDK could not start from quick launch', error);
         })
       }, 1000);
@@ -102,13 +116,13 @@ export default function App() {
       initCallback();
     });
 
-    setTimeout(() => {
-      // Test never resolved. Launch
-      if (!testResolved) {
-        launch();
-        initCallback();
-      }
-    }, 2000);
+    // setTimeout(() => {
+    //   // Test never resolved. Launch
+    //   if (!testResolved) {
+    //     launch();
+    //     initCallback();
+    //   }
+    // }, 2000);
   };
 
   const currentTabIndex = tabItems.findIndex(item => item.route === location.pathname);

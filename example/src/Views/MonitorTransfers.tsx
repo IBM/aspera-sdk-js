@@ -5,16 +5,15 @@ import { monitorTransfersAspera, removeTransferAspera, stopTransferAspera, resum
 import { useEffect, useReducer } from 'react';
 import hljs from 'highlight.js';
 
+let transfers: Map<string, any> = new Map();
+
 export default function MonitorTransfers() {
   const [_, forceUpdate] = useReducer(x => x + 1, 0);
-
-  let transfers: Map<string, any> = new Map();
   let destroyed = false;
 
   const monitorTransfers = (): void => {
     if (!destroyed) {
       forceUpdate();
-
       setTimeout(monitorTransfers, 3000);
     }
   }
@@ -32,6 +31,11 @@ export default function MonitorTransfers() {
     }
   }, []);
 
+  const removeTransfer = (transferId: string): void => {
+    transfers.delete(transferId);
+    removeTransferAspera(transferId);
+  }
+
   const getTransferContent = (transfer: any): React.ReactNode => {
     const running = transfer.status === 'running' || transfer.status === 'queued';
     const canResume = transfer.status === 'paused';
@@ -40,7 +44,7 @@ export default function MonitorTransfers() {
     return (
       <ListItem key={transfer.uuid} title={transfer.uuid}>
         {transfer.status} - {(transfer.percentage * 100).toFixed(2)}%
-        <Link onClick={() => removeTransferAspera(transfer.uuid)}>Remove</Link>
+        <Link onClick={() => removeTransfer(transfer.uuid)}>Remove</Link>
         {running && <Link onClick={() => stopTransferAspera(transfer.uuid)}>Stop</Link>}
         {canResume && <Link onClick={() => resumeTransferAspera(transfer.uuid)}>Resume</Link>}
         {canOpen && <Link onClick={() => showDirectoryAspera(transfer.uuid)}>Show local</Link>}
@@ -50,6 +54,8 @@ export default function MonitorTransfers() {
   }
 
   const transferArray = iterableToArray(transfers.values());
+
+  console.log(transferArray, transfers);
 
   const codeSnippet = [monitorTransfersAspera.toString(), removeTransferAspera.toString(), stopTransferAspera.toString(), resumeTransferAspera.toString(), showDirectoryAspera.toString(), transferInfoAspera.toString()].join('\n\n')
 

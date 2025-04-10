@@ -55,7 +55,7 @@ export function selectItemsAspera(selectFolders) {
     alert(`Selected items:\n\n${JSON.stringify(response, undefined, 2)}`);
   }).catch(error => {
     // If code -32002 then user canceled selecting. Otherwise another failure.
-    if (error.debugData.code === -32002) {
+    if (error.debugData?.code === -32002) {
       alert('User canceled selecting items');
     } else {
       console.log('Selecting items failed', error);
@@ -150,6 +150,7 @@ export function monitorTransfersAspera() {
 
   // On load get all transfers. This needs to be done after init.
   getAllTransfers().then(transfers => {
+    console.log("TRANSFERS", transfers);
     parseTransfers(transfers);
   }).catch(error => {
     console.log('Could not get all transfers on load', error);
@@ -255,7 +256,7 @@ export function registerStatusCallbackAspera() {
    * Register status callback. This will monitor if the app is closed or reopens.
    * This test currently just consoles all changes.
    */
-  alert('Registered app status changes');
+  alert('Registered app status changes. Monitor the console for events.');
 
   registerStatusCallback(status => {
     console.log('Status changed', status);
@@ -272,7 +273,7 @@ export function registerSafariExtensionStatusCallbackAspera() {
    */
 
   if (isSafari()) {
-    alert('Registered safari extension changes');
+    alert('Registered safari extension changes. Monitor the console for events.');
 
     registerSafariExtensionStatusCallback(status => {
       console.log('Status changed for Safari Extension', status);

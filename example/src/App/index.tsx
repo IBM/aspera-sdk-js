@@ -1,5 +1,5 @@
 import './App.scss';
-import { init, launch, testConnection, registerStatusCallback } from '@ibm-aspera/sdk';
+import { init, launch, testConnection } from '@ibm-aspera/sdk';
 import { Header, HeaderGlobalAction, HeaderGlobalBar, HeaderName, Theme, Tab, TabList, Tabs, Button } from '@carbon/react';
 import { LogoGithub, Notification, NotificationOff, Sdk } from '@carbon/icons-react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router';

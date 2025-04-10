@@ -21,6 +21,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
+    "allowJs": true,
     "paths": {
       "@ibm-aspera/sdk": ["./src/*"]
     }

@@ -1,14 +1,12 @@
-import { init, testConnection, showSelectFolderDialog, showSelectFileDialog, startTransfer, initDragDrop, createDropzone, removeDropzone, getAllTransfers, registerActivityCallback, registerRemovedCallback, removeTransfer, stopTransfer, resumeTransfer, getTransfer, showDirectory, getInfo, showPreferences, registerStatusCallback, registerSafariExtensionStatusCallback, isSafari } from '@ibm-aspera/sdk';
-
 /**
  * This JS file is used for code snippet examples.
  * TypeScript file declrarations of toString
  * do not maintain comments or newlines.
  */
 
-export const selectedFiles = [];
+window.selectedFiles = [];
 
-export function initializeAspera(supportMulti) {
+function initializeAspera(supportMulti) {
   /**
    * An ID for your application. For multi user applications
    * this can include the user ID or other identifier
@@ -21,7 +19,7 @@ export function initializeAspera(supportMulti) {
    */
   const supportMultipleUsers = !!supportMulti;
 
-  init({appId, supportMultipleUsers}).then(() => {
+  asperaSdk.init({appId, supportMultipleUsers}).then(() => {
     // The SDK started. Transfers and file picker can now be used.
     alert('SDK started');
   }).catch(error => {
@@ -31,8 +29,8 @@ export function initializeAspera(supportMulti) {
   });
 }
 
-export function testAspera() {
-  testConnection().then(response => {
+function testAspera() {
+  asperaSdk.testConnection().then(response => {
     // The test was successful. The app is running
     alert(`Test successful\n\n${JSON.stringify(response, undefined, 2)}`);
   }).catch(error => {
@@ -42,20 +40,20 @@ export function testAspera() {
   })
 }
 
-export function selectItemsAspera(selectFolders) {
+function selectItemsAspera(selectFolders) {
   /**
    * showSelectFolderDialog will only allow picking folders.
    * showSelectFileDialog will only allow picking files.
    * They both return the same response type. So swapping
    * out the function is safe.
    */
-  (selectFolders ? showSelectFolderDialog() : showSelectFileDialog()).then(response => {
+  (selectFolders ? asperaSdk.showSelectFolderDialog() : asperaSdk.showSelectFileDialog()).then(response => {
     /**
      * File list for transferSpec is returned in `response.dataTransfer.files` array
      * where name is the path to the selected item.
      */
     alert(`Selected items:\n\n${JSON.stringify(response, undefined, 2)}`);
-    response.dataTransfer.files.forEach(item => selectedFiles.push(item));
+    response.dataTransfer.files.forEach(item => window.selectedFiles.push(item));
   }).catch(error => {
     // If code -32002 then user canceled selecting. Otherwise another failure.
     if (error.debugData?.code === -32002) {
@@ -67,11 +65,11 @@ export function selectItemsAspera(selectFolders) {
   });
 }
 
-export function startTransferAspera(transferSpec) {
+function startTransferAspera(transferSpec) {
   /** The AsperaSpec defines rules on how the client app should work with transfers */
   const asperaSpec = {use_absolute_destination_path: false};
 
-  startTransfer(transferSpec, asperaSpec).then(response => {
+  asperaSdk.startTransfer(transferSpec, asperaSpec).then(response => {
     // Transfer accepted and is starting
     alert(`Transfer started:\n\n${JSON.stringify(response, undefined, 2)}`);
   }).catch(error => {
@@ -81,7 +79,7 @@ export function startTransferAspera(transferSpec) {
   });
 }
 
-export function setupDropAspera(dropZone) {
+function setupDropAspera(dropZone) {
   /**
    * dropZone is a CSS style selector for an element that should be
    * registered to watch for file drop events.
@@ -109,7 +107,7 @@ export function setupDropAspera(dropZone) {
      * where name is the path to the selected item.
      */
     alert(`Dropped items:\n\n${JSON.stringify(response.files, undefined, 2)}`);
-    response.files.dataTransfer.files.forEach(item => selectedFiles.push(item));
+    response.files.dataTransfer.files.forEach(item => window.selectedFiles.push(item));
   };
 
   /**
@@ -117,13 +115,13 @@ export function setupDropAspera(dropZone) {
    * This will remove the listener and no longer accept drops to that element.
    */
   const cancelDropzone = () => {
-    removeDropzone(dropZone);
+    asperaSdk.removeDropzone(dropZone);
   };
 
-  initDragDrop().then(() => {
+  asperaSdk.initDragDrop().then(() => {
     // Drag and drop can now be safely registered
     // Register the dropZone
-    createDropzone(dropCallback, dropZone);
+    asperaSdk.createDropzone(dropCallback, dropZone);
   }).catch(error => {
     // Drag and drop init failed. This is rare.
     console.error('Drag and drop could not start', error);
@@ -131,7 +129,7 @@ export function setupDropAspera(dropZone) {
   });
 }
 
-export function monitorTransfersAspera() {
+function monitorTransfersAspera() {
   /**
    * Setup all monitor callbacks and store transfers with latest
    * data in the transferStore to render on a UI.
@@ -153,19 +151,19 @@ export function monitorTransfersAspera() {
   }
 
   // On load get all transfers. This needs to be done after init.
-  getAllTransfers().then(transfers => {
+  asperaSdk.getAllTransfers().then(transfers => {
     parseTransfers(transfers);
   }).catch(error => {
     console.error('Could not get all transfers on load', error);
   });
 
   // Register event listener for new transfers
-  registerActivityCallback(response => {
+  asperaSdk.registerActivityCallback(response => {
     parseTransfers(response.transfers);
   });
 
   // Register event listener for transfers removed from app
-  registerRemovedCallback(transfer => {
+  asperaSdk.registerRemovedCallback(transfer => {
     transferStore.delete(transfer.uuid);
   });
 
@@ -173,12 +171,12 @@ export function monitorTransfersAspera() {
   return transferStore;
 }
 
-export function removeTransferAspera(transferId) {
+function removeTransferAspera(transferId) {
   /** Remove a transfer from the monitor in app and from SDK responses */
-  removeTransfer(transferId).then(response => {
+  asperaSdk.removeTransfer(transferId).then(response => {
     // Transfer was removed. Remove it from local store
-      alert('Transfer removed');
-      console.info('Transfer removed', response);
+    alert('Transfer removed');
+    console.info('Transfer removed', response);
   }).catch(error => {
     // Transfer could not be removed
     console.error('Transfer removal failed', error);
@@ -186,12 +184,12 @@ export function removeTransferAspera(transferId) {
   });
 }
 
-export function stopTransferAspera(transferId) {
+function stopTransferAspera(transferId) {
   /** Stop an active transfer. You can resume this transfer later. */
-  stopTransfer(transferId).then(() => {
+  asperaSdk.stopTransfer(transferId).then(() => {
     // Transfer was stopped. Next update from activity should indicate this.
-      alert('Transfer stopped');
-      console.info('Transfer stopped', response);
+    alert('Transfer stopped');
+    console.info('Transfer stopped', response);
   }).catch(error => {
     // Transfer could not be stopped
     console.error('Transfer stopping failed', error);
@@ -199,12 +197,12 @@ export function stopTransferAspera(transferId) {
   });
 }
 
-export function resumeTransferAspera(transferId) {
+function resumeTransferAspera(transferId) {
   /** Resume a stopped transfer. */
-  resumeTransfer(transferId).then(response => {
+  asperaSdk.resumeTransfer(transferId).then(response => {
     // Transfer was resumed. Next update from activity should indicate this.
-      alert('Transfer resumed');
-      console.info('Transfer resumed', response);
+    alert('Transfer resumed');
+    console.info('Transfer resumed', response);
   }).catch(error => {
     // Transfer could not be resumed
     console.error('Transfer resuming failed', error);
@@ -212,9 +210,9 @@ export function resumeTransferAspera(transferId) {
   });
 }
 
-export function showDirectoryAspera(transferId) {
+function showDirectoryAspera(transferId) {
   /** Open the local directory of the downloaded item. */
-  showDirectory(transferId).then(response => {
+  asperaSdk.showDirectory(transferId).then(response => {
     console.info('Show directory', response);
   }).catch(error => {
     // Transfer info could not be retrieved
@@ -223,9 +221,9 @@ export function showDirectoryAspera(transferId) {
   });
 }
 
-export function transferInfoAspera(transferId) {
+function transferInfoAspera(transferId) {
   /** Get all details on a specific transfer. */
-  getTransfer(transferId).then(response => {
+  asperaSdk.getTransfer(transferId).then(response => {
     alert('Transfer info retrieved. See console for object.');
     console.info('Get transfer', response);
   }).catch(error => {
@@ -235,9 +233,9 @@ export function transferInfoAspera(transferId) {
   });
 }
 
-export function getInfoAspera() {
+function getInfoAspera() {
   /** Get metadata about the IBM Aspera installation. */
-  getInfo().then(response => {
+  asperaSdk.getInfo().then(response => {
     alert(`Get info response\n\n${JSON.stringify(response, undefined, 2)}`);
     console.info('Get info response', response);
   }).catch(error => {
@@ -246,27 +244,27 @@ export function getInfoAspera() {
   });
 }
 
-export function showPreferencesAspera() {
+function showPreferencesAspera() {
   /** Open preference window for IBM Aspera. */
-  showPreferences().catch(error => {
+  asperaSdk.showPreferences().catch(error => {
     console.error('Show preferences failed', error);
     alert(`Show preferences failed\n\n${JSON.stringify(error, undefined, 2)}`);
   });
 }
 
-export function registerStatusCallbackAspera() {
+function registerStatusCallbackAspera() {
   /**
    * Register status callback. This will monitor if the app is closed or reopens.
    * This test currently just consoles all changes.
    */
   alert('Registered app status changes. Monitor the console for events.');
 
-  registerStatusCallback(status => {
+  asperaSdk.registerStatusCallback(status => {
     console.info('Status changed', status);
   });
 }
 
-export function registerSafariExtensionStatusCallbackAspera() {
+function registerSafariExtensionStatusCallbackAspera() {
   /**
    * Register status callback for the Safari Extension.
    * This will monitor if the extension has changes.
@@ -275,10 +273,10 @@ export function registerSafariExtensionStatusCallbackAspera() {
    * This test currently just consoles all changes.
    */
 
-  if (isSafari()) {
+  if (asperaSdk.isSafari()) {
     alert('Registered safari extension changes. Monitor the console for events.');
 
-    registerSafariExtensionStatusCallback(status => {
+    asperaSdk.registerSafariExtensionStatusCallback(status => {
       console.info('Status changed for Safari Extension', status);
     });
   } else {

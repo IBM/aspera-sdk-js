@@ -1,6 +1,5 @@
 import './Views.scss';
 import { Button, CodeSnippet } from '@carbon/react';
-import { initializeAspera } from './sdk-code';
 import { useEffect } from 'react';
 import hljs from 'highlight.js';
 
@@ -13,10 +12,10 @@ export default function Initialize() {
   return (
     <div className="example-pages">
       <h2>Code example</h2>
-      <CodeSnippet type="multi" feedback="Copied to clipboard" maxCollapsedNumberOfRows={25}>{initializeAspera.toString()}</CodeSnippet>
+      <CodeSnippet type="multi" feedback="Copied to clipboard" maxCollapsedNumberOfRows={25}>{window.initializeAspera.toString()}</CodeSnippet>
       <h2>Try it out</h2>
-      <Button onClick={() => initializeAspera(false)}>Initialize SDK</Button>
-      <Button onClick={() => initializeAspera(true)}>Initialize SDK (multi user)</Button>
+      <Button onClick={() => window.initializeAspera(false)}>Initialize SDK</Button>
+      <Button onClick={() => window.initializeAspera(true)}>Initialize SDK (multi user)</Button>
     </div>
   );
 };

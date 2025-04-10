@@ -6,6 +6,8 @@ import { init, testConnection, showSelectFolderDialog, showSelectFileDialog, sta
  * do not maintain comments or newlines.
  */
 
+export const selectedFiles = [];
+
 export function initializeAspera(supportMulti) {
   /**
    * An ID for your application. For multi user applications
@@ -35,7 +37,7 @@ export function testAspera() {
     alert(`Test successful\n\n${JSON.stringify(response, undefined, 2)}`);
   }).catch(error => {
     // The test failed. The app is not running or cannot be reached.
-    console.log('Test failed', error);
+    console.error('Test failed', error);
     alert(`Test failed\n\n${JSON.stringify(error, undefined, 2)}`);
   })
 }
@@ -53,12 +55,13 @@ export function selectItemsAspera(selectFolders) {
      * where name is the path to the selected item.
      */
     alert(`Selected items:\n\n${JSON.stringify(response, undefined, 2)}`);
+    response.dataTransfer.files.forEach(item => selectedFiles.push(item));
   }).catch(error => {
     // If code -32002 then user canceled selecting. Otherwise another failure.
     if (error.debugData?.code === -32002) {
       alert('User canceled selecting items');
     } else {
-      console.log('Selecting items failed', error);
+      console.error('Selecting items failed', error);
       alert(`Selecting items failed\n\n${JSON.stringify(error, undefined, 2)}`);
     }
   });
@@ -73,7 +76,7 @@ export function startTransferAspera(transferSpec) {
     alert(`Transfer started:\n\n${JSON.stringify(response, undefined, 2)}`);
   }).catch(error => {
     // Transfer not accepted by the Aspera app
-    console.log('Start transfer failed', error);
+    console.error('Start transfer failed', error);
     alert(`Start transfer failed\n\n${JSON.stringify(error, undefined, 2)}`);
   });
 }
@@ -106,6 +109,7 @@ export function setupDropAspera(dropZone) {
      * where name is the path to the selected item.
      */
     alert(`Dropped items:\n\n${JSON.stringify(response.files, undefined, 2)}`);
+    response.files.dataTransfer.files.forEach(item => selectedFiles.push(item));
   };
 
   /**
@@ -122,7 +126,7 @@ export function setupDropAspera(dropZone) {
     createDropzone(dropCallback, dropZone);
   }).catch(error => {
     // Drag and drop init failed. This is rare.
-    console.log('Drag and drop could not start', error);
+    console.error('Drag and drop could not start', error);
     alert(`Drag and drop failed\n\n${JSON.stringify(error, undefined, 2)}`);
   });
 }
@@ -145,15 +149,14 @@ export function monitorTransfersAspera() {
   const parseTransfers = transfers => {
     transfers.forEach(item => {
       transferStore.set(item.uuid, item);
-    })
+    });
   }
 
   // On load get all transfers. This needs to be done after init.
   getAllTransfers().then(transfers => {
-    console.log("TRANSFERS", transfers);
     parseTransfers(transfers);
   }).catch(error => {
-    console.log('Could not get all transfers on load', error);
+    console.error('Could not get all transfers on load', error);
   });
 
   // Register event listener for new transfers
@@ -175,10 +178,10 @@ export function removeTransferAspera(transferId) {
   removeTransfer(transferId).then(response => {
     // Transfer was removed. Remove it from local store
       alert('Transfer removed');
-      console.log('Transfer removed', response);
+      console.info('Transfer removed', response);
   }).catch(error => {
     // Transfer could not be removed
-    console.log('Transfer removal failed', error);
+    console.error('Transfer removal failed', error);
     alert(`Transfer removal failed\n\n${JSON.stringify(error, undefined, 2)}`);
   });
 }
@@ -188,10 +191,10 @@ export function stopTransferAspera(transferId) {
   stopTransfer(transferId).then(() => {
     // Transfer was stopped. Next update from activity should indicate this.
       alert('Transfer stopped');
-      console.log('Transfer stopped', response);
+      console.info('Transfer stopped', response);
   }).catch(error => {
     // Transfer could not be stopped
-    console.log('Transfer stopping failed', error);
+    console.error('Transfer stopping failed', error);
     alert(`Transfer stopping failed\n\n${JSON.stringify(error, undefined, 2)}`);
   });
 }
@@ -201,10 +204,10 @@ export function resumeTransferAspera(transferId) {
   resumeTransfer(transferId).then(response => {
     // Transfer was resumed. Next update from activity should indicate this.
       alert('Transfer resumed');
-      console.log('Transfer resumed', response);
+      console.info('Transfer resumed', response);
   }).catch(error => {
     // Transfer could not be resumed
-    console.log('Transfer resuming failed', error);
+    console.error('Transfer resuming failed', error);
     alert(`Transfer resuming failed\n\n${JSON.stringify(error, undefined, 2)}`);
   });
 }
@@ -212,10 +215,10 @@ export function resumeTransferAspera(transferId) {
 export function showDirectoryAspera(transferId) {
   /** Open the local directory of the downloaded item. */
   showDirectory(transferId).then(response => {
-    console.log('Show directory', response);
+    console.info('Show directory', response);
   }).catch(error => {
     // Transfer info could not be retrieved
-    console.log('Show local directory failed', error);
+    console.error('Show local directory failed', error);
     alert(`Show local directory failed\n\n${JSON.stringify(error, undefined, 2)}`);
   });
 }
@@ -224,10 +227,10 @@ export function transferInfoAspera(transferId) {
   /** Get all details on a specific transfer. */
   getTransfer(transferId).then(response => {
     alert('Transfer info retrieved. See console for object.');
-    console.log('Get transfer', response);
+    console.info('Get transfer', response);
   }).catch(error => {
     // Transfer info could not be retrieved
-    console.log('Transfer info get failed', error);
+    console.error('Transfer info get failed', error);
     alert(`Transfer info get failed\n\n${JSON.stringify(error, undefined, 2)}`);
   });
 }
@@ -236,9 +239,9 @@ export function getInfoAspera() {
   /** Get metadata about the IBM Aspera installation. */
   getInfo().then(response => {
     alert(`Get info response\n\n${JSON.stringify(response, undefined, 2)}`);
-    console.log('Get info response', response);
+    console.info('Get info response', response);
   }).catch(error => {
-    console.log('Get info failed', error);
+    console.error('Get info failed', error);
     alert(`Get info failed\n\n${JSON.stringify(error, undefined, 2)}`);
   });
 }
@@ -246,7 +249,7 @@ export function getInfoAspera() {
 export function showPreferencesAspera() {
   /** Open preference window for IBM Aspera. */
   showPreferences().catch(error => {
-    console.log('Show preferences failed', error);
+    console.error('Show preferences failed', error);
     alert(`Show preferences failed\n\n${JSON.stringify(error, undefined, 2)}`);
   });
 }
@@ -259,7 +262,7 @@ export function registerStatusCallbackAspera() {
   alert('Registered app status changes. Monitor the console for events.');
 
   registerStatusCallback(status => {
-    console.log('Status changed', status);
+    console.info('Status changed', status);
   });
 }
 
@@ -276,7 +279,7 @@ export function registerSafariExtensionStatusCallbackAspera() {
     alert('Registered safari extension changes. Monitor the console for events.');
 
     registerSafariExtensionStatusCallback(status => {
-      console.log('Status changed for Safari Extension', status);
+      console.info('Status changed for Safari Extension', status);
     });
   } else {
     alert('Register safari extension not set since not in Safari');

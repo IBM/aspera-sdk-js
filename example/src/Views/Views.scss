@@ -35,10 +35,6 @@
     max-width: 100%;
   }
 
-  .ending-content {
-    margin-bottom: 2rem;
-  }
-
   .cds--form-item {
     margin-bottom: 1.5rem;
     max-width: 48rem;
@@ -69,9 +65,38 @@
     justify-content: center;
     align-items: center;
   }
+
+  .transfer-row {
+    .cds--link {
+      margin: 0 0.5rem;
+      cursor: pointer;
+    }
+  }
 }
 
 .all-together {
+  .item-row {
+    display: flex;
+    flex-wrap: wrap;
+
+    &:not(.flat-space) {
+      gap: 1rem;
+
+      .item-area {
+        flex: 1;
+        min-width: 20rem;
+      }
+    }
+
+    &:not(:last-child) {
+      margin-bottom: 2rem;
+    }
+  }
+
+  .cds--btn--primary {
+    padding-right: 2rem;
+  }
+
   h2:not(.item-area--header) {
     display: none;
   }

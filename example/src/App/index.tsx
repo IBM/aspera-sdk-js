@@ -18,16 +18,16 @@ import Home from '../Views/Home';
 import AllTogether from '../Views/AllTogether';
 
 export const tabItems = [
-  {route: '/', name: 'Home', component: <Home />, hideFromAll: true},
-  {route: '/init', name: 'Initialize', component: <Initialize />},
-  {route: '/test', name: 'Test', component: <Test />},
-  {route: '/installer', name: 'Installing', component: <Installer />},
-  {route: '/select-items', name: 'Select items', component: <SelectItems />},
-  {route: '/start-transfer', name: 'Start transfer', component: <StartTransfer />},
-  {route: '/manage-transfer', name: 'Manage transfers', component: <MonitorTransfers />},
-  {route: '/drag-drop', name: 'Drag & drop', component: <DragDrop />},
-  {route: '/other', name: 'Other', component: <Other />},
-  {route: '/all', name: 'All together', component: <AllTogether />, hideFromAll: true},
+  {route: '/', name: 'Home', component: <Home />},
+  {route: '/init', name: 'Initialize', component: <Initialize />, row: 1},
+  {route: '/test', name: 'Test', component: <Test />, row: 1},
+  {route: '/installer', name: 'Installing', component: <Installer />, row: 4},
+  {route: '/select-items', name: 'Select items', component: <SelectItems />, row: 3},
+  {route: '/start-transfer', name: 'Start transfer', component: <StartTransfer />, row: 2},
+  {route: '/manage-transfer', name: 'Manage transfers', component: <MonitorTransfers />, row: 2},
+  {route: '/drag-drop', name: 'Drag & drop', component: <DragDrop />, row: 3},
+  {route: '/other', name: 'Other', component: <Other />, row: 1},
+  {route: '/all', name: 'All together', component: <AllTogether />},
 ];
 
 export default function App() {
@@ -60,7 +60,7 @@ export default function App() {
 
     if (newValue) {
       window.alert = (data) => {
-        console.log(data);
+        console.info(data);
       };
     } else {
       window.location.reload();
@@ -98,13 +98,14 @@ export default function App() {
         return;
       }
 
+      // Seeing issue in Safari where calling init doesn't catch or then...
       setTimeout(() => {
         init({appId: 'my-application-unique-id'}).then(() => {
           initialized = true;
         }).catch((error: unknown) => {
           console.error('SDK could not start from quick launch', error);
         })
-      }, 1000);
+      }, 3000);
     };
 
     testConnection().then(() => {
@@ -116,13 +117,13 @@ export default function App() {
       initCallback();
     });
 
-    // setTimeout(() => {
-    //   // Test never resolved. Launch
-    //   if (!testResolved) {
-    //     launch();
-    //     initCallback();
-    //   }
-    // }, 2000);
+    setTimeout(() => {
+      // Test never resolved. Launch
+      if (!testResolved) {
+        launch();
+        initCallback();
+      }
+    }, 2000);
   };
 
   const currentTabIndex = tabItems.findIndex(item => item.route === location.pathname);

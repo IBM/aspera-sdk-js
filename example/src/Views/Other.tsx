@@ -19,8 +19,8 @@ export default function Test() {
       <h2>Try it out</h2>
       <Button onClick={getInfoAspera}>Get info</Button>
       <Button onClick={showPreferencesAspera}>Open preferences</Button>
-      <Button onClick={registerStatusCallbackAspera}>Monitor app status changes</Button>
-      <Button onClick={registerSafariExtensionStatusCallbackAspera}>Monitor Safari Extension status changes</Button>
+      <Button onClick={registerStatusCallbackAspera}>Status changes</Button>
+      <Button onClick={registerSafariExtensionStatusCallbackAspera}>Status changes (Safari)</Button>
     </div>
   );
 };

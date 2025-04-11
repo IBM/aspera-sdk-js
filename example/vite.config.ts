@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import basicSsl from '@vitejs/plugin-basic-ssl';
 import path from "path";
 
 export default defineConfig({
@@ -9,9 +10,13 @@ export default defineConfig({
       '@ibm-aspera/sdk': path.resolve(__dirname, '../src'),
     },
   },
-  plugins: [react()],
+  plugins: [
+    react(),
+    basicSsl()
+  ],
   assetsInclude: ['**/*.md'],
   server: {
+    host: 'js-sdk.aspera.us',
     open: true,
   },
 });

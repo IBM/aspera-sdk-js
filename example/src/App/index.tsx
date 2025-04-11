@@ -52,6 +52,13 @@ export default function App() {
         document.querySelector('#aspera-installer-test')?.remove();
       }
     })
+
+    const path = localStorage.getItem('path');
+
+    if (path) {
+      localStorage.removeItem('path');
+      navigate(path);
+    }
   }, []);
 
   const openGithub = (): void => {
@@ -59,7 +66,7 @@ export default function App() {
   };
 
   const openSDKdocs = (): void => {
-    window.open('https://ibm.github.io/aspera-sdk-js/docs/', '_blank', 'noopener,noreferrer');
+    window.open('docs', '_blank', 'noopener,noreferrer');
   };
 
   const toggleAlert = (): void => {

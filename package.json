@@ -7,15 +7,14 @@
   "scripts": {
     "build": "rm -rf ./dist && webpack --mode=production",
     "build:module": "tsc --project tsconfig.module.json",
-    "dev": "npm run set:hosts && webpack serve --mode development",
+    "dev": "npm run set:hosts && npm --prefix ./example run start",
     "test": "jest",
     "test:watch": "jest --watchAll",
     "release": "standard-version",
     "lint": "eslint -c .eslintrc.js --ext .ts ./src",
     "docs": "typedoc src/index.ts --out ./sdk-docs",
     "set:hosts": "if ! hostile list | grep \"127.0.0.1 js-sdk.aspera.us\" >/dev/null; then sudo hostile set 127.0.0.1 js-sdk.aspera.us; fi",
-    "build:demo": "npm run build && npm run docs && cp src/index.html dist/js && cp -R sdk-docs dist/js/docs",
-    "start:example": "npm --prefix ./example run start",
+    "build:demo": "npm --prefix ./example run build && npm run docs && cp -R example/dist dist && cp -R sdk-docs dist/docs",
     "postinstall": "npm --prefix ./example ci"
   },
   "repository": {

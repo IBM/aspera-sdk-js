@@ -29,24 +29,6 @@ module.exports = {
       }
     ]
   },
-  devServer: {
-    server: {
-      type: 'https',
-    },
-    open: true,
-    static: [
-      {
-        publicPath: '/',
-        directory: './src',
-      },
-      {
-        publicPath: '/aspera-sdk-js/docs',
-        directory: './dist/js/docs',
-      },
-    ],
-    host: 'js-sdk.aspera.us',
-    port: 4205
-  },
   plugins: [
     new webpack.BannerPlugin(banner)
   ]

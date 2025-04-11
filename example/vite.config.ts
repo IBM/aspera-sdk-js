@@ -4,6 +4,7 @@ import basicSsl from '@vitejs/plugin-basic-ssl';
 import path from "path";
 
 export default defineConfig({
+  base: '/aspera-sdk-js/',
   resolve: {
     alias: {
       '~@ibm/plex': path.resolve(__dirname, 'node_modules/@ibm/plex'),

@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "start": "vite",
-    "build": "rm -rf dist && tsc -b && vite build --base /aspera-sdk-js/"
+    "build": "rm -rf dist && tsc -b && vite build"
   },
   "dependencies": {
     "@carbon/icons-react": "^11.57.0",

@@ -11,7 +11,7 @@ declare global {
 }
 
 createRoot(document.getElementById('root')!).render(
-  <BrowserRouter>
+  <BrowserRouter basename='/aspera-sdk-js'>
     <App />
   </BrowserRouter>,
 );

@@ -1,0 +1,47 @@
+@use '@carbon/react';
+@import 'highlight.js/styles/tomorrow-night-bright.css';
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-weight: 400;
+  src: url(~@ibm/plex/IBM-Plex-Sans/fonts/complete/woff2/IBMPlexSans-Regular.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-weight: 400;
+  src: url(~@ibm/plex/IBM-Plex-Mono/fonts/complete/woff2/IBMPlexMono-Regular.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-weight: 300;
+  src: url(~@ibm/plex/IBM-Plex-Sans/fonts/complete/woff2/IBMPlexSans-Light.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-weight: 600;
+  src: url(~@ibm/plex/IBM-Plex-Sans/fonts/complete/woff2/IBMPlexSans-SemiBold.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-weight: 700;
+  src: url(~@ibm/plex/IBM-Plex-Sans/fonts/complete/woff2/IBMPlexSans-Bold.woff2) format('woff2');
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: italic;
+  src: url(~@ibm/plex/IBM-Plex-Sans/fonts/complete/woff2/IBMPlexSans-Italic.woff2) format('woff2');
+}
+
+.cds--snippet--multi .cds--snippet-container {
+  width: calc(100% - 3rem);
+
+  pre code {
+    background-color: unset;
+    overflow: auto;
+  }
+}

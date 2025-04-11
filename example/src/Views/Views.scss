@@ -1,0 +1,111 @@
+
+.markdown-render {
+  h1 {
+    display: none;
+  }
+
+  p {
+    margin-bottom: 1rem;
+  }
+
+  h2, h3 {
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  pre {
+    padding: 0.5rem;
+    background-color: var(--cds-layer-01);
+    margin-bottom: 1rem;
+  }
+}
+
+.example-pages {
+  h2 {
+    margin-bottom: 2rem;
+  }
+
+  .cds--snippet {
+    margin-bottom: 2rem;
+  }
+
+  .cds--btn {
+    margin-right: 1rem;
+    margin-bottom: 2rem;
+    max-width: 100%;
+  }
+
+  .cds--form-item {
+    margin-bottom: 1.5rem;
+    max-width: 48rem;
+  }
+
+  pre, code {
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  .code-input {
+    textarea, input {
+      font-family: 'IBM Plex Mono', monospace;
+    }
+  }
+
+  .cds--snippet--multi {
+    $max-width: 60rem;
+    max-width: $max-width;
+    max-inline-size: $max-width;
+  }
+
+  .drop-zone {
+    width: 25rem;
+    height: 5rem;
+    background-color: var(--cds-layer-02);
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .transfer-row {
+    .cds--link {
+      margin: 0 0.5rem;
+      cursor: pointer;
+    }
+  }
+
+  .hidden {
+    display: none;
+  }
+}
+
+.all-together {
+  .item-row {
+    display: flex;
+    flex-wrap: wrap;
+
+    &:not(.flat-space) {
+      gap: 1rem;
+
+      .item-area {
+        flex: 1;
+        min-width: 20rem;
+      }
+    }
+
+    &:not(:last-child) {
+      margin-bottom: 2rem;
+    }
+  }
+
+  .cds--btn--primary {
+    padding-right: 2rem;
+  }
+
+  h2:not(.item-area--header) {
+    display: none;
+  }
+
+  .cds--snippet, .cds--tabs {
+    display: none;
+  }
+}

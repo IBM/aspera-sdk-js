@@ -10,6 +10,9 @@ module.exports = {
   "plugins": [
       "@typescript-eslint",
   ],
+  "ignorePatterns": [
+    "example"
+  ],
   "rules": {
       "@typescript-eslint/consistent-type-definitions": "error",
       "@typescript-eslint/dot-notation": "off",

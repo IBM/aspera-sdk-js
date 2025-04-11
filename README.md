@@ -23,3 +23,6 @@ or copied to a web server for hosting.
 
 ## Development
 To get started with development, take a look [here](https://github.com/IBM/aspera-sdk-js/blob/main/docs/DEVELOPMENT.md).
+
+## Code Example and test application
+You can run the test appp by running `npm run start:example` which will launch the browser to the test app.

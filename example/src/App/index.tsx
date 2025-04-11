@@ -45,6 +45,13 @@ export default function App() {
     window.addEventListener('dragover', event => {
       event.preventDefault();
     });
+
+    window.addEventListener('keyup', event => {
+      // If ESCAPE is pressed remove the installer window if set. Hidden option for power users.
+      if (event.key === 'Escape') {
+        document.querySelector('#aspera-installer-test')?.remove();
+      }
+    })
   }, []);
 
   const openGithub = (): void => {

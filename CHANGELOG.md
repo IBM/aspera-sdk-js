@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.7](https://github.com/IBM/aspera-sdk-js/compare/v0.2.6...v0.2.7) (2025-04-11)
+
+
+### Features
+
+* **#54:** handle isAlive safari extension events ([#57](https://github.com/IBM/aspera-sdk-js/issues/57)) ([266a649](https://github.com/IBM/aspera-sdk-js/commit/266a649643ee4d07f4546054807d901c3edbe444)), closes [#54](https://github.com/IBM/aspera-sdk-js/issues/54)
+* example app ([#58](https://github.com/IBM/aspera-sdk-js/issues/58)) ([a29728f](https://github.com/IBM/aspera-sdk-js/commit/a29728f357b374cafa0667e87e92f8bea804bdfe))
+
+
+### Bug Fixes
+
+* add base to build ([9c1e1ea](https://github.com/IBM/aspera-sdk-js/commit/9c1e1ea20e5b22669eb742cd35aa33ee4b797d96))
+
 ### [0.2.6](https://github.com/IBM/aspera-sdk-js/compare/v0.2.5...v0.2.6) (2024-11-27)
 
 

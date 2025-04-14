@@ -65,12 +65,13 @@ import {CommonModule} from '@angular/common';
 })
 
 export class InstallerView implements OnInit {
+  public entries: {platform: string; type: string; url: string; version: string; arch: string}[] = [];
   public wrapperStyle = {position: 'fixed', bottom: '0px', right: '32px', height: '260px', width: '280px', 'background-color': '#444', padding: '16px 20px'};
   public buttonStyle = {display: 'block', width: '100%', 'margin-bottom': '16px', padding: '8px'};
-  public entries: {platform: string; type: string; url: string; version: string; arch: string}[] = [];
 
   ngOnInit() {
     window.asperaSdk.getInstallerInfo().then(response => {
+      // Installers for your platform. While normally just one. Some OS may provide multiple for user to choose.
       this.entries = response.entries;
     }).catch(error => {
       console.error('Installer info get failed', error);
@@ -85,6 +86,39 @@ export class InstallerView implements OnInit {
     window.open(url, '_blank', 'noopener,noreferrer');
   }
 }`;
+
+const InstallerViewVue = `<script setup>
+import { ref } from 'vue';
+
+// Value for installer list
+const entries = ref([]);
+const wrapperStyle = {position: 'fixed', bottom: '0', right: '32px', height: '260px', width: '280px', backgroundColor: '#444', padding: '16px 20px'};
+const buttonStyle = {display: 'block', width: '100%', marginBottom: '16px', padding: '8px'};
+
+const launch = () => {
+  window.asperaSdk.launch();
+};
+
+const install = (url) => {
+  window.open(url, '_blank', 'noopener,noreferrer');
+};
+
+window.asperaSdk.getInstallerInfo().then(response => {
+  // Installers for your platform. While normally just one. Some OS may provide multiple for user to choose.
+  entries.value = response.entries;
+}).catch(error => {
+  console.error('Installer info get failed', error);
+});
+</script>
+
+<template>
+  <div :style="wrapperStyle">
+    <h4 :style="{marginBottom: '20px', color: '#fff'}">IBM Aspera Installer</h4>
+    <button :style="buttonStyle" type="button" @click="launch()">Launch</button>
+    <button v-for="entry of entries" :style="buttonStyle" type="button" @click="install(entry.url)">Install ({{entry.platform}} - {{entry.type}})</button>
+  </div>
+</template>
+`;
 
 export default function Installer() {
   const [tabIndex, setTabIndex] = useState(0);
@@ -111,9 +145,10 @@ export default function Installer() {
           <Tab>React</Tab>
           <Tab>JavaScript</Tab>
           <Tab>Angular</Tab>
+          <Tab>Vue</Tab>
         </TabList>
       </Tabs>
-      {[InstallerViewReact, window.installerAspera.toString(), InstallerViewAngular].map((item, index) => getCodeView(item, index))}
+      {[InstallerViewReact, window.installerAspera.toString(), InstallerViewAngular, InstallerViewVue].map((item, index) => getCodeView(item, index))}
     </div>
   );
 };

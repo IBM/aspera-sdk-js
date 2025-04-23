@@ -22,10 +22,11 @@ export const testConnection = (): Promise<any> => {
 
 /**
  * Initialize drag and drop.
+ * @param initCall - Indicate if called via init flow and should not reject
  *
  * @returns a promise that resolves if the initialization was successful or not
  */
-export const initDragDrop = (): Promise<boolean> => {
+export const initDragDrop = (initCall?: boolean): Promise<boolean> => {
   if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
@@ -36,7 +37,13 @@ export const initDragDrop = (): Promise<boolean> => {
     .then((data: boolean) => promiseInfo.resolver(data))
     .catch(error => {
       errorLog(messages.dragDropInitFailed, error);
-      promiseInfo.rejecter(generateErrorBody(messages.dragDropInitFailed, error));
+
+      if (initCall) {
+        promiseInfo.resolver(false);
+        errorLog(messages.dragDropInitFailedInit, error);
+      } else {
+        promiseInfo.rejecter(generateErrorBody(messages.dragDropInitFailed, error));
+      }
     });
 
   return promiseInfo.promise;
@@ -73,7 +80,7 @@ export const init = (options?: InitOptions): Promise<any> => {
 
   return asperaSdk.activityTracking.setup()
     .then(() => testConnection())
-    .then(() => initDragDrop())
+    .then(() => initDragDrop(true))
     .catch(error => {
       errorLog(messages.serverError, error);
       asperaSdk.globals.asperaAppVerified = false;

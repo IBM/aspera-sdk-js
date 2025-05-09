@@ -22,6 +22,8 @@ jobs:
           npm ci
           npm run build
           npm run build:module
+          rm -rf .github .husky docs example src tests .editorconfig .eslintrc.js .gitignore CHANGELOG.md jest.config.js jest.setup.js renovate.json tsconfig.json tsconfig.module.json typedoc.js webpack.config.js package.json-e
+          sed -i -e 's/npm --prefix .\/example ci//g' package.json
 
       - name: Publish
         uses: JS-DevTools/npm-publish@v1

@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.8](https://github.com/IBM/aspera-sdk-js/compare/v0.2.7...v0.2.8) (2025-05-09)
+
+
+### Bug Fixes
+
+* 404 for GH pages ([0cf7abd](https://github.com/IBM/aspera-sdk-js/commit/0cf7abdf7784ceadfcd58175effc4c6628fdd708))
+* add vue to example for installer ([#60](https://github.com/IBM/aspera-sdk-js/issues/60)) ([6a79ad2](https://github.com/IBM/aspera-sdk-js/commit/6a79ad2c2c12a70682b8ef787c97923979e75a6e))
+* basename for router and vite ([7d03afd](https://github.com/IBM/aspera-sdk-js/commit/7d03afd1b7749be40c49d347491c4307ade12039))
+* clean NPM script to remove un needed files ([#66](https://github.com/IBM/aspera-sdk-js/issues/66)) ([7882879](https://github.com/IBM/aspera-sdk-js/commit/7882879f98e31854c4a38ef485ff8062b11b184f))
+* do not fail out init if drag and drop fails ([#61](https://github.com/IBM/aspera-sdk-js/issues/61)) ([82ae64d](https://github.com/IBM/aspera-sdk-js/commit/82ae64d95d50448570d1057277284cd157f57e97))
+* handle 404 on the nested route ([386ba5e](https://github.com/IBM/aspera-sdk-js/commit/386ba5e16905368f67f01a886870098607697285))
+
 ### [0.2.7](https://github.com/IBM/aspera-sdk-js/compare/v0.2.6...v0.2.7) (2025-04-11)
 
 

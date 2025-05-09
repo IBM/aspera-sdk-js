@@ -1,5 +1,5 @@
 # IBM Aspera JavaScript SDK
-This JavaScript SDK allows web applications to integrate with IBM Aspera to perform high-speed Aspera file transfers.
+This JavaScript SDK allows web applications to integrate with `IBM Aspera for desktop` to perform high-speed Aspera file transfers.
 
 Documentation is available on [GitHub Pages](https://ibm.github.io/aspera-sdk-js/docs/)
 

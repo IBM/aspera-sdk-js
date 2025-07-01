@@ -15,14 +15,14 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 18
+          node-version: 22
 
       - name: Build Package
         run: |
           npm ci
           npm run build
           npm run build:module
-          rm -rf .github .husky docs example src tests .editorconfig .eslintrc.js .gitignore CHANGELOG.md jest.config.js jest.setup.js renovate.json tsconfig.json tsconfig.module.json typedoc.js webpack.config.js package.json-e
+          rm -rf .github docs example src tests .editorconfig eslint.config.js .gitignore CHANGELOG.md jest.config.js jest.setup.js renovate.json tsconfig.json tsconfig.module.json typedoc.js webpack.config.js package.json-e
           sed -i -e 's/npm --prefix .\/example ci//g' package.json
 
       - name: Publish

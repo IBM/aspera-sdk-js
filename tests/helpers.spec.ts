@@ -31,16 +31,19 @@ describe('errorLog', () => {
     const testMessage = 'Test message';
     expect((<any>window).asperaSdkLogs).toBe(undefined);
     errorLog(testMessage);
-    expect(console.warn).toBeCalled();
+    expect(consoleWarnCall).toHaveBeenCalled();
     expect((<any>window).asperaSdkLogs[0].message).toBe(testMessage);
     expect((<any>window).asperaSdkLogs[0].debugData).toBe(undefined);
   });
 
   test('with message and debug data should store in array and console', () => {
+    const consoleWarnCall = jest.fn();
+    console.warn = consoleWarnCall;
     const testMessage = 'Test message';
     expect((<any>window).asperaSdkLogs).toBe(undefined);
+    const error = {error: true};
     errorLog(testMessage, {error: true});
-    expect(console.warn).toBeCalled();
+    expect(consoleWarnCall).toHaveBeenLastCalledWith('Aspera SDK: Test message', error);
     expect((<any>window).asperaSdkLogs[0].message).toBe(testMessage);
     expect((<any>window).asperaSdkLogs[0].debugData.error).toBe(true);
   });

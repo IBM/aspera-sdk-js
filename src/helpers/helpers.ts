@@ -183,7 +183,6 @@ export const isValidURL = (url: string): boolean => {
  * @returns {boolean} Whether the browser is Safari.
  */
 export const isSafari = (): boolean => {
-  // eslint-disable-next-line
   return /^((?!chrome|android).)*safari/i.test(navigator.userAgent) && !(window as any).MSStream;
 };
 

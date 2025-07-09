@@ -25,6 +25,9 @@ class AsperaSdkGlobals {
   sessionId?: string;
   /** Map of drop zones created by querySelector */
   dropZonesCreated: Map<string, {event: string; callback: (event: any) => void}[]> = new Map();
+  /** HTTP Gateway URL after successful passing */
+  httpGatewayUrl?: string;
+
 
   backupLaunchMethod(url: string): void {
     window.alert(messages.loadingProtocol);
@@ -395,5 +398,10 @@ export class AsperaSdk {
    */
   get isReady(): boolean {
     return this.globals.asperaAppVerified && this.globals.appId !== '';
+  }
+
+  /** Indicate that HTTP Gateway is available. */
+  get supportsHttpGateway(): boolean {
+    return !!this.globals.httpGatewayUrl;
   }
 }

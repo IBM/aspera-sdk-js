@@ -27,7 +27,8 @@ class AsperaSdkGlobals {
   dropZonesCreated: Map<string, {event: string; callback: (event: any) => void}[]> = new Map();
   /** HTTP Gateway URL after successful passing */
   httpGatewayUrl?: string;
-
+  /** Indication that the HTTP Gateway has been verified as working */
+  httpGatewayVerified = false;
 
   backupLaunchMethod(url: string): void {
     window.alert(messages.loadingProtocol);

@@ -6,7 +6,7 @@
 
 window.selectedFiles = [];
 
-function initializeAspera(supportMulti) {
+function initializeAspera(supportMulti, httpGatewayUrl, forceHttpGateway) {
   /**
    * An ID for your application. For multi user applications
    * this can include the user ID or other identifier
@@ -19,7 +19,11 @@ function initializeAspera(supportMulti) {
    */
   const supportMultipleUsers = !!supportMulti;
 
-  asperaSdk.init({appId, supportMultipleUsers}).then(() => {
+  /**
+   * HTTP Gateway URL can be set to support fallback to a gateway.
+   * You can also force it to not start the desktop app.
+   */
+  asperaSdk.init({appId, supportMultipleUsers, httpGatewayUrl, forceHttpGateway}).then(() => {
     // The SDK started. Transfers and file picker can now be used.
     alert('SDK started');
   }).catch(error => {

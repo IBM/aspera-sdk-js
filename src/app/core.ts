@@ -1,6 +1,7 @@
 import {messages} from '../constants/messages';
 import {client} from '../helpers/client/client';
 import {errorLog, generateErrorBody, generatePromiseObjects, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
+import { getApiCall } from '../http-gateway/core';
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, TransferResponse} from '../models/aspera-sdk.model';
 import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent} from '../models/models';
@@ -78,14 +79,46 @@ export const init = (options?: InitOptions): Promise<any> => {
     asperaSdk.globals.sessionId = randomUUID();
   }
 
-  return asperaSdk.activityTracking.setup()
-    .then(() => testConnection())
-    .then(() => initDragDrop(true))
-    .catch(error => {
-      errorLog(messages.serverError, error);
-      asperaSdk.globals.asperaAppVerified = false;
-      throw generateErrorBody(messages.serverError, error);
+  const handleErrors = (error: unknown) => {
+    errorLog(messages.serverError, error);
+    asperaSdk.globals.asperaAppVerified = false;
+    throw generateErrorBody(messages.serverError, error);
+  };
+
+  const getDesktopStartCalls = (): Promise<unknown> => {
+    return asperaSdk.activityTracking.setup()
+      .then(() => testConnection())
+      .then(() => initDragDrop(true))
+      .catch(handleErrors);
+  };
+
+  if (options.httpGatewayUrl && !asperaSdk.globals.httpGatewayVerified) {
+    let finalHttpGatewayUrl = options.httpGatewayUrl.trim();
+
+    if (finalHttpGatewayUrl.indexOf('http') !== 0) {
+      finalHttpGatewayUrl = `https://${finalHttpGatewayUrl}`;
+    }
+
+    if (finalHttpGatewayUrl.endsWith('/')) {
+      finalHttpGatewayUrl = finalHttpGatewayUrl.slice(0, -1);
+    }
+
+    asperaSdk.globals.httpGatewayUrl = finalHttpGatewayUrl;
+
+    return getApiCall('INFO').then(() => {
+      asperaSdk.globals.httpGatewayVerified = true;
+
+      if (options.forceHttpGateway) {
+        return asperaSdk.activityTracking.setup()
+          .then(() => initDragDrop(true))
+          .catch(handleErrors);
+      } else {
+        return getDesktopStartCalls();
+      }
     });
+  }
+
+  return getDesktopStartCalls();
 };
 
 /**

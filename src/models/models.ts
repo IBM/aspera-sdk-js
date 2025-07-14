@@ -664,8 +664,14 @@ export interface CustomTheme {
 }
 
 export interface InitOptions {
+  /** The application ID to link to. This should be unique for each use app/user. */
   appId?: string;
+  /** Indicate if the computer is running multiple users possibly (avoid port crossing). */
   supportMultipleUsers?: boolean;
+  /** Aspera HTTP Gateway URL to use if desktop is not available. Include gateway route but not versions (example: https://example.com/aspera/http-gwy). */
+  httpGatewayUrl?: string;
+  /** Indicate if HTTP Gateway should be forced. This will not start desktop if httpGatewayUrl is valid. */
+  forceHttpGateway?: boolean;
 }
 
 export interface InstallerUrlInfo {

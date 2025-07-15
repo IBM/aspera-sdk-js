@@ -1,5 +1,6 @@
 import {httpDownload} from './download';
 import {httpUpload} from './upload';
+import {getApiCall, handleHttpGatewayDrop, httpGatewaySelectFileDialog, httpGatewaySelectFolderDialog} from './core';
 
 /**
  * HTTP Gateway Exports
@@ -12,4 +13,8 @@ import {httpUpload} from './upload';
 export {
   httpUpload,
   httpDownload,
+  getApiCall,
+  handleHttpGatewayDrop,
+  httpGatewaySelectFileDialog,
+  httpGatewaySelectFolderDialog
 };

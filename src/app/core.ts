@@ -1,9 +1,10 @@
 import {messages} from '../constants/messages';
 import {client} from '../helpers/client/client';
 import {errorLog, generateErrorBody, generatePromiseObjects, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
-import { getApiCall } from '../http-gateway/core';
+import {getApiCall, handleHttpGatewayDrop, httpGatewaySelectFileDialog, httpGatewaySelectFolderDialog} from '../http-gateway/core';
+import {HttpGatewayInfo} from '../http-gateway/models';
 import {asperaSdk} from '../index';
-import {AsperaSdkInfo, TransferResponse} from '../models/aspera-sdk.model';
+import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
 import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent} from '../models/models';
 
 /**
@@ -14,21 +15,24 @@ import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, BrowserStyle
  */
 export const testConnection = (): Promise<any> => {
   return client.request('get_info')
-    .then((data: AsperaSdkInfo) => {
-      asperaSdk.globals.AsperaSdkInfo = data;
+    .then((data: AsperaSdkClientInfo) => {
+      asperaSdk.globals.asperaSdkInfo = data;
       asperaSdk.globals.asperaAppVerified = true;
-      return data;
+      return asperaSdk.globals.sdkResponseData;
     });
 };
 
 /**
- * Initialize drag and drop.
+ * Initialize drag and drop. HTTP Gateway does not need to init.
+ * Ignore if only HTTP Gateway
  * @param initCall - Indicate if called via init flow and should not reject
  *
  * @returns a promise that resolves if the initialization was successful or not
  */
 export const initDragDrop = (initCall?: boolean): Promise<boolean> => {
-  if (!asperaSdk.isReady) {
+  if (asperaSdk.useHttpGateway) {
+    return Promise.resolve(true);
+  } else if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -89,6 +93,7 @@ export const init = (options?: InitOptions): Promise<any> => {
     return asperaSdk.activityTracking.setup()
       .then(() => testConnection())
       .then(() => initDragDrop(true))
+      .then(() => asperaSdk.globals.sdkResponseData)
       .catch(handleErrors);
   };
 
@@ -105,16 +110,20 @@ export const init = (options?: InitOptions): Promise<any> => {
 
     asperaSdk.globals.httpGatewayUrl = finalHttpGatewayUrl;
 
-    return getApiCall('INFO').then(() => {
+    return getApiCall('INFO').then((response: HttpGatewayInfo) => {
+      asperaSdk.globals.httpGatewayInfo = response;
       asperaSdk.globals.httpGatewayVerified = true;
 
       if (options.forceHttpGateway) {
-        return asperaSdk.activityTracking.setup()
-          .then(() => initDragDrop(true))
-          .catch(handleErrors);
+        return Promise.resolve(asperaSdk.globals.sdkResponseData);
       } else {
         return getDesktopStartCalls();
       }
+    }).catch(error => {
+      // If HTTP Gateway fails log and move on to desktop
+      errorLog(messages.httpInitFail, error);
+
+      return getDesktopStartCalls();
     });
   }
 
@@ -338,7 +347,9 @@ export const resumeTransfer = (id: string, options?: ResumeTransferOptions): Pro
  * @returns a promise that resolves with the selected file(s) and rejects if user cancels dialog
  */
 export const showSelectFileDialog = (options?: FileDialogOptions): Promise<DataTransferResponse> => {
-  if (!asperaSdk.isReady) {
+  if (asperaSdk.useHttpGateway) {
+    return httpGatewaySelectFileDialog(options);
+  } else if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -367,7 +378,9 @@ export const showSelectFileDialog = (options?: FileDialogOptions): Promise<DataT
  * @returns a promise that resolves with the selected folder(s) and rejects if user cancels dialog
  */
 export const showSelectFolderDialog = (options?: FolderDialogOptions): Promise<DataTransferResponse> => {
-  if (!asperaSdk.isReady) {
+  if (asperaSdk.useHttpGateway) {
+    return httpGatewaySelectFolderDialog(options);
+  } else if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
 
@@ -567,7 +580,7 @@ export const setBranding = (id: string, options: CustomBrandingOptions): Promise
  * @param elementSelector the selector of the element on the page that should watch for drop events
  */
 export const createDropzone = (
-  callback: (data: {event: any; files: DataTransferResponse}) => void,
+  callback: (data: {event: DragEvent; files: DataTransferResponse}) => void,
   elementSelector: string,
 ): void => {
   const elements = document.querySelectorAll(elementSelector);
@@ -576,16 +589,19 @@ export const createDropzone = (
     return;
   }
 
-  const dragEvent = (event: any) => {
+  const dragEvent = (event: DragEvent) => {
     event.preventDefault();
   };
 
-  const dropEvent = (event: any) => {
+  const dropEvent = (event: DragEvent) => {
     event.preventDefault();
-    const files: BrowserStyleFile[] = [];
     if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length && event.dataTransfer.files[0]) {
+      const files: BrowserStyleFile[] = [];
+      const rawFiles: File[] = [];
+
       for (let i = 0; i < event.dataTransfer.files.length; i++) {
         const file = event.dataTransfer.files[i];
+        rawFiles.push(file);
         files.push({
           lastModified: file.lastModified,
           name: file.name,
@@ -599,11 +615,17 @@ export const createDropzone = (
         app_id: asperaSdk.globals.appId,
       };
 
-      client.request('dropped_files', payload)
-        .then((data: any) => callback({event, files: data}))
-        .catch(error => {
-          errorLog(messages.unableToReadDropped, error);
-        });
+      handleHttpGatewayDrop(rawFiles);
+
+      if (asperaSdk.isReady) {
+        client.request('dropped_files', payload)
+          .then((data: any) => callback({event, files: data}))
+          .catch(error => {
+            errorLog(messages.unableToReadDropped, error);
+          });
+      } else {
+        callback({event, files: {dataTransfer: {files}}});
+      }
     }
   };
 
@@ -646,6 +668,6 @@ export const getInfo = (): Promise<AsperaSdkInfo> => {
   }
 
   return new Promise((resolve, _) => {
-    resolve(asperaSdk.globals.AsperaSdkInfo);
+    resolve(asperaSdk.globals.sdkResponseData);
   });
 };

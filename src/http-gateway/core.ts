@@ -1,4 +1,5 @@
 import {asperaSdk} from '../index';
+import {FileDialogOptions, DataTransferResponse} from '../models/models';
 import {HttpGatewayDownload, HttpGatewayDownloadLegacy, HttpGatewayInfo, HttpGatewayPresign, HttpGatewayUpload} from './models';
 
 /**
@@ -44,4 +45,36 @@ export const getApiCall = (type: 'INFO'|'DOWNLOAD'|'UPLOAD'|'PRESIGN', body?: Bo
 
     return response.body;
   });
+};
+
+/**
+ * Handle drop events and store files for HTTP Gateway
+ * This works on top of desktop.
+ */
+export const handleHttpGatewayDrop = (files: File[]): void => {
+  files.forEach(file => {
+    asperaSdk.httpGatewaySelectedFiles.set(file.name, file);
+  });
+};
+
+/**
+ * Open native browser file picker for files
+ *
+ * @param options - File picker options
+ *
+ * @returns Promise that resolves with info about the files picked
+ */
+export const httpGatewaySelectFileDialog = (options?: FileDialogOptions): Promise<DataTransferResponse> => {
+  return Promise.reject('TODO: Select file. Need to create form since showOpenFilePicker has limited browser support');
+};
+
+/**
+ * Open native browser file picker for folders
+ *
+ * @param options - File picker options
+ *
+ * @returns Promise that resolves with info about the folders picked
+ */
+export const httpGatewaySelectFolderDialog = (options?: FileDialogOptions): Promise<DataTransferResponse> => {
+  return Promise.reject('TODO: Select folder. Need to create form since showOpenFilePicker has limited browser support');
 };

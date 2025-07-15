@@ -28,4 +28,5 @@ export const messages = {
   websocketClosedUnexpect: 'The websocket was closed unexpectedly',
   websocketNotReady: 'The websocket is not ready. Run init first',
   httpNotAvailable: 'IBM Aspera HTTP Gateway is not available',
+  httpInitFail: 'IBM Aspera HTTP Gateway could not be started',
 };

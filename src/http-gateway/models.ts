@@ -1,8 +1,8 @@
 export interface HttpGatewayInfo {
   version: string;
   name: string;
-  upload_endpoint: string;
-  download_endpoint: string;
+  upload_endpoint: string[];
+  download_endpoint: string[];
   endpoints: string[];
 }
 

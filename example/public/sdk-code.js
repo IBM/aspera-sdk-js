@@ -51,7 +51,7 @@ function selectItemsAspera(selectFolders) {
    * They both return the same response type. So swapping
    * out the function is safe.
    */
-  (selectFolders ? asperaSdk.showSelectFolderDialog() : asperaSdk.showSelectFileDialog()).then(response => {
+  (selectFolders ? asperaSdk.showSelectFolderDialog({multiple: true}) : asperaSdk.showSelectFileDialog({multiple: true})).then(response => {
     /**
      * File list for transferSpec is returned in `response.dataTransfer.files` array
      * where name is the path to the selected item.

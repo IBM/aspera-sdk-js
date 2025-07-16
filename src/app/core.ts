@@ -1,7 +1,7 @@
 import {messages} from '../constants/messages';
 import {client} from '../helpers/client/client';
 import {errorLog, generateErrorBody, generatePromiseObjects, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
-import {getApiCall, handleHttpGatewayDrop, httpGatewaySelectFileDialog, httpGatewaySelectFolderDialog} from '../http-gateway/core';
+import {getApiCall, handleHttpGatewayDrop, httpGatewaySelectFileFolderDialog} from '../http-gateway/core';
 import {HttpGatewayInfo} from '../http-gateway/models';
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
@@ -348,7 +348,7 @@ export const resumeTransfer = (id: string, options?: ResumeTransferOptions): Pro
  */
 export const showSelectFileDialog = (options?: FileDialogOptions): Promise<DataTransferResponse> => {
   if (asperaSdk.useHttpGateway) {
-    return httpGatewaySelectFileDialog(options);
+    return httpGatewaySelectFileFolderDialog(options, false);
   } else if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
@@ -379,7 +379,7 @@ export const showSelectFileDialog = (options?: FileDialogOptions): Promise<DataT
  */
 export const showSelectFolderDialog = (options?: FolderDialogOptions): Promise<DataTransferResponse> => {
   if (asperaSdk.useHttpGateway) {
-    return httpGatewaySelectFolderDialog(options);
+    return httpGatewaySelectFileFolderDialog(options, true);
   } else if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
@@ -597,11 +597,9 @@ export const createDropzone = (
     event.preventDefault();
     if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length && event.dataTransfer.files[0]) {
       const files: BrowserStyleFile[] = [];
-      const rawFiles: File[] = [];
 
       for (let i = 0; i < event.dataTransfer.files.length; i++) {
         const file = event.dataTransfer.files[i];
-        rawFiles.push(file);
         files.push({
           lastModified: file.lastModified,
           name: file.name,
@@ -615,16 +613,14 @@ export const createDropzone = (
         app_id: asperaSdk.globals.appId,
       };
 
-      handleHttpGatewayDrop(rawFiles);
-
       if (asperaSdk.isReady) {
         client.request('dropped_files', payload)
           .then((data: any) => callback({event, files: data}))
           .catch(error => {
             errorLog(messages.unableToReadDropped, error);
           });
-      } else {
-        callback({event, files: {dataTransfer: {files}}});
+      } else if (asperaSdk.httpGatewayIsReady) {
+        handleHttpGatewayDrop(event.dataTransfer.items, callback, event);
       }
     }
   };

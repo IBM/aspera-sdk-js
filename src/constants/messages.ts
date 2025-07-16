@@ -29,4 +29,5 @@ export const messages = {
   websocketNotReady: 'The websocket is not ready. Run init first',
   httpNotAvailable: 'IBM Aspera HTTP Gateway is not available',
   httpInitFail: 'IBM Aspera HTTP Gateway could not be started',
+  filePickerCancel: 'User canceled the select file or folder dialog.',
 };

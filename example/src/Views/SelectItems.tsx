@@ -35,7 +35,7 @@ export default function SelectItems() {
       <div className="ending-content">
         {window.selectedFiles.length ? (
           <UnorderedList>
-            {window.selectedFiles.map((file: {name: string; size: number; type: string}) => <ListItem>{file.name} ({file.size} - {file.type})</ListItem>)}
+            {window.selectedFiles.map((file: {name: string; size: number; type: string}, index: number) => <ListItem key={index}>{file.name} ({file.size} - {file.type})</ListItem>)}
           </UnorderedList> ) : (
             <h4>No files selected</h4>
           )

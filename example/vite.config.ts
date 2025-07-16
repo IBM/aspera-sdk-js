@@ -13,7 +13,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    basicSsl()
+    // basicSsl()
   ],
   assetsInclude: ['**/*.md'],
   server: {

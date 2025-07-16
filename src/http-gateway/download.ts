@@ -15,7 +15,7 @@ import {messages} from '../constants/messages';
  * You may not need to import anything from this file.
  */
 export const httpDownload = (transferSpec: TransferSpec): Promise<AsperaSdkTransfer> => {
-  if (!asperaSdk.supportsHttpGateway) {
+  if (!asperaSdk.httpGatewayIsReady) {
     return throwError(messages.serverNotVerified, {type: 'download'});
   }
 

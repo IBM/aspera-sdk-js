@@ -23,9 +23,9 @@ function initializeAspera(supportMulti, httpGatewayUrl, forceHttpGateway) {
    * HTTP Gateway URL can be set to support fallback to a gateway.
    * You can also force it to not start the desktop app.
    */
-  asperaSdk.init({appId, supportMultipleUsers, httpGatewayUrl, forceHttpGateway}).then(() => {
+  asperaSdk.init({appId, supportMultipleUsers, httpGatewayUrl, forceHttpGateway}).then(response => {
     // The SDK started. Transfers and file picker can now be used.
-    alert('SDK started');
+    alert(`SDK started\n\n${JSON.stringify(response, undefined, 2)}`)
   }).catch(error => {
     // The SDK could not start. The app may not be running.
     console.error('SDK could not start', error);

@@ -1,7 +1,7 @@
 import './App.scss';
 import { init, launch, testConnection } from '@ibm-aspera/sdk';
 import { Header, HeaderGlobalAction, HeaderGlobalBar, HeaderName, Theme, Tab, TabList, Tabs, Button } from '@carbon/react';
-import { LogoGithub, Notification, NotificationOff, Sdk } from '@carbon/icons-react';
+import { LogoGithub, Notification, NotificationOff, Sdk, Reset } from '@carbon/icons-react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router';
 import { useEffect, useState } from 'react';
 import hljs from 'highlight.js/lib/core';
@@ -83,6 +83,11 @@ export default function App() {
     setDisableAlert(newValue);
   }
 
+  const resetTestApp = (): void => {
+    localStorage.clear();
+    window.location.reload();
+  }
+
   const openPath = (path: string): void => {
     navigate(path);
   };
@@ -91,6 +96,9 @@ export default function App() {
     <Header aria-label="Carbon Tutorial">
       <HeaderName prefix="IBM Aspera">JavaScript SDK Test Application</HeaderName>
       <HeaderGlobalBar>
+        <HeaderGlobalAction aria-label="Reset test app" tooltipAlignment="end" className="action-icons" onClick={resetTestApp}>
+          <Reset size={20} />
+        </HeaderGlobalAction>
         <HeaderGlobalAction aria-label={disableAlert ? 'Enable alerts (needs reload)' : 'Disable alerts'} tooltipAlignment="end" className="action-icons" onClick={toggleAlert}>
           {disableAlert ? <Notification size={20} /> : <NotificationOff size={20} />}
         </HeaderGlobalAction>

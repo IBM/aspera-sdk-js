@@ -2,6 +2,7 @@ import {AsperaSdk} from './models/aspera-sdk.model';
 import {createDropzone, deregisterActivityCallback, deregisterRemovedCallback, deregisterSafariExtensionStatusCallback, deregisterStatusCallback, getAllTransfers, getInfo, getTransfer, init, initDragDrop, modifyTransfer, registerActivityCallback, registerRemovedCallback, registerSafariExtensionStatusCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showDirectory, showPreferences, showSelectFileDialog, showSelectFolderDialog, startTransfer, stopTransfer, testConnection,} from './app/core';
 import {getInstallerInfo} from './app/installer';
 import {getInstallerUrls, isSafari} from './helpers/helpers';
+import * as httpGatewayCalls from './http-gateway';
 
 export const asperaSdk: AsperaSdk = new AsperaSdk();
 
@@ -34,6 +35,7 @@ asperaSdk.setBranding = setBranding;
 asperaSdk.getInfo = getInfo;
 asperaSdk.isSafari = isSafari;
 asperaSdk.getInstallerUrls = getInstallerUrls;
+asperaSdk.httpGatewayCalls = httpGatewayCalls;
 
 const launch = asperaSdk.globals.launch;
 asperaSdk.launch = launch;

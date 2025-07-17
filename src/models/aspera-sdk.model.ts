@@ -30,7 +30,7 @@ class AsperaSdkGlobals {
   httpGatewayUrl?: string;
   /** Indicate that the HTTP Gateway has been verified as working */
   httpGatewayVerified = false;
-  /** Aspera HTTP Gateway info */
+  /** HTTP Gateway info */
   httpGatewayInfo?: HttpGatewayInfo;
 
   backupLaunchMethod(url: string): void {

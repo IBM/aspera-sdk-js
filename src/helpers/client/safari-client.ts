@@ -1,5 +1,5 @@
 import Client from './client';
-import {randomUUID} from '../helpers';
+import {randomUUID, safeJsonString} from '../helpers';
 import {asperaSdk} from '../../index';
 
 /**
@@ -169,7 +169,7 @@ export class SafariClient implements Client {
         this.dispatchEvent(type, request);
       } else {
         console.warn('The Safari extension is disabled or unresponsive (dispatch event)');
-        console.warn(`Failed event: ${JSON.stringify(request)}`);
+        console.warn(`Failed event: ${safeJsonString(request)}`);
 
         reject('The Safari extension is disabled or unresponsive (dispatch event)');
       }

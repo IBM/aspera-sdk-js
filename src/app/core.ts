@@ -1,6 +1,7 @@
 import {messages} from '../constants/messages';
 import {client} from '../helpers/client/client';
 import {errorLog, generateErrorBody, generatePromiseObjects, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
+import { httpDownload, httpUpload } from '../http-gateway';
 import {getApiCall, handleHttpGatewayDrop, httpGatewaySelectFileFolderDialog} from '../http-gateway/core';
 import {HttpGatewayInfo} from '../http-gateway/models';
 import {asperaSdk} from '../index';
@@ -134,17 +135,19 @@ export const init = (options?: InitOptions): Promise<any> => {
  * Start a transfer
  *
  * @param transferSpec standard transferSpec for transfer
- * @param asperaSdkSpec IBM Aspera settings when starting a transfer
+ * @param asperaSdkSpec IBM Aspera settings when starting a transfer. This is not used when in HTTP Gateway mode
  *
  * @returns a promise that resolves if transfer initiation is successful and rejects if transfer cannot be started
  */
 export const startTransfer = (transferSpec: TransferSpec, asperaSdkSpec: AsperaSdkSpec): Promise<AsperaSdkTransfer> => {
-  if (!asperaSdk.isReady) {
-    return throwError(messages.serverNotVerified);
-  }
-
   if (!isValidTransferSpec(transferSpec)) {
     return throwError(messages.notValidTransferSpec, {transferSpec});
+  }
+
+  if (asperaSdk.useHttpGateway) {
+    return transferSpec.direction === 'receive' ? httpDownload(transferSpec, asperaSdkSpec?.override_http_gateway_url) : httpUpload(transferSpec, asperaSdkSpec?.override_http_gateway_url);
+  } else if (!asperaSdk.isReady) {
+    return throwError(messages.serverNotVerified);
   }
 
   const promiseInfo = generatePromiseObjects();
@@ -261,6 +264,17 @@ export const deregisterSafariExtensionStatusCallback = (id: string): void => {
  * @returns a promise that resolves if transfer is removed and rejects if transfer cannot be removed
  */
 export const removeTransfer = (id: string): Promise<any> => {
+  if (asperaSdk.useHttpGateway) {
+    const transfer = asperaSdk.httpGatewayTransferStore.get(id);
+
+    if (transfer) {
+      asperaSdk.httpGatewayTransferStore.delete(id);
+      return Promise.resolve({removed: true});
+    } else {
+      return Promise.reject(generateErrorBody(messages.removeTransferFailed, {reason: 'Not found'}));
+    }
+  }
+
   if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
@@ -429,6 +443,10 @@ export const showPreferences = (): Promise<any> => {
  * @returns a promise that resolves with an array of transfers.
  */
 export const getAllTransfers = (): Promise<AsperaSdkTransfer[]> => {
+  if (asperaSdk.useHttpGateway) {
+    return Promise.resolve(Array.from(asperaSdk.httpGatewayTransferStore.values()));
+  }
+
   if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
@@ -457,6 +475,16 @@ export const getAllTransfers = (): Promise<AsperaSdkTransfer[]> => {
  * @returns a promise that resolves with the transfer.
  */
 export const getTransfer = (id: string): Promise<AsperaSdkTransfer> => {
+  if (asperaSdk.useHttpGateway) {
+    const transfer = asperaSdk.httpGatewayTransferStore.get(id);
+
+    if (transfer) {
+      return Promise.resolve(transfer);
+    } else {
+      return Promise.reject(generateErrorBody(messages.getTransferFailed, {reason: 'Not found'}));
+    }
+  }
+
   if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }

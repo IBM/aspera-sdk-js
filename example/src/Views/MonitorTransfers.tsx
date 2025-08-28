@@ -47,9 +47,9 @@ export default function MonitorTransfers() {
   }
 
   const getTransferContent = (transfer: any): React.ReactNode => {
-    const running = transfer.status === 'running' || transfer.status === 'queued';
-    const canResume = transfer.status === 'paused';
-    const canOpen = transfer.status === 'completed' && transfer.transfer_spec.direction === 'receive';
+    const running = (transfer.status === 'running' || transfer.status === 'queued') && !transfer.httpGatewayTransfer;
+    const canResume = transfer.status === 'paused' && !transfer.httpGatewayTransfer;
+    const canOpen = transfer.status === 'completed' && transfer.transfer_spec.direction === 'receive' && !transfer.httpGatewayTransfer;
 
     return (
       <ListItem className="transfer-row" key={transfer.uuid} title={transfer.uuid}>

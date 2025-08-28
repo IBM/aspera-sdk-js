@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import hljs from 'highlight.js';
 
 export default function StartTransfer() {
-  const [transferSpec, setTransferSpec] = useState('');
+  const [transferSpec, setTransferSpec] = useState(localStorage.getItem('ASPERA-SDK-TRANSFER-SPEC') || '');
 
   useEffect(() => {
     document.querySelector('.cds--snippet-container > pre > code')?.classList.add('language-javascript');
@@ -20,12 +20,17 @@ export default function StartTransfer() {
     }
   }
 
+  const setTransferSpecItem = (value: string): void => {
+    localStorage.setItem('ASPERA-SDK-TRANSFER-SPEC', value);
+    setTransferSpec(value);
+  }
+
   return (
     <div className="example-pages">
       <h2>Code example</h2>
       <CodeSnippet type="multi" feedback="Copied to clipboard" maxCollapsedNumberOfRows={25}>{window.startTransferAspera.toString()}</CodeSnippet>
       <h2>Try it out</h2>
-      <TextArea className="code-input" value={transferSpec} onChange={value => setTransferSpec(value.target.value)} labelText="Transfer spec" helperText="Paste a transfer spec to test a transfer. For uploads be sure to select the items first on the 'Select items' page." />
+      <TextArea className="code-input" value={transferSpec} onChange={value => setTransferSpecItem(value.target.value)} labelText="Transfer spec" helperText="Paste a transfer spec to test a transfer. For uploads be sure to select the items first on the 'Select items' page." />
       <Button onClick={startTransfer}>Start transfer</Button>
     </div>
   );

@@ -198,6 +198,40 @@ export const getInstallerUrls = (): InstallerUrlInfo => {
   };
 };
 
+/**
+ * Try to stringify a JSON string and log failures
+ *
+ * @param json - Object to make into a string
+ *
+ * @returns string representing JSON or empty string on error
+ */
+export const safeJsonString = (json: unknown): string => {
+  try {
+    return JSON.stringify(json);
+  } catch (error) {
+    errorLog('safeJsonString: unable to stringify JSON', {error, json});
+
+    return '';
+  }
+};
+
+/**
+ * Try to parse a JSON string and log failures
+ *
+ * @param json - String to make into an object
+ *
+ * @returns object or array from the JSON string. Or undefined
+ */
+export const safeJsonParse = (json: string): any|undefined => {
+  try {
+    return JSON.parse(json);
+  } catch (error) {
+    errorLog('safeJsonParse: unable to parse JSON', {error, json});
+
+    return undefined;
+  }
+};
+
 export default {
   errorLog,
   generateErrorBody,
@@ -210,4 +244,6 @@ export default {
   randomUUID,
   throwError,
   getInstallerUrls,
+  safeJsonString,
+  safeJsonParse,
 };

@@ -60,6 +60,10 @@ export const httpUpload = (transferSpec: TransferSpec, overrideServerUrl?: strin
   };
 
   request.upload.addEventListener('progress', event => {
+    if (transferObject.status === 'failed') {
+      return;
+    }
+
     transferObject.status = 'running';
     transferObject.elapsed_usec = (new Date().getTime() - new Date(transferObject.add_time).getTime()) * 1000;
 
@@ -73,6 +77,10 @@ export const httpUpload = (transferSpec: TransferSpec, overrideServerUrl?: strin
   });
 
   request.upload.addEventListener('load', event => {
+    if (transferObject.status === 'failed') {
+      return;
+    }
+
     transferObject.status = 'completed';
     transferObject.elapsed_usec = (new Date().getTime() - new Date(transferObject.add_time).getTime()) * 1000;
 
@@ -86,8 +94,12 @@ export const httpUpload = (transferSpec: TransferSpec, overrideServerUrl?: strin
   });
 
   request.upload.addEventListener('loadstart', () => {
-    promiseInfo.resolver(transferObject);
+    if (transferObject.status === 'failed') {
+      return;
+    }
+
     transferObject.status = 'running';
+    promiseInfo.resolver(transferObject);
     triggerUpdate();
   });
 

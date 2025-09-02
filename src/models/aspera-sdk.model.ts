@@ -419,6 +419,8 @@ export class AsperaSdk {
   getInstallerUrls: () => InstallerUrlInfo;
   /** Aspera HTTP Gateway calls. This normally is not needed by clients but expose just in case. */
   httpGatewayCalls: unknown;
+  /** Store of HTTP Gateway transfers */
+  httpGatewayTransferStore: Map<string, AsperaSdkTransfer> = new Map();
 
   /**
    * Check if IBM Aspera is ready to be used and has been verified.

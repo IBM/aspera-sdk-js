@@ -1,4 +1,4 @@
-import {errorLog, generatePromiseObjects, getWebsocketUrl} from './helpers';
+import {errorLog, generatePromiseObjects, getWebsocketUrl, safeJsonParse, safeJsonString} from './helpers';
 import {messages} from '../constants/messages';
 import {asperaSdk} from '../index';
 import {TransferResponse} from '../models/aspera-sdk.model';
@@ -62,13 +62,7 @@ export class WebsocketService {
    * This function handles messages received from the websocket
    */
   private handleMessage = (message: MessageEvent<string>): void => {
-    let data: WebsocketMessage|undefined;
-
-    try {
-      data = JSON.parse(message.data);
-    } catch (error) {
-      errorLog('Unable to parse Websocket message', {error, message});
-    }
+    const data: WebsocketMessage|undefined = safeJsonParse(message.data);
 
     // Message we get on subscription
     if (data && data.id === 1) {
@@ -93,7 +87,7 @@ export class WebsocketService {
       return false;
     }
 
-    this.globalSocket.send(JSON.stringify({jsonrpc: '2.0', method: 'subscribe_transfer_activity', params: [asperaSdk.globals.appId], id: 1}));
+    this.globalSocket.send(safeJsonString({jsonrpc: '2.0', method: 'subscribe_transfer_activity', params: [asperaSdk.globals.appId], id: 1}));
 
     return true;
   }

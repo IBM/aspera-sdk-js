@@ -37,6 +37,15 @@ module.exports = defineConfig([{
     '@typescript-eslint/no-shadow': ['error', {
       'hoist': 'all',
     }],
+    'semi-style': ['error', 'last'],
+    semi: [2, 'always'],
+    'no-trailing-spaces': ['error'],
+    'no-extra-semi': 'off',
+    'space-in-parens': [2, 'never'],
+    'comma-spacing': [2, {
+      before: false,
+      after: true,
+    }],
     '@typescript-eslint/no-unused-expressions': 'error',
     '@typescript-eslint/no-use-before-define': 'error',
     '@typescript-eslint/prefer-function-type': 'error',

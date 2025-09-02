@@ -7,6 +7,7 @@ import {messages} from '../constants/messages';
  * HTTP Gateway Download Logic
  *
  * @param transferSpec - TransferSpec for the download
+ * @param overrideServerUrl - Server URL to override for transfer
  *
  * @returns Promise that resolves on success invoke or rejects if unable to start
  *
@@ -14,7 +15,7 @@ import {messages} from '../constants/messages';
  * Most logic is called directly by Desktop SDK functions
  * You may not need to import anything from this file.
  */
-export const httpDownload = (transferSpec: TransferSpec): Promise<AsperaSdkTransfer> => {
+export const httpDownload = (transferSpec: TransferSpec, overrideServerUrl?: string): Promise<AsperaSdkTransfer> => {
   if (!asperaSdk.httpGatewayIsReady) {
     return throwError(messages.serverNotVerified, {type: 'download'});
   }

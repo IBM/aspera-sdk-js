@@ -1,7 +1,7 @@
 import {messages} from '../constants/messages';
-import {generatePromiseObjects} from '../helpers/helpers';
+import {generatePromiseObjects, randomUUID, safeJsonParse} from '../helpers/helpers';
 import {asperaSdk} from '../index';
-import {FileDialogOptions, DataTransferResponse} from '../models/models';
+import {FileDialogOptions, DataTransferResponse, TransferSpec, AsperaSdkTransfer} from '../models/models';
 import {HttpGatewayDownload, HttpGatewayDownloadLegacy, HttpGatewayInfo, HttpGatewayPresign, HttpGatewayUpload} from './models';
 
 /**
@@ -15,13 +15,13 @@ import {HttpGatewayDownload, HttpGatewayDownloadLegacy, HttpGatewayInfo, HttpGat
  */
 
 /**
- * Get an API call for HTTP Gateway calls
+ * Get an API call for HTTP Gateway calls. Upload needs to use XHR for monitoring status.
  *
  * @param type - The type of API call to make
  *
  * @returns
  */
-export const getApiCall = (type: 'INFO'|'DOWNLOAD'|'UPLOAD'|'PRESIGN', body?: BodyInit, customHeaders?: HeadersInit): Promise<HttpGatewayInfo|HttpGatewayDownloadLegacy|HttpGatewayDownload|HttpGatewayUpload|HttpGatewayPresign> => {
+export const getApiCall = (type: 'INFO'|'DOWNLOAD'|'PRESIGN', body?: BodyInit, customHeaders?: HeadersInit): Promise<HttpGatewayInfo|HttpGatewayDownloadLegacy|HttpGatewayDownload|HttpGatewayUpload|HttpGatewayPresign> => {
   const headers: HeadersInit = {
     ...(customHeaders || {})
   };
@@ -32,16 +32,25 @@ export const getApiCall = (type: 'INFO'|'DOWNLOAD'|'UPLOAD'|'PRESIGN', body?: Bo
   case 'DOWNLOAD':
     baseCall = fetch(`${asperaSdk.globals.httpGatewayUrl}/download`, {method: 'GET', headers: headers});
     break;
-  case 'UPLOAD':
-    baseCall = fetch(`${asperaSdk.globals.httpGatewayUrl}/upload`, {method: 'GET', headers: headers});
-    break;
   case 'PRESIGN':
     baseCall = fetch(`${asperaSdk.globals.httpGatewayUrl}/presign`, {method: 'POST', body: body, headers: headers});
     break;
   }
 
   return baseCall.then(response => {
-    if (response.headers.get('Content-Type') === 'application/json') {
+    const jsonResponse = response.headers.get('Content-Type') === 'application/json';
+
+    if (!response.ok) {
+      if (jsonResponse) {
+        return response.json().then(data => {
+          return Promise.reject(data);
+        });
+      }
+
+      return Promise.reject(response.body);
+    }
+
+    if (jsonResponse) {
       return response.json();
     }
 
@@ -169,4 +178,78 @@ export const httpGatewaySelectFileFolderDialog = (options?: FileDialogOptions, f
   element.click();
 
   return promise;
+};
+
+/**
+ * Get a generic transfer object for HTTP Gateway transfers.
+ *
+ * @param transferSpec - TransferSpec being provided for the HTTP Gateway transfer
+ *
+ * @returns a transfer object to track status and send to consumers
+ */
+export const getSdkTransfer = (transferSpec: TransferSpec): AsperaSdkTransfer => {
+  return {
+    uuid: randomUUID(),
+    transfer_spec: transferSpec,
+    current_file: '',
+    add_time: new Date().toISOString(),
+    file_counts: {
+      attempted: 0,
+      completed: 0,
+      failed: 0,
+      skipped: 0,
+    },
+    end_time: '',
+    explorer_path: '',
+    status: 'queued',
+    bytes_written: 0,
+    bytes_expected: 0,
+    calculated_rate_kbps: 0,
+    elapsed_usec: 0,
+    percentage: 0,
+    title: '',
+    remaining_usec: 0,
+    httpGatewayTransfer: true,
+  };
+};
+
+/**
+ * Send a transfer update through the SDK
+ *
+ * @param transfer - Transsfer object to send to consumers
+ */
+export const sendTransferUpdate = (transfer: AsperaSdkTransfer): void => {
+  asperaSdk.httpGatewayTransferStore.set(transfer.uuid, transfer);
+  asperaSdk.activityTracking.handleTransferActivity({
+    type: 'transferUpdated',
+    data: {transfers: [transfer]},
+  });
+};
+
+/**
+ * Try to parse and get a useful string from API calls for HTTP Gateway
+ *
+ * @param error - Error from API call for Gateway
+ *
+ * @returns a string to use for errors
+ */
+export const getMessageFromError = (error: any): {message: string, code: number} => {
+  const data = safeJsonParse(error);
+  let message = messages.httpNetworkFail;
+  let code = 500;
+
+  if (data && typeof data === 'object') {
+    message = data.message || data.description || messages.httpNetworkFail;
+    code = data.code || 500;
+  } else if (error && typeof error === 'object') {
+    message = error.message || error.description || messages.httpNetworkFail;
+    code = error.code || 500;
+  } else if (typeof error === 'string') {
+    message = error;
+  }
+
+  return {
+    message,
+    code,
+  };
 };

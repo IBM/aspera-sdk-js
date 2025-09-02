@@ -1,6 +1,6 @@
 import {JSONRPCClient, JSONRPCRequest} from 'json-rpc-2.0';
 import Client from './client';
-import {generatePromiseObjects} from '../helpers';
+import {generatePromiseObjects, safeJsonString} from '../helpers';
 import {asperaSdk} from '../../index';
 
 export const getRpcServerUrl = (): string => {
@@ -49,7 +49,7 @@ class JSONRPCHttpClient {
       headers: {
         'content-type': 'application/json',
       },
-      body: JSON.stringify(request),
+      body: safeJsonString(request),
     };
 
     const rpcServerURL = getRpcServerUrl();

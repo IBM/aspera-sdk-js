@@ -144,6 +144,11 @@ export interface AsperaSdkSpec {
    * alongside the transfer.
    */
   preview_base64?: string;
+  /**
+   * HTTP Gateway Server override. This will not verify server but switch a transfer to use
+   * this server instead of the default one that initiated the SDK.
+   */
+  override_http_gateway_url?: string;
 }
 
 export interface Path {
@@ -405,7 +410,7 @@ export interface AsperaSdkTransfer {
   /** The transferSpec that started the transfer (secrets redacted) */
   transfer_spec: TransferSpec;
   /** ISO date string when transfer was started */
-  // add_time: string; // FIXME: Not yet added in SDK
+  add_time: string;
   /** The name of the current file being transferred */
   current_file: string;
   /** The count of files being transferred */
@@ -426,9 +431,9 @@ export interface AsperaSdkTransfer {
   /** The status of the transfer */
   status: TransferStatus;
   /** The transfer error description if the status is error */
-  error_desc: string;
+  error_desc?: string;
   /** The transfer error code (SSH or HTTP) if the status is error */
-  error_code: number;
+  error_code?: number;
   /** The number of bytes written to storage for this transfer */
   bytes_written: number;
   /** The number of bytes expected to be written to storage for this transfer */
@@ -440,9 +445,11 @@ export interface AsperaSdkTransfer {
   /** The percentage of the transfer 0 - 1 (0.6 = 60%) */
   percentage: number;
   /** Remaining time in microseconds */
-  // remaining_usec: number; // FIXME: Not yet added in SDK
+  remaining_usec: number;
   /** The title of the transfer */
   title: string;
+  /** Indicate if HTTP Gateway transfer */
+  httpGatewayTransfer?: boolean;
 }
 
 export interface InstallerInfo {

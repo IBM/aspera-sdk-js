@@ -440,4 +440,13 @@ export class AsperaSdk {
   get useHttpGateway(): boolean {
     return this.httpGatewayIsReady && !this.isReady;
   }
+
+  /** Indicates if old HTTP Gateway SDK should be used (v2 and lower) */
+  get useOldHttpGateway(): boolean {
+    if (!this.useHttpGateway) {
+      return false;
+    }
+
+    return Number(this.globals.httpGatewayInfo.version.split('.')[0] || 3) <= 2;
+  }
 }

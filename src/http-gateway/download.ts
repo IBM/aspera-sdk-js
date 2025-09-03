@@ -3,6 +3,7 @@ import {asperaSdk} from '../index';
 import {safeJsonString, throwError} from '../helpers/helpers';
 import {messages} from '../constants/messages';
 import { base64Encoding, getMessageFromError, getSdkTransfer, sendTransferUpdate } from './core';
+import {download as oldHttpDownload} from '@ibm-aspera/http-gateway-sdk-js';
 
 /**
  * HTTP Gateway Download Logic
@@ -21,6 +22,10 @@ import { base64Encoding, getMessageFromError, getSdkTransfer, sendTransferUpdate
 export const httpDownload = (transferSpec: TransferSpec, overrideServerUrl?: string): Promise<AsperaSdkTransfer> => {
   if (!asperaSdk.httpGatewayIsReady) {
     return throwError(messages.serverNotVerified, {type: 'download'});
+  }
+
+  if (asperaSdk.useOldHttpGateway) {
+    return oldHttpDownload(transferSpec);
   }
 
   // create a transfer sdk object

@@ -2,11 +2,12 @@ import {messages} from '../constants/messages';
 import {client} from '../helpers/client/client';
 import {errorLog, generateErrorBody, generatePromiseObjects, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
 import { httpDownload, httpUpload } from '../http-gateway';
-import {getApiCall, handleHttpGatewayDrop, httpGatewaySelectFileFolderDialog} from '../http-gateway/core';
+import {handleHttpGatewayDrop, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, sendTransferUpdate} from '../http-gateway/core';
 import {HttpGatewayInfo} from '../http-gateway/models';
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
 import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent} from '../models/models';
+import {registerActivityCallback as oldHttpRegisterActivityCallback} from '@ibm-aspera/http-gateway-sdk-js';
 
 /**
  * Check if IBM Aspera for Desktop connection works. This function is called by init
@@ -79,6 +80,13 @@ export const init = (options?: InitOptions): Promise<any> => {
 
   asperaSdk.globals.appId = appId;
 
+  // Watch for old HTTP Gateway transfers in case used.
+  oldHttpRegisterActivityCallback(oldHttpTransfers => {
+    oldHttpTransfers.transfers.forEach(oldHttpTransfer => {
+      sendTransferUpdate(oldHttpTransfer as unknown as AsperaSdkTransfer);
+    });
+  });
+
   if (supportMultipleUsers) {
     asperaSdk.globals.supportMultipleUsers = true;
     asperaSdk.globals.sessionId = randomUUID();
@@ -111,7 +119,7 @@ export const init = (options?: InitOptions): Promise<any> => {
 
     asperaSdk.globals.httpGatewayUrl = finalHttpGatewayUrl;
 
-    return getApiCall('INFO').then((response: HttpGatewayInfo) => {
+    return fetch(`${asperaSdk.globals.httpGatewayUrl}/info`, {method: 'GET'}).then(response => response.json()).then((response: HttpGatewayInfo) => {
       asperaSdk.globals.httpGatewayInfo = response;
       asperaSdk.globals.httpGatewayVerified = true;
 
@@ -145,7 +153,7 @@ export const startTransfer = (transferSpec: TransferSpec, asperaSdkSpec: AsperaS
   }
 
   if (asperaSdk.useHttpGateway) {
-    return transferSpec.direction === 'receive' ? httpDownload(transferSpec, asperaSdkSpec?.override_http_gateway_url) : httpUpload(transferSpec, asperaSdkSpec?.override_http_gateway_url);
+    return transferSpec.direction === 'receive' ? httpDownload(transferSpec, asperaSdkSpec?.override_http_gateway_url) : httpUpload(transferSpec, asperaSdkSpec?.override_http_gateway_url, asperaSdkSpec?.oldHttpGatewayTransferId);
   } else if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
@@ -265,14 +273,7 @@ export const deregisterSafariExtensionStatusCallback = (id: string): void => {
  */
 export const removeTransfer = (id: string): Promise<any> => {
   if (asperaSdk.useHttpGateway) {
-    const transfer = asperaSdk.httpGatewayTransferStore.get(id);
-
-    if (transfer) {
-      asperaSdk.httpGatewayTransferStore.delete(id);
-      return Promise.resolve({removed: true});
-    } else {
-      return Promise.reject(generateErrorBody(messages.removeTransferFailed, {reason: 'Not found'}));
-    }
+    return httpRemoveTransfer(id);
   }
 
   if (!asperaSdk.isReady) {
@@ -444,7 +445,7 @@ export const showPreferences = (): Promise<any> => {
  */
 export const getAllTransfers = (): Promise<AsperaSdkTransfer[]> => {
   if (asperaSdk.useHttpGateway) {
-    return Promise.resolve(Array.from(asperaSdk.httpGatewayTransferStore.values()));
+    return Promise.resolve(httpGetAllTransfers());
   }
 
   if (!asperaSdk.isReady) {
@@ -476,7 +477,7 @@ export const getAllTransfers = (): Promise<AsperaSdkTransfer[]> => {
  */
 export const getTransfer = (id: string): Promise<AsperaSdkTransfer> => {
   if (asperaSdk.useHttpGateway) {
-    const transfer = asperaSdk.httpGatewayTransferStore.get(id);
+    const transfer = httpGetTransfer(id);
 
     if (transfer) {
       return Promise.resolve(transfer);

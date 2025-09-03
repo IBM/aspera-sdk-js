@@ -22,6 +22,8 @@ export interface FileDialogOptions {
   multiple?: boolean;
   /** The file types to filter by */
   filters?: FileFilter[];
+  /** ID for old HTTP gateway (v2) */
+  oldHttpGatewayTransferId?: string;
 }
 
 export interface FolderDialogOptions {
@@ -149,6 +151,8 @@ export interface AsperaSdkSpec {
    * this server instead of the default one that initiated the SDK.
    */
   override_http_gateway_url?: string;
+  /** ID for old HTTP gateway (v2) */
+  oldHttpGatewayTransferId?: string;
 }
 
 export interface Path {

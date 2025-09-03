@@ -3,12 +3,14 @@ import {asperaSdk} from '../index';
 import {generatePromiseObjects, safeJsonString, throwError} from '../helpers/helpers';
 import {messages} from '../constants/messages';
 import {getMessageFromError, getSdkTransfer, sendTransferUpdate} from './core';
+import {upload as oldHttpUpload} from '@ibm-aspera/http-gateway-sdk-js';
 
 /**
  * HTTP Gateway Upload Logic
  *
  * @param transferSpec - TransferSpec for the upload
  * @param overrideServerUrl - Server URL to override for transfer
+ * @param oldHttpGatewayTransferId - Old gateway ID for legacy gateway servers
  *
  * @returns Promise that resolves on success invoke or rejects if unable to start
  *
@@ -16,9 +18,13 @@ import {getMessageFromError, getSdkTransfer, sendTransferUpdate} from './core';
  * Most logic is called directly by Desktop SDK functions
  * You may not need to import anything from this file.
  */
-export const httpUpload = (transferSpec: TransferSpec, overrideServerUrl?: string): Promise<AsperaSdkTransfer> => {
+export const httpUpload = (transferSpec: TransferSpec, overrideServerUrl?: string, oldHttpGatewayTransferId?: string): Promise<AsperaSdkTransfer> => {
   if (!asperaSdk.httpGatewayIsReady) {
     return throwError(messages.serverNotVerified, {type: 'upload'});
+  }
+
+  if (asperaSdk.useOldHttpGateway) {
+    return oldHttpUpload(transferSpec, oldHttpGatewayTransferId || '');
   }
 
   const promiseInfo = generatePromiseObjects();

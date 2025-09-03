@@ -1,8 +1,8 @@
 import {messages} from '../constants/messages';
-import {generatePromiseObjects, randomUUID, safeJsonParse} from '../helpers/helpers';
+import {generateErrorBody, generatePromiseObjects, randomUUID, safeJsonParse} from '../helpers/helpers';
 import {asperaSdk} from '../index';
+import {removeTransfer as oldHttpRemoveTransfer, getAllTransfers as oldHttpGetAllTransfers, getTransferById as oldHttpGetTransfer, getFilesForUploadPromise as oldHttpGetFilesForUploadPromise, getFoldersForUploadPromise as oldHttpGetFoldersForUploadPromise} from '@ibm-aspera/http-gateway-sdk-js';
 import {FileDialogOptions, DataTransferResponse, TransferSpec, AsperaSdkTransfer} from '../models/models';
-import {HttpGatewayDownload, HttpGatewayDownloadLegacy, HttpGatewayInfo, HttpGatewayPresign, HttpGatewayUpload} from './models';
 
 /**
  * HTTP Gateway Core Logic
@@ -15,47 +15,52 @@ import {HttpGatewayDownload, HttpGatewayDownloadLegacy, HttpGatewayInfo, HttpGat
  */
 
 /**
- * Get an API call for HTTP Gateway calls. Upload needs to use XHR for monitoring status.
+ * Remove a transfer from HTTP Gateway systems
+ * @param id - ID of the transfer
  *
- * @param type - The type of API call to make
- *
- * @returns
+ * @returns Promise indicating success
  */
-export const getApiCall = (type: 'INFO'|'DOWNLOAD'|'PRESIGN', body?: BodyInit, customHeaders?: HeadersInit): Promise<HttpGatewayInfo|HttpGatewayDownloadLegacy|HttpGatewayDownload|HttpGatewayUpload|HttpGatewayPresign> => {
-  const headers: HeadersInit = {
-    ...(customHeaders || {})
-  };
+export const httpRemoveTransfer = (id: string): Promise<any> => {
+  if (asperaSdk.useOldHttpGateway) {
+    oldHttpRemoveTransfer(id);
 
-  let baseCall = fetch(`${asperaSdk.globals.httpGatewayUrl}/info`, {method: 'GET', headers: headers});
-
-  switch (type) {
-  case 'DOWNLOAD':
-    baseCall = fetch(`${asperaSdk.globals.httpGatewayUrl}/download`, {method: 'GET', headers: headers});
-    break;
-  case 'PRESIGN':
-    baseCall = fetch(`${asperaSdk.globals.httpGatewayUrl}/presign`, {method: 'POST', body: body, headers: headers});
-    break;
+    return Promise.resolve({removed: true});
   }
 
-  return baseCall.then(response => {
-    const jsonResponse = response.headers.get('Content-Type') === 'application/json';
+  const transfer = asperaSdk.httpGatewayTransferStore.get(id);
 
-    if (!response.ok) {
-      if (jsonResponse) {
-        return response.json().then(data => {
-          return Promise.reject(data);
-        });
-      }
+  if (transfer) {
+    asperaSdk.httpGatewayTransferStore.delete(id);
+    return Promise.resolve({removed: true});
+  } else {
+    return Promise.reject(generateErrorBody(messages.removeTransferFailed, {reason: 'Not found'}));
+  }
+};
 
-      return Promise.reject(response.body);
-    }
+/**
+ * Get the list of http gateway transfers
+ *
+ * @returns list of HTTP Gateway
+ */
+export const httpGetAllTransfers = (): AsperaSdkTransfer[] => {
+  if (asperaSdk.useOldHttpGateway) {
+    return oldHttpGetAllTransfers().transfers as unknown as AsperaSdkTransfer[];
+  }
 
-    if (jsonResponse) {
-      return response.json();
-    }
+  return Array.from(asperaSdk.httpGatewayTransferStore.values());
+};
 
-    return response.body;
-  });
+/**
+ * Get a HTTP Gateway transfer by ID
+ *
+ * @returns a transfer or null
+ */
+export const httpGetTransfer = (id: string): AsperaSdkTransfer|null => {
+  if (asperaSdk.useOldHttpGateway) {
+    return oldHttpGetTransfer(id) as unknown as AsperaSdkTransfer|null;
+  }
+
+  return asperaSdk.httpGatewayTransferStore.get(id);
 };
 
 /**
@@ -139,6 +144,10 @@ export const handleHttpGatewayDrop = (items: DataTransferItemList, callback: (da
  * @returns Promise that resolves with info about the files picked
  */
 export const httpGatewaySelectFileFolderDialog = (options?: FileDialogOptions, folder?: boolean): Promise<DataTransferResponse> => {
+  if (asperaSdk.useOldHttpGateway) {
+    return (folder ? oldHttpGetFoldersForUploadPromise(options?.oldHttpGatewayTransferId || '') : oldHttpGetFilesForUploadPromise(options?.oldHttpGatewayTransferId || '')) as Promise<DataTransferResponse>;
+  }
+
   const {promise, rejecter, resolver} = generatePromiseObjects();
   const element = createHtmlInputElement();
 

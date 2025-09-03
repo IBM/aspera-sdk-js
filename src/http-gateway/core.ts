@@ -253,3 +253,11 @@ export const getMessageFromError = (error: any): {message: string, code: number}
     code,
   };
 };
+
+export const base64Encoding = (jsonString: string): string => {
+  const bytes = new TextEncoder().encode(jsonString);
+  const binString = Array.from(bytes, (byte) =>
+    String.fromCodePoint(byte),
+  ).join('');
+  return btoa(binString);
+};

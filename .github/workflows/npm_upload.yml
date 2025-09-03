@@ -26,7 +26,7 @@ jobs:
           sed -i -e 's/npm --prefix .\/example ci//g' package.json
 
       - name: Publish
-        uses: JS-DevTools/npm-publish@v1
+        uses: JS-DevTools/npm-publish@v3
         with:
           access: public
           token: ${{ secrets.NPM_TOKEN }}

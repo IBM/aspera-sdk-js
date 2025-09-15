@@ -58,7 +58,7 @@ export const httpUpload = (transferSpec: TransferSpec, overrideServerUrl?: strin
 
   const triggerFailed = (): void => {
     const errorData = getMessageFromError(request.response);
-
+    transferObject.httpRequestId = request.getResponseHeader('X-Request-Id');
     transferObject.status = 'failed';
     transferObject.error_code = errorData.code;
     transferObject.error_desc = errorData.message;
@@ -69,7 +69,6 @@ export const httpUpload = (transferSpec: TransferSpec, overrideServerUrl?: strin
     if (transferObject.status === 'failed') {
       return;
     }
-
     transferObject.status = 'running';
     transferObject.elapsed_usec = (new Date().getTime() - new Date(transferObject.add_time).getTime()) * 1000;
 
@@ -80,6 +79,10 @@ export const httpUpload = (transferSpec: TransferSpec, overrideServerUrl?: strin
     }
 
     triggerUpdate();
+  });
+
+  request.addEventListener('load', () => {
+    transferObject.httpRequestId = request.getResponseHeader('X-Request-Id');
   });
 
   request.upload.addEventListener('load', event => {

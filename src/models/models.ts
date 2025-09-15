@@ -454,6 +454,8 @@ export interface AsperaSdkTransfer {
   title: string;
   /** Indicate if HTTP Gateway transfer */
   httpGatewayTransfer?: boolean;
+  /** Indicate the request id of the HTTP Gateway transfer */
+  httpRequestId?: string;
 }
 
 export interface InstallerInfo {

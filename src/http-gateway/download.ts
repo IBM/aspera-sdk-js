@@ -44,6 +44,7 @@ export const httpDownload = (transferSpec: TransferSpec, overrideServerUrl?: str
 
   fetch(`${overrideServerUrl || asperaSdk.globals.httpGatewayUrl}/download`, {method: 'GET', headers: {'X-Aspera-Spec': base64Encoding(safeJsonString(transferSpec))}}).then(data => {
     const headers = data.headers;
+    transferObject.httpRequestId = headers.get('X-Request-Id');
     const chunks: Uint8Array<ArrayBuffer>[] = [];
     const reader = data.body.getReader();
     transferObject.status = 'running';

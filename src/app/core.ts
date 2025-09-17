@@ -119,9 +119,24 @@ export const init = (options?: InitOptions): Promise<any> => {
 
     asperaSdk.globals.httpGatewayUrl = finalHttpGatewayUrl;
 
-    return fetch(`${asperaSdk.globals.httpGatewayUrl}/info`, {method: 'GET'}).then(response => response.json()).then((response: HttpGatewayInfo) => {
+    return fetch(`${asperaSdk.globals.httpGatewayUrl}/info`, {method: 'GET'}).then(response => {
+      return response.json().then(responseData => {
+        if (response.status >= 400) {
+          throw Error(responseData);
+        }
+
+        return responseData;
+      });
+    }).then((response: HttpGatewayInfo) => {
       asperaSdk.globals.httpGatewayInfo = response;
       asperaSdk.globals.httpGatewayVerified = true;
+
+      const iframeContainer = document.createElement('div');
+      iframeContainer.id = 'aspera-http-gateway-iframes';
+      iframeContainer.style = 'display: none;';
+      document.body.appendChild(iframeContainer);
+
+      asperaSdk.globals.httpGatewayIframeContainer = iframeContainer;
 
       if (options.forceHttpGateway) {
         return Promise.resolve(asperaSdk.globals.sdkResponseData);

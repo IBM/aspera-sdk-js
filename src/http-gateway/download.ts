@@ -4,9 +4,11 @@ import {safeJsonString, throwError} from '../helpers/helpers';
 import {messages} from '../constants/messages';
 import { base64Encoding, getMessageFromError, getSdkTransfer, sendTransferUpdate } from './core';
 import {download as oldHttpDownload} from '@ibm-aspera/http-gateway-sdk-js';
+import { HttpGatewayPresign } from './models';
 
 /**
- * HTTP Gateway Download Logic
+ * HTTP Gateway Download Logic for presigned flow
+ * Presigned flow is when used files are too large or unknown file size
  *
  * @param transferSpec - TransferSpec for the download
  * @param overrideServerUrl - Server URL to override for transfer
@@ -14,20 +16,89 @@ import {download as oldHttpDownload} from '@ibm-aspera/http-gateway-sdk-js';
  * @returns Promise that resolves on success invoke or rejects if unable to start
  *
  * @remarks
- * Most logic is called directly by Desktop SDK functions
- * You may not need to import anything from this file.
- *
- * @todo Handle large files
+ * This function is used internally and not exported.
  */
-export const httpDownload = (transferSpec: TransferSpec, overrideServerUrl?: string): Promise<AsperaSdkTransfer> => {
-  if (!asperaSdk.httpGatewayIsReady) {
-    return throwError(messages.serverNotVerified, {type: 'download'});
-  }
+const httpDownloadPresigned = (transferSpec: TransferSpec, overrideServerUrl?: string): Promise<AsperaSdkTransfer> => {
+  // create a transfer sdk object
+  const transferObject = getSdkTransfer(transferSpec);
+  transferObject.httpDownloadExternalHandle = true;
+  sendTransferUpdate(transferObject);
 
-  if (asperaSdk.useOldHttpGateway) {
-    return oldHttpDownload(transferSpec);
-  }
+  const triggerFailed = (error: any): void => {
+    const errorData = getMessageFromError(error.response || error);
 
+    transferObject.status = 'failed';
+    transferObject.error_code = errorData.code;
+    transferObject.error_desc = errorData.message;
+    sendTransferUpdate(transferObject);
+  };
+
+  const url = new URL(overrideServerUrl || asperaSdk.globals.httpGatewayUrl);
+
+  return fetch(
+    `${url.toString()}/presign`,
+    {
+      method: 'POST',
+      body: safeJsonString({
+        transfer_spec: transferSpec,
+        method: 'GET',
+        protocol: 'http',
+        headers: {
+          host: url.host,
+        },
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+        accept: 'application/json',
+      },
+    },
+  ).then(response => {
+    return response.json().then(data => {
+      return {
+        headers: response.headers,
+        body: data as HttpGatewayPresign,
+        status: response.status,
+      };
+    });
+  }).then(response => {
+    if (response.status >= 400) {
+      triggerFailed(response.body);
+
+      return transferObject;
+    }
+
+    transferObject.httpRequestId = response.headers.get('X-Request-Id');
+    transferObject.status = 'running';
+    sendTransferUpdate(transferObject);
+
+    const iframe = document.createElement('iframe');
+    iframe.src = response.body.signed_url;
+    iframe.width = '1px';
+    iframe.height = '1px';
+
+    asperaSdk.globals.httpGatewayIframeContainer.appendChild(iframe);
+
+    return transferObject;
+  }).catch(error => {
+    triggerFailed(error);
+
+    return transferObject;
+  });
+};
+
+/**
+ * HTTP Gateway Download Logic for in browser download with progress
+ * This is used when the transfer size is known and under the threshold
+ *
+ * @param transferSpec - TransferSpec for the download
+ * @param overrideServerUrl - Server URL to override for transfer
+ *
+ * @returns Promise that resolves on success invoke or rejects if unable to start
+ *
+ * @remarks
+ * This function is used internally and not exported.
+ */
+const httpDownloadInBrowser = (transferSpec: TransferSpec, overrideServerUrl?: string): Promise<AsperaSdkTransfer> => {
   // create a transfer sdk object
   const transferObject = getSdkTransfer(transferSpec);
 
@@ -92,4 +163,37 @@ export const httpDownload = (transferSpec: TransferSpec, overrideServerUrl?: str
   });
 
   return Promise.resolve(transferObject);
+};
+
+/**
+ * HTTP Gateway Download Logic
+ *
+ * @param transferSpec - TransferSpec for the download
+ * @param overrideServerUrl - Server URL to override for transfer
+ *
+ * @returns Promise that resolves on success invoke or rejects if unable to start
+ *
+ * @remarks
+ * Most logic is called directly by Desktop SDK functions
+ * You may not need to import anything from this file.
+ */
+export const httpDownload = (transferSpec: TransferSpec, overrideServerUrl?: string): Promise<AsperaSdkTransfer> => {
+  if (!asperaSdk.httpGatewayIsReady) {
+    return throwError(messages.serverNotVerified, {type: 'download'});
+  }
+
+  if (asperaSdk.useOldHttpGateway) {
+    return oldHttpDownload(transferSpec);
+  }
+
+  if (
+    transferSpec.tags &&
+    transferSpec.tags.aspera &&
+    transferSpec.tags.aspera['http-gateway'] &&
+    transferSpec.tags.aspera['http-gateway'].expected_size <= asperaSdk.httpGatewayInBrowserDownloadThreshold
+  ) {
+    return httpDownloadInBrowser(transferSpec, overrideServerUrl);
+  } else {
+    return httpDownloadPresigned(transferSpec, overrideServerUrl);
+  }
 };

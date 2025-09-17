@@ -219,6 +219,7 @@ export const getSdkTransfer = (transferSpec: TransferSpec): AsperaSdkTransfer =>
     title: '',
     remaining_usec: 0,
     httpGatewayTransfer: true,
+    httpDownloadExternalHandle: false,
   };
 };
 

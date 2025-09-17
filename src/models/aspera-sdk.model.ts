@@ -32,6 +32,8 @@ class AsperaSdkGlobals {
   httpGatewayVerified = false;
   /** HTTP Gateway info */
   httpGatewayInfo?: HttpGatewayInfo;
+  /** Http Gateway IFRAME container */
+  httpGatewayIframeContainer?: HTMLDivElement;
 
   backupLaunchMethod(url: string): void {
     window.alert(messages.loadingProtocol);
@@ -421,6 +423,8 @@ export class AsperaSdk {
   httpGatewayCalls: unknown;
   /** Store of HTTP Gateway transfers */
   httpGatewayTransferStore: Map<string, AsperaSdkTransfer> = new Map();
+  /** HTTP Gateway in app threshold limit. This can be changed globally for the app. */
+  httpGatewayInBrowserDownloadThreshold = 1000000000;
 
   /**
    * Check if IBM Aspera is ready to be used and has been verified.

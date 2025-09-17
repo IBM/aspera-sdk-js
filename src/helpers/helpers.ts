@@ -223,6 +223,10 @@ export const safeJsonString = (json: unknown): string => {
  * @returns object or array from the JSON string. Or undefined
  */
 export const safeJsonParse = (json: string): any|undefined => {
+  if (json && typeof json === 'object') {
+    return json;
+  }
+
   try {
     return JSON.parse(json);
   } catch (error) {

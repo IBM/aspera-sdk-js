@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.9](https://github.com/IBM/aspera-sdk-js/compare/v0.2.8...v0.2.9) (2025-09-18)
+
+
+### Features
+
+* **#39:** init HTTP Gateway basic setup ([#97](https://github.com/IBM/aspera-sdk-js/issues/97)) ([ec5e1e3](https://github.com/IBM/aspera-sdk-js/commit/ec5e1e38be10597c8fbe92c429c28cf2697208a3)), closes [#39](https://github.com/IBM/aspera-sdk-js/issues/39)
+* download via presign ([#119](https://github.com/IBM/aspera-sdk-js/issues/119)) ([a1a11f9](https://github.com/IBM/aspera-sdk-js/commit/a1a11f967a741c4a873e23822f754e4663b72208))
+* drag and drop for folders and file pickers ([#101](https://github.com/IBM/aspera-sdk-js/issues/101)) ([42bb703](https://github.com/IBM/aspera-sdk-js/commit/42bb703d41e028c862635e0671e24d46e25bbb36))
+* http-gateway download support ([#109](https://github.com/IBM/aspera-sdk-js/issues/109)) ([a507ccf](https://github.com/IBM/aspera-sdk-js/commit/a507ccf10d4ba1d0f0218f7a9de7dc089c183bbc))
+* upload support for HTTP Gateway ([#103](https://github.com/IBM/aspera-sdk-js/issues/103)) ([d7c3e52](https://github.com/IBM/aspera-sdk-js/commit/d7c3e52ff12203703fb1646c38c2bf47f13e50ab))
+
+
+### Bug Fixes
+
+* **#113:** add request-id header ([#117](https://github.com/IBM/aspera-sdk-js/issues/117)) ([895711c](https://github.com/IBM/aspera-sdk-js/commit/895711cf5670b2f54ecef1261fcd113d236a75d9)), closes [#113](https://github.com/IBM/aspera-sdk-js/issues/113)
+* **#118:** support auth headers for http gateway ([#125](https://github.com/IBM/aspera-sdk-js/issues/125)) ([4a0a958](https://github.com/IBM/aspera-sdk-js/commit/4a0a958701e55c37079782b53ad372278dfe82c8)), closes [#118](https://github.com/IBM/aspera-sdk-js/issues/118)
+* **#39:** file picking and clean up init logic ([#99](https://github.com/IBM/aspera-sdk-js/issues/99)) ([682703c](https://github.com/IBM/aspera-sdk-js/commit/682703cfabd2e4981296cb45a996f9a8b788cf59)), closes [#39](https://github.com/IBM/aspera-sdk-js/issues/39)
+* **#59:** remove safari callbacks ([#129](https://github.com/IBM/aspera-sdk-js/issues/129)) ([f6a181c](https://github.com/IBM/aspera-sdk-js/commit/f6a181ceab18777900f34adcd9444f35d2440dc6)), closes [#59](https://github.com/IBM/aspera-sdk-js/issues/59)
+* add HTTP Gateway v2 SDK ([#102](https://github.com/IBM/aspera-sdk-js/issues/102)) ([fafee9d](https://github.com/IBM/aspera-sdk-js/commit/fafee9d04f4c27cd5444f157a5b17c2e9fad6382))
+* build docs migration ([#90](https://github.com/IBM/aspera-sdk-js/issues/90)) ([a8844af](https://github.com/IBM/aspera-sdk-js/commit/a8844af7659afefff8022272c19de74a349ab6de))
+* HTTP initial setup structure ([#96](https://github.com/IBM/aspera-sdk-js/issues/96)) ([efc0351](https://github.com/IBM/aspera-sdk-js/commit/efc0351632e549c667323487f33803df0c2d682c))
+* if failed upload http do not reset on other changes. ([#104](https://github.com/IBM/aspera-sdk-js/issues/104)) ([6333708](https://github.com/IBM/aspera-sdk-js/commit/633370883408219895b0c7545ab4fad887ad4bbf))
+* update deps ([#105](https://github.com/IBM/aspera-sdk-js/issues/105)) ([9f2d33a](https://github.com/IBM/aspera-sdk-js/commit/9f2d33af52ef6eefedfff390680cc62b6888f5fa))
+* update libs and typo ([#128](https://github.com/IBM/aspera-sdk-js/issues/128)) ([90ba81a](https://github.com/IBM/aspera-sdk-js/commit/90ba81a4d359bb5b2ef881088254d5eb1a26298a))
+* update security and migrate jest and eslint ([#87](https://github.com/IBM/aspera-sdk-js/issues/87)) ([d460133](https://github.com/IBM/aspera-sdk-js/commit/d4601337f8d4b70050a414051849608eafc783b2))
+* v2 support for http gateway ([#110](https://github.com/IBM/aspera-sdk-js/issues/110)) ([a7f35b8](https://github.com/IBM/aspera-sdk-js/commit/a7f35b845a32959c477bbcca13777a14ad01948d))
+
 ### [0.2.8](https://github.com/IBM/aspera-sdk-js/compare/v0.2.7...v0.2.8) (2025-05-09)
 
 

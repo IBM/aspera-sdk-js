@@ -41,7 +41,7 @@ const httpDownloadPresigned = (transferSpec: TransferSpec, asperaSdkSpec?: Asper
   };
 
   if (asperaSdkSpec?.http_gateway_authentication) {
-    headers['Authorization'] = `Beaerer ${asperaSdkSpec.http_gateway_authentication.token}`;
+    headers['Authorization'] = `Bearer ${asperaSdkSpec.http_gateway_authentication.token}`;
     headers['X-Aspera-AccessKey'] = asperaSdkSpec.http_gateway_authentication.access_key;
   }
 
@@ -125,7 +125,7 @@ const httpDownloadInBrowser = (transferSpec: TransferSpec, asperaSdkSpec?: Asper
   };
 
   if (asperaSdkSpec?.http_gateway_authentication) {
-    headers['Authorization'] = `Beaerer ${asperaSdkSpec.http_gateway_authentication.token}`;
+    headers['Authorization'] = `Bearer ${asperaSdkSpec.http_gateway_authentication.token}`;
     headers['X-Aspera-AccessKey'] = asperaSdkSpec.http_gateway_authentication.access_key;
   }
 

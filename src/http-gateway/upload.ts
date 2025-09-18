@@ -50,7 +50,7 @@ export const httpUpload = (transferSpec: TransferSpec, asperaSdkSpec?: AsperaSdk
   const transferObject = getSdkTransfer(transferSpec);
 
   if (asperaSdkSpec?.http_gateway_authentication) {
-    request.setRequestHeader('Authorization', `Beaerer ${asperaSdkSpec.http_gateway_authentication.token}`);
+    request.setRequestHeader('Authorization', `Bearer ${asperaSdkSpec.http_gateway_authentication.token}`);
     request.setRequestHeader('X-Aspera-AccessKey', asperaSdkSpec.http_gateway_authentication.access_key);
   }
 

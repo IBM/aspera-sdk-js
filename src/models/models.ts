@@ -23,7 +23,7 @@ export interface FileDialogOptions {
   /** The file types to filter by */
   filters?: FileFilter[];
   /** ID for old HTTP gateway (v2) */
-  oldHttpGatewayTransferId?: string;
+  http_gateway_v2_transfer_id?: string;
 }
 
 export interface FolderDialogOptions {
@@ -150,9 +150,23 @@ export interface AsperaSdkSpec {
    * HTTP Gateway Server override. This will not verify server but switch a transfer to use
    * this server instead of the default one that initiated the SDK.
    */
-  override_http_gateway_url?: string;
-  /** ID for old HTTP gateway (v2) */
-  oldHttpGatewayTransferId?: string;
+  http_gateway_override_server_url?: string;
+  /**
+   * HTTP Gateway Server authentication data.
+   * This will be added to transfer calls to authenticate against servers when required.
+   * Auth flows are only added when these are present here.
+   */
+  http_gateway_authentication?: {
+    /** Aspera Access Key */
+    access_key: string;
+    /** Aspera Bearer Token (do not include type, only the token itself) */
+    token: string;
+  }
+  /**
+   * HTTP Gateway v2 transferID. This is not required for v3 gateways.
+   * This is for backwards compatibility with the old SDK.
+   */
+  http_gateway_v2_transfer_id?: string;
 }
 
 export interface Path {

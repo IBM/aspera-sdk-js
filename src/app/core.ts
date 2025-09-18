@@ -158,7 +158,7 @@ export const init = (options?: InitOptions): Promise<any> => {
  * Start a transfer
  *
  * @param transferSpec standard transferSpec for transfer
- * @param asperaSdkSpec IBM Aspera settings when starting a transfer. This is not used when in HTTP Gateway mode
+ * @param asperaSdkSpec IBM Aspera settings when starting a transfer.
  *
  * @returns a promise that resolves if transfer initiation is successful and rejects if transfer cannot be started
  */
@@ -168,7 +168,7 @@ export const startTransfer = (transferSpec: TransferSpec, asperaSdkSpec: AsperaS
   }
 
   if (asperaSdk.useHttpGateway) {
-    return transferSpec.direction === 'receive' ? httpDownload(transferSpec, asperaSdkSpec?.override_http_gateway_url) : httpUpload(transferSpec, asperaSdkSpec?.override_http_gateway_url, asperaSdkSpec?.oldHttpGatewayTransferId);
+    return transferSpec.direction === 'receive' ? httpDownload(transferSpec, asperaSdkSpec) : httpUpload(transferSpec, asperaSdkSpec);
   } else if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }

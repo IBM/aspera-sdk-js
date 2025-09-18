@@ -391,7 +391,16 @@ export interface TransferSpec {
   /** The method for processing symbolic links. */
   symlink_policy?: 'follow'|'copy'|'copy+force'|'skip';
   /** Tags to include in the transfer */
-  tags?: any;
+  tags?: any&{
+    /** IBM Aspera specific tags for IBM Aspera apps. */
+    aspera: {
+      /** HTTP Gateway tags set by the server */
+      'http-gateway': {
+        /** Expected size of the transfer for HTTP Gateway. If this is set and passes requirements in browser transfers may be used. */
+        expected_size: number;
+      };
+    };
+  };
   /** Tags to include in the transfer (base64 encoded) */
   tags64?: string;
   /** Maximum target rate for incoming transfers, in kilobits per second. */
@@ -456,6 +465,8 @@ export interface AsperaSdkTransfer {
   httpGatewayTransfer?: boolean;
   /** Indicate the request id of the HTTP Gateway transfer */
   httpRequestId?: string;
+  /** Indicate if the HTTP Gateway transfer is being done via browser download manager. (No progress updates) */
+  httpDownloadExternalHandle?: boolean;
 }
 
 export interface InstallerInfo {

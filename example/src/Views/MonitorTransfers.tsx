@@ -53,7 +53,7 @@ export default function MonitorTransfers() {
 
     return (
       <ListItem className="transfer-row" key={transfer.uuid} title={transfer.uuid}>
-        {transfer.status} - {(transfer.percentage * 100).toFixed(1)}%
+        {(transfer.httpDownloadExternalHandle && transfer.status === 'running') ? 'Downloaded via browser' : transfer.status} - {transfer.httpDownloadExternalHandle ? '' : `${(transfer.percentage * 100).toFixed(1)}%`}
         <Link onClick={() => removeTransfer(transfer.uuid)}>Remove</Link>
         {running && <Link onClick={() => window.stopTransferAspera(transfer.uuid)}>Stop</Link>}
         {canResume && <Link onClick={() => window.resumeTransferAspera(transfer.uuid)}>Resume</Link>}

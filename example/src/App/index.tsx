@@ -31,11 +31,17 @@ export const tabItems = [
 ];
 
 export default function App() {
-  const [disableAlert, setDisableAlert] = useState(false);
+  const [disableAlert, setDisableAlert] = useState(!!localStorage.getItem('ASPERA-SDK-DISABLE-ALERT'));
   const navigate = useNavigate();
   const location = useLocation();
   hljs.registerLanguage('javascript', javascript);
   let initialized = false;
+
+  const disableAlerts = (): void => {
+    window.alert = (data) => {
+      console.info(data);
+    };
+  };
 
   useEffect(() => {
     // Prevent drag and drop testing from reloading page
@@ -52,6 +58,10 @@ export default function App() {
         document.querySelector('#aspera-installer-test')?.remove();
       }
     })
+
+    if (disableAlert) {
+      disableAlerts();
+    }
 
     const path = localStorage.getItem('path');
 
@@ -73,11 +83,15 @@ export default function App() {
     const newValue = !disableAlert;
 
     if (newValue) {
-      window.alert = (data) => {
-        console.info(data);
-      };
+      disableAlerts();
     } else {
       window.location.reload();
+    }
+
+    if (newValue) {
+      localStorage.setItem('ASPERA-SDK-DISABLE-ALERT', 'TRUE');
+    } else {
+      localStorage.removeItem('ASPERA-SDK-DISABLE-ALERT');
     }
 
     setDisableAlert(newValue);

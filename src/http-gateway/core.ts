@@ -145,7 +145,7 @@ export const handleHttpGatewayDrop = (items: DataTransferItemList, callback: (da
  */
 export const httpGatewaySelectFileFolderDialog = (options?: FileDialogOptions, folder?: boolean): Promise<DataTransferResponse> => {
   if (asperaSdk.useOldHttpGateway) {
-    return (folder ? oldHttpGetFoldersForUploadPromise(options?.oldHttpGatewayTransferId || '') : oldHttpGetFilesForUploadPromise(options?.oldHttpGatewayTransferId || '')) as Promise<DataTransferResponse>;
+    return (folder ? oldHttpGetFoldersForUploadPromise(options?.http_gateway_v2_transfer_id || '') : oldHttpGetFilesForUploadPromise(options?.http_gateway_v2_transfer_id || '')) as Promise<DataTransferResponse>;
   }
 
   const {promise, rejecter, resolver} = generatePromiseObjects();

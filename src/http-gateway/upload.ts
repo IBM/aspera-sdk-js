@@ -1,4 +1,4 @@
-import {AsperaSdkTransfer, TransferSpec} from '../models/models';
+import {AsperaSdkSpec, AsperaSdkTransfer, TransferSpec} from '../models/models';
 import {asperaSdk} from '../index';
 import {generatePromiseObjects, safeJsonString, throwError} from '../helpers/helpers';
 import {messages} from '../constants/messages';
@@ -9,8 +9,7 @@ import {upload as oldHttpUpload} from '@ibm-aspera/http-gateway-sdk-js';
  * HTTP Gateway Upload Logic
  *
  * @param transferSpec - TransferSpec for the upload
- * @param overrideServerUrl - Server URL to override for transfer
- * @param oldHttpGatewayTransferId - Old gateway ID for legacy gateway servers
+ * @param asperaSdkSpec IBM Aspera settings when starting a transfer.
  *
  * @returns Promise that resolves on success invoke or rejects if unable to start
  *
@@ -18,16 +17,17 @@ import {upload as oldHttpUpload} from '@ibm-aspera/http-gateway-sdk-js';
  * Most logic is called directly by Desktop SDK functions
  * You may not need to import anything from this file.
  */
-export const httpUpload = (transferSpec: TransferSpec, overrideServerUrl?: string, oldHttpGatewayTransferId?: string): Promise<AsperaSdkTransfer> => {
+export const httpUpload = (transferSpec: TransferSpec, asperaSdkSpec?: AsperaSdkSpec): Promise<AsperaSdkTransfer> => {
   if (!asperaSdk.httpGatewayIsReady) {
     return throwError(messages.serverNotVerified, {type: 'upload'});
   }
 
   if (asperaSdk.useOldHttpGateway) {
-    return oldHttpUpload(transferSpec, oldHttpGatewayTransferId || '');
+    return oldHttpUpload(transferSpec, asperaSdkSpec?.http_gateway_v2_transfer_id || '');
   }
 
   const promiseInfo = generatePromiseObjects();
+  const request = new XMLHttpRequest();
   const body = new FormData();
   body.append('x-aspera-spec', safeJsonString(transferSpec));
   const hasBadFile: string[] = [];
@@ -49,8 +49,12 @@ export const httpUpload = (transferSpec: TransferSpec, overrideServerUrl?: strin
 
   const transferObject = getSdkTransfer(transferSpec);
 
-  const request = new XMLHttpRequest();
-  request.open('POST', `${overrideServerUrl || asperaSdk.globals.httpGatewayUrl}/upload`, true);
+  if (asperaSdkSpec?.http_gateway_authentication) {
+    request.setRequestHeader('Authorization', `Beaerer ${asperaSdkSpec.http_gateway_authentication.token}`);
+    request.setRequestHeader('X-Aspera-AccessKey', asperaSdkSpec.http_gateway_authentication.access_key);
+  }
+
+  request.open('POST', `${asperaSdkSpec?.http_gateway_override_server_url || asperaSdk.globals.httpGatewayUrl}/upload`, true);
 
   const triggerUpdate = (): void => {
     sendTransferUpdate(transferObject);

@@ -258,28 +258,6 @@ export const deregisterStatusCallback = (id: string): void => {
 };
 
 /**
- * Register a callback for getting updates about the Safari extension status.
- *
- * This can be useful if you want to handle the case where the user enable or disable the Safari extension.
- *
- * @param callback callback function to receive events
- *
- * @returns ID representing the callback for deregistration purposes
- */
-export const registerSafariExtensionStatusCallback = (callback: (status: SafariExtensionEvent) => void): string => {
-  return asperaSdk.activityTracking.setSafariExtensionEventCallback(callback);
-};
-
-/**
- * Remove a callback from getting Safari extension status events.
- *
- * @param id the ID returned by `registerStatusCallback`
- */
-export const deregisterSafariExtensionStatusCallback = (id: string): void => {
-  asperaSdk.activityTracking.removeSafariExtensionEventCallback(id);
-};
-
-/**
  * Remove a transfer. This will stop the transfer if it is in progress.
  *
  * @param id transfer uuid

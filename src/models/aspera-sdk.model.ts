@@ -107,15 +107,10 @@ export class ActivityTracking {
   private removed_callbacks: Map<string, Function> = new Map();
   /** Map of callbacks that receive connection events */
   private event_callbacks: Map<string, Function> = new Map();
-  /** Map of callbacks that receive Safari extension events */
-  private safari_extension_callbacks: Map<string, Function> = new Map();
-
   /** Keep track of the last WebSocket event **/
   private lastWebSocketEvent: WebsocketEvent = 'CLOSED';
   /** Keep track of the last notified WebSocket event **/
   private lastNotifiedWebSocketEvent: WebsocketEvent = undefined;
-  /** Keep track of the last Safari extension event **/
-  private lastSafariExtensionEvent: SafariExtensionEvent = 'DISABLED';
 
   /**
    * Notify all consumers when a message is received from the websocket
@@ -199,17 +194,7 @@ export class ActivityTracking {
    * @param safariExtensionEvent the event type.
    */
   handleSafariExtensionEvents(safariExtensionEvent: SafariExtensionEvent): void {
-    if (this.lastSafariExtensionEvent === safariExtensionEvent) {
-      return;
-    }
-
-    this.safari_extension_callbacks.forEach(callback => {
-      if (typeof callback === 'function') {
-        callback(safariExtensionEvent);
-      }
-    });
-
-    this.lastSafariExtensionEvent = safariExtensionEvent;
+    asperaSdk.SAFARI_EXTENSION_STATUS = safariExtensionEvent;
   }
 
   /**
@@ -313,33 +298,6 @@ export class ActivityTracking {
     this.event_callbacks.delete(id);
   }
 
-  /**
-   * Register a callback for getting Safari extension events back to the consumer
-   *
-   * @param callback the function to call with the websocket event
-   *
-   * @returns the ID of the callback index
-   */
-  setSafariExtensionEventCallback(callback: (status: SafariExtensionEvent) => void): string {
-    if (typeof callback !== 'function') {
-      errorLog(messages.callbackIsNotFunction);
-      return;
-    }
-    const id = `callback-${this.safari_extension_callbacks.size + 1}`;
-    this.safari_extension_callbacks.set(id, callback);
-    callback(this.lastSafariExtensionEvent);
-    return id;
-  }
-
-  /**
-   * Remove the callback (deregister) from the list of callbacks
-   *
-   * @param id the string of the callback to remove
-   */
-  removeSafariExtensionEventCallback(id: string): void {
-    this.safari_extension_callbacks.delete(id);
-  }
-
   private registerDesktopAppSession(): void {
     const iframe = document.createElement('iframe');
     iframe.style.display = 'none';
@@ -379,10 +337,6 @@ export class AsperaSdk {
   registerStatusCallback: (callback: (status: WebsocketEvent) => void) => string;
   /** Deregister callback to remove it from the callbacks getting connection events */
   deregisterStatusCallback: (id: string) => void;
-  /** Register callback for Safari extension status events */
-  registerSafariExtensionStatusCallback: (callback: (status: SafariExtensionEvent) => void) => string;
-  /** Deregister callback to remove it from the callbacks getting Safari extension events */
-  deregisterSafariExtensionStatusCallback: (id: string) => void;
   /** Function to remove a transfer */
   removeTransfer: (transferId: string) => Promise<any>;
   /** Function to show the transfer's download directory in Finder or Windows Explorer */
@@ -419,6 +373,8 @@ export class AsperaSdk {
   isSafari: () => boolean;
   /** Function to get URLs for installer management. */
   getInstallerUrls: () => InstallerUrlInfo;
+  /** Indicate if Safari Extension is enabled. If the extension is disabled during the lifecycle this will not update to disabled. */
+  SAFARI_EXTENSION_STATUS: SafariExtensionEvent = 'DISABLED';
   /** Aspera HTTP Gateway calls. This normally is not needed by clients but expose just in case. */
   httpGatewayCalls: unknown;
   /** Store of HTTP Gateway transfers */

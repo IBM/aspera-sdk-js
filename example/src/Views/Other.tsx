@@ -9,7 +9,7 @@ export default function Test() {
     hljs.highlightAll();
   }, []);
 
-  const codeSnippet = [window.getInfoAspera.toString(), window.showPreferencesAspera.toString(), window.registerStatusCallbackAspera.toString(), window.registerSafariExtensionStatusCallbackAspera.toString()].join('\n\n')
+  const codeSnippet = [window.getInfoAspera.toString(), window.showPreferencesAspera.toString(), window.registerStatusCallbackAspera.toString()].join('\n\n')
 
   return (
     <div className="example-pages">
@@ -19,7 +19,6 @@ export default function Test() {
       <Button onClick={window.getInfoAspera}>Get info</Button>
       <Button onClick={window.showPreferencesAspera}>Open preferences</Button>
       <Button onClick={window.registerStatusCallbackAspera}>Status changes</Button>
-      <Button onClick={window.registerSafariExtensionStatusCallbackAspera}>Status changes (Safari)</Button>
     </div>
   );
 };

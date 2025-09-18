@@ -268,26 +268,6 @@ function registerStatusCallbackAspera() {
   });
 }
 
-function registerSafariExtensionStatusCallbackAspera() {
-  /**
-   * Register status callback for the Safari Extension.
-   * This will monitor if the extension has changes.
-   * `isSafari` is provided by the Aspera SDK.
-   *
-   * This test currently just consoles all changes.
-   */
-
-  if (asperaSdk.isSafari()) {
-    alert('Registered safari extension changes. Monitor the console for events.');
-
-    asperaSdk.registerSafariExtensionStatusCallback(status => {
-      console.info('Status changed for Safari Extension', status);
-    });
-  } else {
-    alert('Register safari extension not set since not in Safari');
-  }
-}
-
 function installerAspera() {
   /**
    * Basic JavaScript to get the installers and

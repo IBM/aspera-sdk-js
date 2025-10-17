@@ -8,6 +8,9 @@ import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
 import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent} from '../models/models';
 import {registerActivityCallback as oldHttpRegisterActivityCallback} from '@ibm-aspera/http-gateway-sdk-js';
+import {Connect, ConnectInstaller} from '@ibm-aspera/connect-sdk-js';
+import {initConnect} from '../connect/core';
+import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
 
 /**
  * Check if IBM Aspera for Desktop connection works. This function is called by init
@@ -16,6 +19,10 @@ import {registerActivityCallback as oldHttpRegisterActivityCallback} from '@ibm-
  * @returns a promise that resolves if server can connect or rejects if not
  */
 export const testConnection = (): Promise<any> => {
+  if (asperaSdk.useHttpGateway || asperaSdk.useConnect) {
+    return Promise.resolve(asperaSdk.globals.sdkResponseData);
+  }
+
   return client.request('get_info')
     .then((data: AsperaSdkClientInfo) => {
       asperaSdk.globals.asperaSdkInfo = data;
@@ -25,14 +32,14 @@ export const testConnection = (): Promise<any> => {
 };
 
 /**
- * Initialize drag and drop. HTTP Gateway does not need to init.
+ * Initialize drag and drop. HTTP Gateway and Connect does not need to init.
  * Ignore if only HTTP Gateway
  * @param initCall - Indicate if called via init flow and should not reject
  *
  * @returns a promise that resolves if the initialization was successful or not
  */
 export const initDragDrop = (initCall?: boolean): Promise<boolean> => {
-  if (asperaSdk.useHttpGateway) {
+  if (asperaSdk.useHttpGateway || asperaSdk.useConnect) {
     return Promise.resolve(true);
   } else if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
@@ -98,6 +105,26 @@ export const init = (options?: InitOptions): Promise<any> => {
     throw generateErrorBody(messages.serverError, error);
   };
 
+  const getConnectStartCalls = (): Promise<unknown> => {
+    asperaSdk.globals.connect = new Connect({
+      minVersion: options.connectSettings.minVersion || '3.10.1',
+      dragDropEnabled: options.connectSettings.dragDropEnabled,
+      connectMethod: options.connectSettings.method,
+    });
+    asperaSdk.globals.connectInstaller = new ConnectInstaller({
+      sdkLocation: options.connectSettings.sdkLocation,
+      correlationId: options.connectSettings.correlationId,
+      style: 'carbon',
+    });
+
+    asperaSdk.globals.connectAW4 = {
+      Connect,
+      ConnectInstaller,
+    };
+
+    return initConnect(!options.connectSettings.hideIncludedInstaller);
+  };
+
   const getDesktopStartCalls = (): Promise<unknown> => {
     return asperaSdk.activityTracking.setup()
       .then(() => testConnection())
@@ -106,8 +133,8 @@ export const init = (options?: InitOptions): Promise<any> => {
       .catch(handleErrors);
   };
 
-  if (options.httpGatewayUrl && !asperaSdk.globals.httpGatewayVerified) {
-    let finalHttpGatewayUrl = options.httpGatewayUrl.trim();
+  if (options?.httpGatewaySettings?.url && !asperaSdk.globals.httpGatewayVerified) {
+    let finalHttpGatewayUrl = options.httpGatewaySettings.url.trim();
 
     if (finalHttpGatewayUrl.indexOf('http') !== 0) {
       finalHttpGatewayUrl = `https://${finalHttpGatewayUrl}`;
@@ -138,20 +165,20 @@ export const init = (options?: InitOptions): Promise<any> => {
 
       asperaSdk.globals.httpGatewayIframeContainer = iframeContainer;
 
-      if (options.forceHttpGateway) {
+      if (options?.httpGatewaySettings?.forceGateway) {
         return Promise.resolve(asperaSdk.globals.sdkResponseData);
       } else {
-        return getDesktopStartCalls();
+        return options?.connectSettings?.useConnect ? getConnectStartCalls() : getDesktopStartCalls();
       }
     }).catch(error => {
       // If HTTP Gateway fails log and move on to desktop
       errorLog(messages.httpInitFail, error);
 
-      return getDesktopStartCalls();
+      return options?.connectSettings?.useConnect ? getConnectStartCalls() : getDesktopStartCalls();
     });
   }
 
-  return getDesktopStartCalls();
+  return options?.connectSettings?.useConnect ? getConnectStartCalls() : getDesktopStartCalls();
 };
 
 /**
@@ -169,6 +196,10 @@ export const startTransfer = (transferSpec: TransferSpec, asperaSdkSpec: AsperaS
 
   if (asperaSdk.useHttpGateway) {
     return transferSpec.direction === 'receive' ? httpDownload(transferSpec, asperaSdkSpec) : httpUpload(transferSpec, asperaSdkSpec);
+  } else if (asperaSdk.useConnect) {
+    return asperaSdk.globals.connect.startTransferPromise(transferSpec as unknown as ConnectTypes.TransferSpec, asperaSdkSpec).then(response => {
+      return response.transfer_specs[0] as unknown as AsperaSdkTransfer;
+    });
   } else if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
@@ -212,28 +243,6 @@ export const deregisterActivityCallback = (id: string): void => {
 };
 
 /**
- * Register a callback event for when a user removes or cancels a transfer
- * directly from IBM Aspera. This may also be called if IBM Aspera
- * is configured to automatically remove completed transfers.
- *
- * @param callback callback function to receive transfers
- *
- * @returns ID representing the callback for deregistration purposes
- */
-export const registerRemovedCallback = (callback: (transfer: AsperaSdkTransfer) => void): string => {
-  return asperaSdk.activityTracking.setRemovedCallback(callback);
-};
-
-/**
- * Remove a callback from the removed transfer callback
- *
- * @param id the ID returned by `registerRemovedCallback`
- */
-export const deregisterRemovedCallback = (id: string): void => {
-  asperaSdk.activityTracking.removeRemovedCallback(id);
-};
-
-/**
  * Register a callback for getting updates about the connection status of IBM Aspera SDK.
  *
  * For example, to be notified of when the SDK loses connection with the application or connection
@@ -267,6 +276,8 @@ export const deregisterStatusCallback = (id: string): void => {
 export const removeTransfer = (id: string): Promise<any> => {
   if (asperaSdk.useHttpGateway) {
     return httpRemoveTransfer(id);
+  } else if (asperaSdk.useConnect) {
+    return asperaSdk.globals.connect.removeTransfer(id);
   }
 
   if (!asperaSdk.isReady) {
@@ -297,6 +308,10 @@ export const removeTransfer = (id: string): Promise<any> => {
  * @returns a promise that resolves if transfer is stopped and rejects if transfer cannot be stopped
  */
 export const stopTransfer = (id: string): Promise<any> => {
+  if (asperaSdk.useConnect) {
+    return asperaSdk.globals.connect.stopTransfer(id);
+  }
+
   if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
@@ -326,6 +341,12 @@ export const stopTransfer = (id: string): Promise<any> => {
  * @returns a promise that resolves with the new transfer object if transfer is resumed
  */
 export const resumeTransfer = (id: string, options?: ResumeTransferOptions): Promise<AsperaSdkTransfer> => {
+  if (asperaSdk.useConnect) {
+    return asperaSdk.globals.connect.resumeTransfer(id, options).then(response => {
+      return response.transfer_spec as unknown as AsperaSdkTransfer;
+    });
+  }
+
   if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
@@ -357,6 +378,10 @@ export const resumeTransfer = (id: string, options?: ResumeTransferOptions): Pro
 export const showSelectFileDialog = (options?: FileDialogOptions): Promise<DataTransferResponse> => {
   if (asperaSdk.useHttpGateway) {
     return httpGatewaySelectFileFolderDialog(options, false);
+  } else if (asperaSdk.useConnect) {
+    return asperaSdk.globals.connect.showSelectFileDialogPromise(options).then(response => {
+      return response as unknown as DataTransferResponse;
+    });
   } else if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
@@ -388,6 +413,10 @@ export const showSelectFileDialog = (options?: FileDialogOptions): Promise<DataT
 export const showSelectFolderDialog = (options?: FolderDialogOptions): Promise<DataTransferResponse> => {
   if (asperaSdk.useHttpGateway) {
     return httpGatewaySelectFileFolderDialog(options, true);
+  } else if (asperaSdk.useConnect) {
+    return asperaSdk.globals.connect.showSelectFolderDialogPromise(options).then(response => {
+      return response as unknown as DataTransferResponse;
+    });
   } else if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
@@ -415,6 +444,10 @@ export const showSelectFolderDialog = (options?: FolderDialogOptions): Promise<D
  * @returns a promise that resolves when the preferences page is opened.
  */
 export const showPreferences = (): Promise<any> => {
+  if (asperaSdk.useConnect) {
+    return asperaSdk.globals.connect.showPreferences();
+  }
+
   if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
@@ -437,15 +470,25 @@ export const showPreferences = (): Promise<any> => {
  * @returns a promise that resolves with an array of transfers.
  */
 export const getAllTransfers = (): Promise<AsperaSdkTransfer[]> => {
+  const promiseInfo = generatePromiseObjects();
+
   if (asperaSdk.useHttpGateway) {
     return Promise.resolve(httpGetAllTransfers());
+  } else if (asperaSdk.useConnect) {
+    asperaSdk.globals.connect.getAllTransfers({
+      success: data => {
+        promiseInfo.resolver(data.transfers);
+      }, error: error => {
+        promiseInfo.rejecter(error);
+      },
+    });
+
+    return promiseInfo.promise;
   }
 
   if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
-
-  const promiseInfo = generatePromiseObjects();
 
   const payload = {
     app_id: asperaSdk.globals.appId,
@@ -477,6 +520,10 @@ export const getTransfer = (id: string): Promise<AsperaSdkTransfer> => {
     } else {
       return Promise.reject(generateErrorBody(messages.getTransferFailed, {reason: 'Not found'}));
     }
+  } else if (asperaSdk.useConnect) {
+    return asperaSdk.globals.connect.getTransfer(id).then(response => {
+      return response.transfer_info as unknown as AsperaSdkTransfer;
+    });
   }
 
   if (!asperaSdk.isReady) {
@@ -508,6 +555,10 @@ export const getTransfer = (id: string): Promise<AsperaSdkTransfer> => {
  * @returns a promise that resolves if the file can be shown and rejects if not
  */
 export const showDirectory = (id: string): Promise<any> => {
+  if (asperaSdk.useConnect) {
+    return asperaSdk.globals.connect.showDirectory(id);
+  }
+
   if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
@@ -537,6 +588,12 @@ export const showDirectory = (id: string): Promise<any> => {
  * @returns a promise that resolves if the transfer rate can be modified and rejects if not
  */
 export const modifyTransfer = (id: string, options: ModifyTransferOptions): Promise<AsperaSdkTransfer> => {
+  if (asperaSdk.useConnect) {
+    return asperaSdk.globals.connect.modifyTransfer(id, options).then(response => {
+      return response as unknown as AsperaSdkTransfer;
+    });
+  }
+
   if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
@@ -600,11 +657,24 @@ export const setBranding = (id: string, options: CustomBrandingOptions): Promise
  *
  * @param callback the function to call once the files are dropped
  * @param elementSelector the selector of the element on the page that should watch for drop events
+ * @param connectOptions options for connect
  */
 export const createDropzone = (
   callback: (data: {event: DragEvent; files: DataTransferResponse}) => void,
   elementSelector: string,
+  connectOptions?: ConnectTypes.DragDropOptions,
 ): void => {
+  if (asperaSdk.useConnect) {
+    asperaSdk.globals.connect.setDragDropTargets(elementSelector, connectOptions, result => {
+      callback({
+        event: result.event,
+        files: result.files as unknown as DataTransferResponse,
+      });
+    });
+
+    return;
+  }
+
   const elements = document.querySelectorAll(elementSelector);
   if (!elements || !elements.length) {
     errorLog(messages.unableToFindElementOnPage);
@@ -681,6 +751,10 @@ export const removeDropzone = (elementSelector: string): void => {
  * @returns a promise that returns information about the user's IBM Aspera installation.
  */
 export const getInfo = (): Promise<AsperaSdkInfo> => {
+  if (asperaSdk.useHttpGateway || asperaSdk.useConnect) {
+    return Promise.resolve(asperaSdk.globals.sdkResponseData);
+  }
+
   if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }

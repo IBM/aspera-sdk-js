@@ -23,6 +23,7 @@ export default function Initialize() {
       <h2>Try it out</h2>
       <Button onClick={() => window.initializeAspera(false, gatewayServer, false)}>Initialize SDK</Button>
       <Button onClick={() => window.initializeAspera(true, gatewayServer, false)}>Initialize SDK (multi user)</Button>
+      <Button onClick={() => window.initializeAspera(true, gatewayServer, false, true)}>Initialize SDK (force Connect)</Button>
       <Button onClick={() => window.initializeAspera(true, gatewayServer, true)}>Initialize SDK (force gateway)</Button>
       <TextInput id="gateway-server-id" className="code-input" value={gatewayServer} onChange={value => setGatewayUrl(value.target.value)} labelText="HTTP Gateway URL" helperText="The HTTP Gateway Server to start up with Desktop" />
     </div>

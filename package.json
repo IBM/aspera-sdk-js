@@ -47,6 +47,7 @@
     "webpack-dev-server": "^5.2.2"
   },
   "dependencies": {
+    "@ibm-aspera/connect-sdk-js": "^5.0.3",
     "@ibm-aspera/http-gateway-sdk-js": "^7.7.4",
     "json-rpc-2.0": "^1.7.1"
   }

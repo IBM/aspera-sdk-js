@@ -6,24 +6,37 @@
 
 window.selectedFiles = [];
 
-function initializeAspera(supportMulti, httpGatewayUrl, forceHttpGateway) {
-  /**
-   * An ID for your application. For multi user applications
-   * this can include the user ID or other identifier
-   */
-  const appId = 'my-application-unique-id';
-
-  /**
-   * Indicate if machine runs the app with multiple user's at once
-   * like a virtual machine.
-   */
-  const supportMultipleUsers = !!supportMulti;
+function initializeAspera(supportMulti, httpGatewayUrl, forceHttpGateway, forceConnect) {
+  /** Define desktop settings for initialization */
+  const settings = {
+    /**
+     * An ID for your application. For multi user applications
+     * this can include the user ID or other identifier
+     */
+    appId: 'my-application-unique-id',
+    /**
+     * Indicate if machine runs the app with multiple user's at once
+     * like a virtual machine.
+     */
+    supportMultipleUsers: !!supportMulti,
+    /** HTTP Gateway settings for fallback or forced usage */
+    httpGatewaySettings: httpGatewayUrl ? {
+      url: httpGatewayUrl,
+      forceGateway: forceHttpGateway,
+    } : undefined,
+    /** Connect settings. Connect will be used instead of Desktop. Not required if not using Connect. */
+    connectSettings: {
+      useConnect: forceConnect,
+      dragDropEnable: true,
+    },
+  };
 
   /**
    * HTTP Gateway URL can be set to support fallback to a gateway.
    * You can also force it to not start the desktop app.
+   * Connect can be forced to not use Desktop and use Connect only
    */
-  asperaSdk.init({appId, supportMultipleUsers, httpGatewayUrl, forceHttpGateway}).then(response => {
+  asperaSdk.init(settings).then(response => {
     // The SDK started. Transfers and file picker can now be used.
     alert(`SDK started\n\n${JSON.stringify(response, undefined, 2)}`)
   }).catch(error => {
@@ -125,7 +138,7 @@ function setupDropAspera(dropZone) {
   asperaSdk.initDragDrop().then(() => {
     // Drag and drop can now be safely registered
     // Register the dropZone
-    asperaSdk.createDropzone(dropCallback, dropZone);
+    asperaSdk.createDropzone(dropCallback, dropZone, {drop: true, allowPropagation: true});
   }).catch(error => {
     // Drag and drop init failed. This is rare.
     console.error('Drag and drop could not start', error);
@@ -164,11 +177,6 @@ function monitorTransfersAspera() {
   // Register event listener for new transfers
   asperaSdk.registerActivityCallback(response => {
     parseTransfers(response.transfers);
-  });
-
-  // Register event listener for transfers removed from app
-  asperaSdk.registerRemovedCallback(transfer => {
-    transferStore.delete(transfer.uuid);
   });
 
   // Used for demo. Normally use this store to render on the UI

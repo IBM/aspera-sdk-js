@@ -6,6 +6,8 @@ import {errorLog, isSafari} from '../helpers/helpers';
 import {websocketService} from '../helpers/ws';
 import {asperaSdk} from '../index';
 import {HttpGatewayInfo} from '../http-gateway/models';
+import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
+import {Connect, ConnectInstaller} from '@ibm-aspera/connect-sdk-js';
 
 class AsperaSdkGlobals {
   /** The URL of the IBM Aspera HTTP server to use with the SDK */
@@ -34,6 +36,17 @@ class AsperaSdkGlobals {
   httpGatewayInfo?: HttpGatewayInfo;
   /** Http Gateway IFRAME container */
   httpGatewayIframeContainer?: HTMLDivElement;
+  /** Connect raw AW4 objects */
+  connectAW4?: {
+    Connect: typeof Connect,
+    ConnectInstaller: typeof ConnectInstaller,
+  };
+  /** Connect instance */
+  connect?: ConnectTypes.ConnectClientType;
+  /** Connect installer instance */
+  connectInstaller?: ConnectTypes.ConnectInstallerClientType;
+  /** Connect status */
+  connectStatus: ConnectTypes.ConnectStatusStrings = 'WAITING';
 
   backupLaunchMethod(url: string): void {
     window.alert(messages.loadingProtocol);
@@ -69,6 +82,10 @@ class AsperaSdkGlobals {
         url: this.httpGatewayUrl,
         info: this.httpGatewayInfo,
       },
+      connect: {
+        active: this.connectStatus === 'RUNNING',
+        status: this.connectStatus,
+      },
     };
   }
 }
@@ -87,6 +104,10 @@ export type AsperaSdkInfo = AsperaSdkClientInfo&{
     url?: string;
     info?: HttpGatewayInfo;
   };
+  connect: {
+    active: boolean;
+    status: ConnectTypes.ConnectStatusStrings;
+  }
 }
 
 export interface TransferResponse {
@@ -103,8 +124,6 @@ export interface ActivityMessage {
 export class ActivityTracking {
   /** Map of callbacks that receive transfer update events */
   private activity_callbacks: Map<string, Function> = new Map();
-  /** Map of callbacks that received removed transfer events */
-  private removed_callbacks: Map<string, Function> = new Map();
   /** Map of callbacks that receive connection events */
   private event_callbacks: Map<string, Function> = new Map();
   /** Keep track of the last WebSocket event **/
@@ -118,16 +137,8 @@ export class ActivityTracking {
    * @param message the message received from the websocket
    */
   handleTransferActivity(message: ActivityMessage): void {
-    if (message.type === 'transferUpdated') {
+    if (message.type === 'transferUpdated' || message.type === 'transferRemoved') {
       this.activity_callbacks.forEach(callback => {
-        if (typeof callback === 'function') {
-          callback(message.data);
-        }
-      });
-    }
-
-    if (message.type === 'transferRemoved') {
-      this.removed_callbacks.forEach(callback => {
         if (typeof callback === 'function') {
           callback(message.data);
         }
@@ -166,6 +177,15 @@ export class ActivityTracking {
     this.event_callbacks.forEach(callback => {
       if (typeof callback === 'function') {
         callback(webSocketEvent);
+      }
+    });
+  }
+
+  /** Trigger manual event for other event types. */
+  sendManualEventCallback(status: string): void {
+    this.event_callbacks.forEach(callback => {
+      if (typeof callback === 'function') {
+        callback(status);
       }
     });
   }
@@ -246,32 +266,6 @@ export class ActivityTracking {
   }
 
   /**
-   * Register a callback for getting transfers back to the consumer
-   *
-   * @param callback the function to call with the array of transfers
-   *
-   * @returns the ID of the callback index
-   */
-  setRemovedCallback(callback: (transfer: AsperaSdkTransfer) => void): string {
-    if (typeof callback !== 'function') {
-      errorLog(messages.callbackIsNotFunction);
-      return;
-    }
-    const id = `callback-${this.removed_callbacks.size + 1}`;
-    this.removed_callbacks.set(id, callback);
-    return id;
-  }
-
-  /**
-   * Remove the callback (deregister) from the list of callbacks
-   *
-   * @param id the string of the callback to remove
-   */
-  removeRemovedCallback(id: string): void {
-    this.removed_callbacks.delete(id);
-  }
-
-  /**
    * Register a callback for getting websocket events back to the consumer
    *
    * @param callback the function to call with the websocket event
@@ -329,10 +323,6 @@ export class AsperaSdk {
   registerActivityCallback: (callback: (transfers: TransferResponse) => void) => string;
   /** Deregister callback to remove it from the callbacks getting transfer data */
   deregisterActivityCallback: (id: string) => void;
-  /** Register callback for removed transfers from the app */
-  registerRemovedCallback: (callback: (transfer: AsperaSdkTransfer) => void) => string;
-  /** Deregister callback to remove it from the callbacks getting removed transfer data */
-  deregisterRemovedCallback: (id: string) => void;
   /** Register callback for connection status events from the app */
   registerStatusCallback: (callback: (status: WebsocketEvent) => void) => string;
   /** Deregister callback to remove it from the callbacks getting connection events */
@@ -391,6 +381,11 @@ export class AsperaSdk {
     return this.globals.asperaAppVerified && this.globals.appId !== '';
   }
 
+  /** Indicate that Connect is available. */
+  get useConnect(): boolean {
+    return this.globals.connectStatus === 'RUNNING';
+  }
+
   /** Indicate that HTTP Gateway is available. */
   get httpGatewayIsReady(): boolean {
     return !!this.globals.httpGatewayVerified;
@@ -398,7 +393,7 @@ export class AsperaSdk {
 
   /** Indicates if internal calls should use Gateway */
   get useHttpGateway(): boolean {
-    return this.httpGatewayIsReady && !this.isReady;
+    return this.httpGatewayIsReady && !this.isReady && !this.useConnect;
   }
 
   /** Indicates if old HTTP Gateway SDK should be used (v2 and lower) */

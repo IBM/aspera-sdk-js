@@ -706,10 +706,30 @@ export interface InitOptions {
   appId?: string;
   /** Indicate if the computer is running multiple users possibly (avoid port crossing). */
   supportMultipleUsers?: boolean;
-  /** Aspera HTTP Gateway URL to use if desktop is not available. Include gateway route but not versions (example: https://example.com/aspera/http-gwy). */
-  httpGatewayUrl?: string;
-  /** Indicate if HTTP Gateway should be forced. This will not start desktop if httpGatewayUrl is valid. */
-  forceHttpGateway?: boolean;
+  /** HTTP Gateway Settings */
+  httpGatewaySettings?: {
+    /** Aspera HTTP Gateway URL to use if desktop is not available. Include gateway route but not versions (example: https://example.com/aspera/http-gwy). */
+    url: string;
+    /** Indicate if HTTP Gateway should be forced. This will not start desktop if httpGatewayUrl is valid. */
+    forceGateway: boolean;
+  };
+  /** Connect Settings */
+  connectSettings?: {
+    /** Use connect. Indicate if Connect should be used instead of Desktop. */
+    useConnect: boolean;
+    /** Minimum version of Connect to allow */
+    minVersion?: string;
+    /** Indicate if Drag and Drop is enabled */
+    dragDropEnabled?: boolean;
+    /** Method for Connect communication. Default is extension */
+    method?: 'http'|'extension';
+    /** Location of SDK for downloads */
+    sdkLocation?: string;
+    /** Correlation ID for connecting to IBMid users */
+    correlationId?: string;
+    /** Indicate if default Connect installer window should not be shown */
+    hideIncludedInstaller?: boolean;
+  }
 }
 
 export interface InstallerUrlInfo {

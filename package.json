@@ -11,7 +11,7 @@
     "dev": "npm run set:hosts && npm --prefix ./example run start",
     "test": "jest",
     "test:watch": "jest --watchAll",
-    "release": "standard-version",
+    "version:update": "./scripts/version.sh",
     "lint": "eslint -c eslint.config.js --ext .ts ./src",
     "docs": "typedoc src/index.ts --out ./sdk-docs",
     "set:hosts": "if ! hostile list | grep \"127.0.0.1 js-sdk.aspera.us\" >/dev/null; then sudo hostile set 127.0.0.1 js-sdk.aspera.us; fi",
@@ -22,12 +22,6 @@
     "type": "git",
     "url": "git@github.com:IBM/aspera-sdk-js.git"
   },
-  "standard-version": {
-    "message": "chore(release): %s\n\n[ci skip]",
-    "scripts": {
-      "posttag": "npm run build"
-    }
-  },
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types/node": "^24.9.0",
@@ -37,7 +31,6 @@
     "hostile": "^1.4.0",
     "jest": "^30.2.0",
     "jest-environment-jsdom": "^30.2.0",
-    "standard-version": "^9.5.0",
     "ts-jest": "^29.4.5",
     "ts-loader": "^9.5.4",
     "typedoc": "^0.28.14",

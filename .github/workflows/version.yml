@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   npm:
+    if: ${{ !contains(github.event.commits[0].message, '[ci-ignore]') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

@@ -20,5 +20,5 @@ fi
 
 if [ "$NEWVERSION" != "" ]; then
     git add package.json package-lock.json
-    git commit -m "chore(release): $NEWVERSION" --no-verify
+    git commit -m "chore(release): $NEWVERSION [ci-ignore]" --no-verify
 fi

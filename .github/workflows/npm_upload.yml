@@ -20,7 +20,6 @@ jobs:
       - name: Build Package
         run: |
           npm ci
-          npm run version:update
           npm run build
           npm run build:module
           rm -rf .github docs example src tests .editorconfig eslint.config.js .gitignore CHANGELOG.md jest.config.js jest.setup.js renovate.json tsconfig.json tsconfig.module.json typedoc.js webpack.config.js package.json-e

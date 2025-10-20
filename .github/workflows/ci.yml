@@ -4,12 +4,15 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   CI:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [22]
+        node: [24]
     steps:
       - uses: actions/checkout@v5
 

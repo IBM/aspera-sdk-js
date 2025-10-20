@@ -1,0 +1,26 @@
+name: Version
+
+on:
+  push:
+    branches:
+    - main
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  npm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Update version
+        run: |
+          npm ci
+          npm run version:update

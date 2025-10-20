@@ -26,3 +26,4 @@ jobs:
           git config user.email github-actions@github.com
           npm ci
           npm run version:update
+          git push origin main

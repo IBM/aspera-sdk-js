@@ -73,7 +73,7 @@ export class WebsocketService {
 
     const socket = this.sockets.get(data.method);
 
-    if (socket && data.params) {
+    if (typeof socket === 'function' && data.params) {
       socket(data.params);
     }
   };

@@ -28,3 +28,5 @@ jobs:
           npm ci
           npm run version:update
           git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}

@@ -12,6 +12,7 @@ permissions:
 
 jobs:
   Documentation:
+    if: ${{ !contains(github.event.commits[0].message, '[ci-ignore]') }}
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

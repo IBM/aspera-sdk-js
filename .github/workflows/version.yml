@@ -14,12 +14,12 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Bump version and update
+      - name: Setup NodeJS
         uses: actions/setup-node@v5
         with:
           node-version: 24
 
-      - name: Build Package
+      - name: Update version
         run: |
           npm ci
           npm run version:update

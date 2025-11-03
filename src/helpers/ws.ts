@@ -129,7 +129,7 @@ export class WebsocketService {
   }
 
   private connect() {
-    this.getWebSocketConnection(33024, asperaSdk.globals.supportMultipleUsers ? 33029 : 33024)
+    this.getWebSocketConnection(asperaSdk.globals.rpcPort)
       .then((webSocket) => {
         this.globalSocket = webSocket;
         this.globalSocket.onerror = this.handleError;
@@ -153,37 +153,19 @@ export class WebsocketService {
     }, 1000);
   }
 
-  private getWebSocketConnection(startPort: number, endPort: number): Promise<WebSocket> {
+  private getWebSocketConnection(port: number): Promise<WebSocket> {
     const webSocketUrl = getWebsocketUrl(asperaSdk.globals.asperaAppUrl);
 
-    const checkPort = (port: number): Promise<WebSocket> => {
-      return new Promise((resolve, reject) => {
-        const webSocket = new WebSocket(`${webSocketUrl}:${port}`);
-
-        webSocket.onopen = () => {
-          resolve(webSocket);
-        };
-
-        webSocket.onerror = () => {
-          reject(`Connection failed on port ${port}`);
-        };
-      });
-    };
-
     return new Promise((resolve, reject) => {
-      const connectPort = (port: number) => {
-        if (port > endPort) {
-          return reject('No available WebSocket connection found');
-        }
+      const webSocket = new WebSocket(`${webSocketUrl}:${port}`);
 
-        checkPort(port)
-          .then(ws => resolve(ws))
-          .catch((error) => {
-            connectPort(port + 1);
-          });
+      webSocket.onopen = () => {
+        resolve(webSocket);
       };
 
-      connectPort(startPort);
+      webSocket.onerror = () => {
+        reject(`Connection failed on port ${port}`);
+      };
     });
   }
 

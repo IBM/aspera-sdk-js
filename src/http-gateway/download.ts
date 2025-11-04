@@ -45,6 +45,8 @@ const httpDownloadPresigned = (transferSpec: TransferSpec, asperaSdkSpec?: Asper
     headers['X-Aspera-AccessKey'] = asperaSdkSpec.http_gateway_authentication.access_key;
   }
 
+  const protocol = window.location.protocol === 'https:' ? 'https' : 'http';
+
   return fetch(
     `${url.toString()}/presign`,
     {
@@ -53,7 +55,7 @@ const httpDownloadPresigned = (transferSpec: TransferSpec, asperaSdkSpec?: Asper
       body: safeJsonString({
         transfer_spec: transferSpec,
         method: 'GET',
-        protocol: 'http',
+        protocol,
         headers: {
           host: url.host,
         },

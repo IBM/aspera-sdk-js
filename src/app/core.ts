@@ -1,6 +1,6 @@
 import {messages} from '../constants/messages';
 import {client} from '../helpers/client/client';
-import {errorLog, generateErrorBody, generatePromiseObjects, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
+import {errorLog, generateErrorBody, generatePromiseObjects, isSafari, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
 import { httpDownload, httpUpload } from '../http-gateway';
 import {handleHttpGatewayDrop, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, sendTransferUpdate} from '../http-gateway/core';
 import {HttpGatewayInfo} from '../http-gateway/models';
@@ -83,7 +83,6 @@ export const initDragDrop = (initCall?: boolean): Promise<boolean> => {
  */
 export const init = (options?: InitOptions): Promise<any> => {
   const appId = options?.appId ?? randomUUID();
-  const supportMultipleUsers = options?.supportMultipleUsers ?? false;
 
   asperaSdk.globals.appId = appId;
 
@@ -94,7 +93,8 @@ export const init = (options?: InitOptions): Promise<any> => {
     });
   });
 
-  if (supportMultipleUsers) {
+  // For now ignore multi user support in Safari
+  if (options?.supportMultipleUsers && !isSafari()) {
     asperaSdk.globals.supportMultipleUsers = true;
     asperaSdk.globals.sessionId = randomUUID();
   }

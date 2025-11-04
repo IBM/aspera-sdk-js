@@ -2,6 +2,7 @@ import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, AsperaSdkTra
 import {hiddenStyleList, installerUrl, protocol} from '../constants/constants';
 import {messages} from '../constants/messages';
 import {safariClient} from '../helpers/client/safari-client';
+import {client} from '../helpers/client/client';
 import {errorLog, isSafari} from '../helpers/helpers';
 import {websocketService} from '../helpers/ws';
 import {asperaSdk} from '../index';
@@ -228,15 +229,53 @@ export class ActivityTracking {
       this.registerDesktopAppSession();
     }
 
-    if (isSafari()) {
-      return safariClient.monitorTransferActivity();
-    }
+    const finalCall = (): Promise<unknown> => {
+      if (isSafari()) {
+        return safariClient.monitorTransferActivity();
+      }
 
-    return websocketService.init()
-      .then(() => {
-        websocketService.registerMessage('transfer_activity', (data: ActivityMessage) => this.handleTransferActivity(data));
-        websocketService.registerEvent((status: 'CLOSED'|'RECONNECT') => this.handleWebSocketEvents(status));
-      });
+      return websocketService.init()
+        .then(() => {
+          websocketService.registerMessage('transfer_activity', (data: ActivityMessage) => this.handleTransferActivity(data));
+          websocketService.registerEvent((status: 'CLOSED'|'RECONNECT') => this.handleWebSocketEvents(status));
+        });
+    };
+
+    if (asperaSdk.globals.supportMultipleUsers) {
+      let retryCount = 0;
+      const makeVerifyCall = (incrementIt: boolean): Promise<unknown> => {
+        if (incrementIt) {
+          asperaSdk.globals.rpcPort = asperaSdk.globals.rpcPort + 1;
+        }
+
+        if (asperaSdk.globals.rpcPort > 33029) {
+          retryCount++;
+          asperaSdk.globals.rpcPort = 33024;
+
+          return new Promise(resolve => setTimeout(resolve, retryCount * 1050)).then(() => makeVerifyCall(false));
+        }
+
+        return client.request('verify_session', {app_id: asperaSdk.globals.appId, session_id: asperaSdk.globals.sessionId})
+          .then(data => {
+            if (data.result) {
+              return finalCall();
+            }
+
+            return makeVerifyCall(true);
+          }).catch(() => {
+            if (retryCount > 5) {
+              asperaSdk.globals.rpcPort = 33024;
+              return Promise.reject('Unable to find port running for session');
+            }
+
+            return makeVerifyCall(true);
+          });
+      };
+
+      return makeVerifyCall(false);
+    } else {
+      return finalCall();
+    }
   }
 
   /**

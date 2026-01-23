@@ -1,37 +1,23 @@
-name: Publish to NPM
+name: Publish to npm
 
 on:
-  workflow_dispatch:
   push:
     tags:
-      - 'v*'
+      - 'v*.*.*'
 
 permissions:
-  contents: write
-  deployments: write
+  contents: read
   id-token: write
 
 jobs:
-  npm:
+  publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 24
-
-      - name: Build Package
-        run: |
-          npm ci
-          npm run build
-          npm run build:module
-          rm -rf .github docs example src tests .editorconfig eslint.config.js .gitignore CHANGELOG.md jest.config.js jest.setup.js renovate.json tsconfig.json tsconfig.module.json typedoc.js webpack.config.js package.json-e
-          sed -i -e 's/npm --prefix .\/example ci//g' package.json
-
-      - name: Publish
-        uses: JS-DevTools/npm-publish@v4
-        with:
-          access: public
-          token: ${{ secrets.NPM_TOKEN }}
+          node-version: 20
+          registry-url: https://registry.npmjs.org/
+          scope: '@ibm-aspera'
+      - run: npm ci
+      - run: npm publish --provenance --access public

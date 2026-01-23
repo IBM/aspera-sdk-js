@@ -1,6 +1,6 @@
 {
   "name": "@ibm-aspera/sdk",
-  "version": "0.2.24",
+  "version": "0.2.25",
   "author": "IBM Aspera",
   "main": "dist/commonjs/index.js",
   "types": "dist/commonjs/index.d.ts",

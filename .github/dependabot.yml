@@ -4,7 +4,6 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    groups:
-      all-dependencies:
-        patterns:
-          - "*"
+
+    allow:
+      - dependency-type: "direct"

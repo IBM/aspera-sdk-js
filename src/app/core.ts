@@ -774,7 +774,11 @@ export const getInfo = (): Promise<AsperaSdkInfo> => {
  * @returns a promise that resolves with the file data as a base64-encoded string and mime type
  */
 export const readAsArrayBuffer = (path: string): Promise<ReadAsArrayBufferResponse> => {
-  if (asperaSdk.useConnect) {
+  // Note: We should look into allowing clients to pass in a File object which would allow us to construct a FileReader and get the same data. This
+  // would require showSelectFileDialog caching the File object, which this function would then lookup via the given path here.
+  if (asperaSdk.useHttpGateway) {
+    return throwError('readAsArrayBuffer not supported for HTTP Gateway');
+  } else if (asperaSdk.useConnect) {
     return asperaSdk.globals.connect.readAsArrayBuffer({path});
   }
 
@@ -813,7 +817,11 @@ export const readAsArrayBuffer = (path: string): Promise<ReadAsArrayBufferRespon
  * @returns a promise that resolves with the file chunk data as a base64-encoded string and mime type
  */
 export const readChunkAsArrayBuffer = (path: string, offset: number, chunkSize: number): Promise<ReadChunkAsArrayBufferResponse> => {
-  if (asperaSdk.useConnect) {
+  // Note: We should look into allowing clients to pass in a File object which would allow us to construct a FileReader and get the same data. This
+  // would require showSelectFileDialog caching the File object, which this function would then lookup via the given path here.
+  if (asperaSdk.useHttpGateway) {
+    return throwError('readChunkAsArrayBuffer not supported for HTTP Gateway');
+  } else if (asperaSdk.useConnect) {
     return asperaSdk.globals.connect.readChunkAsArrayBuffer({path, offset, chunkSize});
   }
 

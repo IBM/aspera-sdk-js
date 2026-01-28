@@ -774,6 +774,10 @@ export const getInfo = (): Promise<AsperaSdkInfo> => {
  * @returns a promise that resolves with the file data as a base64-encoded string and mime type
  */
 export const readAsArrayBuffer = (path: string): Promise<ReadAsArrayBufferResponse> => {
+  if (asperaSdk.useConnect) {
+    return asperaSdk.globals.connect.readAsArrayBuffer({path});
+  }
+
   if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }
@@ -809,6 +813,10 @@ export const readAsArrayBuffer = (path: string): Promise<ReadAsArrayBufferRespon
  * @returns a promise that resolves with the file chunk data as a base64-encoded string and mime type
  */
 export const readChunkAsArrayBuffer = (path: string, offset: number, chunkSize: number): Promise<ReadChunkAsArrayBufferResponse> => {
+  if (asperaSdk.useConnect) {
+    return asperaSdk.globals.connect.readChunkAsArrayBuffer({path, offset, chunkSize});
+  }
+
   if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
   }

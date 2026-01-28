@@ -1,10 +1,11 @@
 /**
  * This JS file is used for code snippet examples.
- * TypeScript file declrarations of toString
+ * TypeScript file declarations of toString
  * do not maintain comments or newlines.
  */
 
 window.selectedFiles = [];
+window.imagePreviewData = null;
 
 function initializeAspera(supportMulti, httpGatewayUrl, forceHttpGateway, forceConnect) {
   /** Define desktop settings for initialization */
@@ -79,6 +80,26 @@ function selectItemsAspera(selectFolders) {
       console.error('Selecting items failed', error);
       alert(`Selecting items failed\n\n${JSON.stringify(error, undefined, 2)}`);
     }
+  });
+}
+
+function getImagePreviewAspera(filePath) {
+  /**
+   * readAsArrayBuffer reads an entire file and returns the contents
+   * as a base64-encoded string along with the MIME type.
+   * This is useful for previewing images or other file types in the browser.
+   */
+  asperaSdk.readAsArrayBuffer(filePath).then(response => {
+    /**
+     * Response contains:
+     * - data: base64-encoded file contents
+     * - type: MIME type of the file
+     */
+    alert(`Image loaded successfully!\n\nMIME Type: ${response.type}\nData length: ${response.data.length} characters`);
+    window.imagePreviewData = response;
+  }).catch(error => {
+    console.error('Failed to read file as array buffer', error);
+    alert(`Failed to read file\n\n${JSON.stringify(error, undefined, 2)}`);
   });
 }
 

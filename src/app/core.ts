@@ -6,7 +6,7 @@ import {handleHttpGatewayDrop, httpGatewaySelectFileFolderDialog, httpGetAllTran
 import {HttpGatewayInfo} from '../http-gateway/models';
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
-import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent} from '../models/models';
+import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse} from '../models/models';
 import {registerActivityCallback as oldHttpRegisterActivityCallback} from '@ibm-aspera/http-gateway-sdk-js';
 import {Connect, ConnectInstaller} from '@ibm-aspera/connect-sdk-js';
 import {initConnect} from '../connect/core';
@@ -762,4 +762,74 @@ export const getInfo = (): Promise<AsperaSdkInfo> => {
   return new Promise((resolve, _) => {
     resolve(asperaSdk.globals.sdkResponseData);
   });
+};
+
+/**
+ * Read an entire file as an array buffer (base64-encoded).
+ *
+ * Note: The maximum file size allowed is 50 MiB.
+ *
+ * @param path absolute path to the file to read
+ *
+ * @returns a promise that resolves with the file data as a base64-encoded string and mime type
+ */
+export const readAsArrayBuffer = (path: string): Promise<ReadAsArrayBufferResponse> => {
+  if (!asperaSdk.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  const promiseInfo = generatePromiseObjects();
+
+  const payload = {
+    request: {
+      path,
+    },
+    app_id: asperaSdk.globals.appId,
+  };
+
+  client.request('read_as_array_buffer', payload)
+    .then((data: ReadAsArrayBufferResponse) => promiseInfo.resolver(data))
+    .catch(error => {
+      errorLog(messages.readAsArrayBufferFailed, error);
+      promiseInfo.rejecter(generateErrorBody(messages.readAsArrayBufferFailed, error));
+    });
+
+  return promiseInfo.promise;
+};
+
+/**
+ * Read a chunk of a file as an array buffer (base64-encoded).
+ *
+ * Note: The maximum chunk size allowed is 50 MiB.
+ *
+ * @param path absolute path to the file to read
+ * @param offset offset to start reading the file, in bytes
+ * @param chunkSize the size of the chunk to read, in bytes
+ *
+ * @returns a promise that resolves with the file chunk data as a base64-encoded string and mime type
+ */
+export const readChunkAsArrayBuffer = (path: string, offset: number, chunkSize: number): Promise<ReadChunkAsArrayBufferResponse> => {
+  if (!asperaSdk.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  const promiseInfo = generatePromiseObjects();
+
+  const payload = {
+    request: {
+      path,
+      offset,
+      chunkSize,
+    },
+    app_id: asperaSdk.globals.appId,
+  };
+
+  client.request('read_chunk_as_array_buffer', payload)
+    .then((data: ReadChunkAsArrayBufferResponse) => promiseInfo.resolver(data))
+    .catch(error => {
+      errorLog(messages.readChunkAsArrayBufferFailed, error);
+      promiseInfo.rejecter(generateErrorBody(messages.readChunkAsArrayBufferFailed, error));
+    });
+
+  return promiseInfo.promise;
 };

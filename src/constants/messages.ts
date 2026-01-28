@@ -32,4 +32,6 @@ export const messages = {
   filePickerCancel: 'User canceled the select file or folder dialog.',
   fileNotAllowed: 'TransferSpec contained file not selected by user.',
   httpNetworkFail: 'HTTP network encountered unknown error.',
+  readAsArrayBufferFailed: 'Unable to read file as array buffer',
+  readChunkAsArrayBufferFailed: 'Unable to read file chunk as array buffer',
 };

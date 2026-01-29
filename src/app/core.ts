@@ -6,7 +6,7 @@ import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChun
 import {HttpGatewayInfo} from '../http-gateway/models';
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
-import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse} from '../models/models';
+import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities} from '../models/models';
 import {registerActivityCallback as oldHttpRegisterActivityCallback} from '@ibm-aspera/http-gateway-sdk-js';
 import {Connect, ConnectInstaller} from '@ibm-aspera/connect-sdk-js';
 import {initConnect} from '../connect/core';
@@ -28,6 +28,31 @@ export const testConnection = (): Promise<any> => {
       asperaSdk.globals.asperaSdkInfo = data;
       asperaSdk.globals.asperaAppVerified = true;
       return asperaSdk.globals.sdkResponseData;
+    });
+};
+
+/**
+ * RPC discovery used internally when initializing the SDK.
+ *
+ * @returns a promise that resolves if discovery is successful
+ */
+const rpcDiscover = (): Promise<any> => {
+  if (asperaSdk.useConnect || asperaSdk.useHttpGateway) {
+    return Promise.resolve({methods: []});
+  }
+
+  if (!asperaSdk.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  return client.request('rpc.discover')
+    .then((data: OpenRpcSpec) => {
+      asperaSdk.globals.rpcMethods = data.methods.map(m => m.name);
+      return data;
+    })
+    .catch(error => {
+      errorLog(messages.rpcDiscoverFailed, error);
+      return Promise.reject(generateErrorBody(messages.rpcDiscoverFailed, error));
     });
 };
 
@@ -128,6 +153,7 @@ export const init = (options?: InitOptions): Promise<any> => {
   const getDesktopStartCalls = (): Promise<unknown> => {
     return asperaSdk.activityTracking.setup()
       .then(() => testConnection())
+      .then(() => rpcDiscover())
       .then(() => initDragDrop(true))
       .then(() => asperaSdk.globals.sdkResponseData)
       .catch(handleErrors);
@@ -844,4 +870,39 @@ export const readChunkAsArrayBuffer = (path: string, offset: number, chunkSize: 
     });
 
   return promiseInfo.promise;
+};
+
+const supportsMethod = (method: string): boolean => {
+  // HTTP Gateway and Connect do not have any RPC methods so fallback to true
+  if (asperaSdk.useHttpGateway || asperaSdk.useConnect) {
+    return true;
+  }
+
+  return asperaSdk.globals.rpcMethods.includes(method);
+};
+
+/**
+ * Returns an object describing the high-level capabilities supported by the user's
+ * transfer client (e.g. IBM Aspera for desktop, Connect, or HTTP Gateway).
+ *
+ * Use this for feature detection at a semantic level rather than checking individual RPC methods.
+ * Capabitilies may depend on multiple underlying RPC methods and also may vary by transfer client.
+ *
+ * Some capabitilies may depend on newer versions of the transfer client. This function may be useful
+ * if you want to conditionally perform certain actions rather than potentially getting an error.
+ *
+ * @returns an object with boolean flags for each capability.
+ *
+ * @example
+ * // Conditionally render UI based on capabilities
+ * const caps = asperaSdk.getCapabilities();
+ * // Determine if your web application can render image previews for user selected files
+ * if (caps.imagePreview) {
+ *   asperaSdk.readAsArrayBuffer(path);
+ * }
+ */
+export const getCapabilities = (): SdkCapabilities => {
+  return {
+    imagePreview: supportsMethod('read_as_array_buffer') && supportsMethod('read_chunk_as_array_buffer'),
+  };
 };

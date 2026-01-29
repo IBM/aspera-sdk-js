@@ -34,4 +34,5 @@ export const messages = {
   httpNetworkFail: 'HTTP network encountered unknown error.',
   readAsArrayBufferFailed: 'Unable to read file as array buffer',
   readChunkAsArrayBufferFailed: 'Unable to read file chunk as array buffer',
+  rpcDiscoverFailed: 'Unable to discover RPC endpoints',
 };

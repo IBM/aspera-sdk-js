@@ -30,7 +30,7 @@ export const messages = {
   httpNotAvailable: 'IBM Aspera HTTP Gateway is not available',
   httpInitFail: 'IBM Aspera HTTP Gateway could not be started',
   filePickerCancel: 'User canceled the select file or folder dialog.',
-  fileNotAllowed: 'TransferSpec contained file not selected by user.',
+  fileNotAllowed: 'Request contained file not selected by user.',
   httpNetworkFail: 'HTTP network encountered unknown error.',
   readAsArrayBufferFailed: 'Unable to read file as array buffer',
   readChunkAsArrayBufferFailed: 'Unable to read file chunk as array buffer',

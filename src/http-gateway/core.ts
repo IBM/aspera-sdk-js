@@ -1,8 +1,8 @@
 import {messages} from '../constants/messages';
-import {generateErrorBody, generatePromiseObjects, randomUUID, safeJsonParse} from '../helpers/helpers';
+import {generateErrorBody, generatePromiseObjects, randomUUID, safeJsonParse, throwError} from '../helpers/helpers';
 import {asperaSdk} from '../index';
 import {removeTransfer as oldHttpRemoveTransfer, getAllTransfers as oldHttpGetAllTransfers, getTransferById as oldHttpGetTransfer, getFilesForUploadPromise as oldHttpGetFilesForUploadPromise, getFoldersForUploadPromise as oldHttpGetFoldersForUploadPromise} from '@ibm-aspera/http-gateway-sdk-js';
-import {FileDialogOptions, DataTransferResponse, TransferSpec, AsperaSdkTransfer} from '../models/models';
+import {FileDialogOptions, DataTransferResponse, TransferSpec, AsperaSdkTransfer, ReadAsArrayBufferResponse} from '../models/models';
 
 /**
  * HTTP Gateway Core Logic
@@ -270,4 +270,75 @@ export const base64Encoding = (jsonString: string): string => {
     String.fromCodePoint(byte),
   ).join('');
   return btoa(binString);
+};
+
+/**
+ * Attempt to read the specified `File` object contents as a base64-encoded string.
+ *
+ * @param file - File previously selected by the user
+ *
+ * @returns an object with base64 data and mime type
+ */
+const readFileAsBase64 = (file: File): Promise<{data: string; type: string}> => {
+  // 50MiB which matches the limits in Connect and IBM Aspera for desktop
+  const MAX_FILE_SIZE = 50 * 1024 * 1024;
+
+  if (file.size > MAX_FILE_SIZE) {
+    return throwError('File exceeds allowed maximum');
+  }
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      try {
+        const dataUrl = event.target?.result;
+
+        if (typeof dataUrl !== 'string') {
+          reject(generateErrorBody('FileReader did not return a data URL'));
+          return;
+        }
+
+        // Remove `data:*/*;base64,` from the start of the data URL (https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL)
+        const base64 = dataUrl.split(';base64,')[1];
+        if (base64 === undefined) {
+          reject(generateErrorBody('Invalid data URL format'));
+          return;
+        }
+
+        resolve({
+          data: base64,
+          type: file.type || 'application/octet-stream'
+        });
+      } catch (err) {
+        reject(generateErrorBody('Failed to process file data', err));
+      }
+    };
+
+    reader.onerror = () => {
+      reject(generateErrorBody('Failed to read file', reader.error));
+    };
+
+    reader.readAsDataURL(file);
+  });
+};
+
+/**
+ * Returns the specified file's contents as a base64-encoded string.
+ *
+ * Note: The maximum file size allowed is 50 MiB.
+ *
+ * @param path path to the file to read
+ *
+ * @returns a promise that resolves with the file data as a base64-encoded string and mime type
+ */
+export const httpGatewayReadAsArrayBuffer = (path: string): Promise<ReadAsArrayBufferResponse> => {
+  // Caller must have previously selected file via `showSelectFileDialog()`
+  const file = asperaSdk.httpGatewaySelectedFiles.get(path);
+
+  if (!file) {
+    return throwError(messages.fileNotAllowed);
+  }
+
+  return readFileAsBase64(file);
 };

@@ -1,4 +1,4 @@
-import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, InstallerUrlInfo} from './models';
+import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, InstallerUrlInfo, RpcMethod, SdkCapabilities} from './models';
 import {hiddenStyleList, installerUrl, protocol} from '../constants/constants';
 import {messages} from '../constants/messages';
 import {safariClient} from '../helpers/client/safari-client';
@@ -15,6 +15,8 @@ class AsperaSdkGlobals {
   asperaAppUrl = 'http://127.0.0.1';
   /** The URL of the IBM Aspera Desktop HTTP server to use with the SDK */
   rpcPort = 33024;
+  /** The list of RPC methods supported by the running IBM Aspera for desktop application */
+  rpcMethods: string[] = [];
   /** The default URL to check for latest Aspera installers */
   installerUrl = installerUrl;
   /** Aspera SDK info */
@@ -406,6 +408,8 @@ export class AsperaSdk {
   isSafari: () => boolean;
   /** Function to get URLs for installer management. */
   getInstallerUrls: () => InstallerUrlInfo;
+  /** Function to get the SDK capabilities. */
+  getCapabilities: () => SdkCapabilities;
   /** Indicate if Safari Extension is enabled. If the extension is disabled during the lifecycle this will not update to disabled. */
   SAFARI_EXTENSION_STATUS: SafariExtensionEvent = 'DISABLED';
   /** Aspera HTTP Gateway calls. This normally is not needed by clients but expose just in case. */

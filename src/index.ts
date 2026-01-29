@@ -1,5 +1,5 @@
 import {AsperaSdk} from './models/aspera-sdk.model';
-import {createDropzone, deregisterActivityCallback, deregisterStatusCallback, getAllTransfers, getInfo, getTransfer, init, initDragDrop, modifyTransfer, readAsArrayBuffer, readChunkAsArrayBuffer, registerActivityCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showDirectory, showPreferences, showSelectFileDialog, showSelectFolderDialog, startTransfer, stopTransfer, testConnection,} from './app/core';
+import {createDropzone, deregisterActivityCallback, deregisterStatusCallback, getAllTransfers, getCapabilities, getInfo, getTransfer, init, initDragDrop, modifyTransfer, readAsArrayBuffer, readChunkAsArrayBuffer, registerActivityCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showDirectory, showPreferences, showSelectFileDialog, showSelectFolderDialog, startTransfer, stopTransfer, testConnection,} from './app/core';
 import {getInstallerInfo} from './app/installer';
 import {getInstallerUrls, isSafari} from './helpers/helpers';
 import * as httpGatewayCalls from './http-gateway';
@@ -33,6 +33,7 @@ asperaSdk.readAsArrayBuffer = readAsArrayBuffer;
 asperaSdk.readChunkAsArrayBuffer = readChunkAsArrayBuffer;
 asperaSdk.isSafari = isSafari;
 asperaSdk.getInstallerUrls = getInstallerUrls;
+asperaSdk.getCapabilities = getCapabilities;
 asperaSdk.httpGatewayCalls = httpGatewayCalls;
 
 const launch = asperaSdk.globals.launch;
@@ -71,13 +72,7 @@ export {
   readAsArrayBuffer,
   readChunkAsArrayBuffer,
   getInstallerUrls,
+  getCapabilities,
 };
 
 export default asperaSdk;
-
-export type {
-  ReadAsArrayBufferRequest,
-  ReadAsArrayBufferResponse,
-  ReadChunkAsArrayBufferRequest,
-  ReadChunkAsArrayBufferResponse,
-} from './models/models';

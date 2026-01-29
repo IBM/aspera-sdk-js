@@ -770,3 +770,26 @@ export interface InstallerUrlInfo {
   /** URL to the latest installers (GA release) */
   latest: string;
 }
+
+export interface OpenRpcSpec {
+  /** List of RPC methods supported by the application */
+  methods: RpcMethod[]
+}
+
+export interface RpcMethod {
+  /** The RPC method name */
+  name: string;
+}
+
+/**
+ * Describes the high-level capabilities supported by the SDK.
+ */
+export interface SdkCapabilities {
+  /**
+   * Whether the SDK can read file contents for generating image previews.
+   *
+   * Image preview is supported if the SDK is using HTTP Gateway, Connect, or IBM Aspera for desktop
+   * with the required RPC methods.
+  */
+  imagePreview: boolean,
+}

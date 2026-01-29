@@ -2,7 +2,7 @@ import {messages} from '../constants/messages';
 import {client} from '../helpers/client/client';
 import {errorLog, generateErrorBody, generatePromiseObjects, isSafari, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
 import { httpDownload, httpUpload } from '../http-gateway';
-import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, sendTransferUpdate} from '../http-gateway/core';
+import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChunkAsArrayBuffer, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, sendTransferUpdate} from '../http-gateway/core';
 import {HttpGatewayInfo} from '../http-gateway/models';
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
@@ -769,7 +769,7 @@ export const getInfo = (): Promise<AsperaSdkInfo> => {
  *
  * Note: The maximum file size allowed is 50 MiB.
  *
- * @param path absolute path to the file to read
+ * @param path path to the file to read
  *
  * @returns a promise that resolves with the file data as a base64-encoded string and mime type
  */
@@ -808,17 +808,15 @@ export const readAsArrayBuffer = (path: string): Promise<ReadAsArrayBufferRespon
  *
  * Note: The maximum chunk size allowed is 50 MiB.
  *
- * @param path absolute path to the file to read
+ * @param path path to the file to read
  * @param offset offset to start reading the file, in bytes
  * @param chunkSize the size of the chunk to read, in bytes
  *
  * @returns a promise that resolves with the file chunk data as a base64-encoded string and mime type
  */
 export const readChunkAsArrayBuffer = (path: string, offset: number, chunkSize: number): Promise<ReadChunkAsArrayBufferResponse> => {
-  // Note: We should look into allowing clients to pass in a File object which would allow us to construct a FileReader and get the same data. This
-  // would require showSelectFileDialog caching the File object, which this function would then lookup via the given path here.
   if (asperaSdk.useHttpGateway) {
-    return throwError('readAsArrayBuffer not supported for HTTP Gateway');
+    return httpGatewayReadChunkAsArrayBuffer(path, offset, chunkSize);
   } else if (asperaSdk.useConnect) {
     return asperaSdk.globals.connect.readChunkAsArrayBuffer({path, offset, chunkSize});
   }

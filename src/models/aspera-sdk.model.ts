@@ -398,6 +398,10 @@ export class AsperaSdk {
   initDragDrop: () => Promise<any>;
   /** Function to get information about the IBM Aspera instance */
   getInfo: () => Promise<AsperaSdkInfo>;
+  /** Function to read an entire file as an array buffer (base64-encoded) */
+  readAsArrayBuffer: (path: string) => Promise<{data: string; type: string}>;
+  /** Function to read a chunk of a file as an array buffer (base64-encoded) */
+  readChunkAsArrayBuffer: (path: string, offset: number, chunkSize: number) => Promise<{data: string; type: string}>;
   /** Function to get whether IBM Aspera is running on Safari */
   isSafari: () => boolean;
   /** Function to get URLs for installer management. */

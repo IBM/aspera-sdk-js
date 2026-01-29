@@ -76,6 +76,38 @@ export interface BrowserStyleFile {
   type: string;
 }
 
+/** Request to read an entire file as a base64-encoded string */
+export interface ReadAsArrayBufferRequest {
+  /** Absolute path to the file */
+  path: string;
+}
+
+/** Response containing file data as a base64-encoded string */
+export interface ReadAsArrayBufferResponse {
+  /** File bytes as base64-encoded string */
+  data: string;
+  /** Mime type of the file */
+  type: string;
+}
+
+/** Request to read a chunk of a file as a base64-encoded string */
+export interface ReadChunkAsArrayBufferRequest {
+  /** Absolute path to the file */
+  path: string;
+  /** Offset to start reading the file, in bytes */
+  offset: number;
+  /** The size of the chunk, in bytes */
+  chunkSize: number;
+}
+
+/** Response containing file chunk data as a base64-encoded string */
+export interface ReadChunkAsArrayBufferResponse {
+  /** File chunk as a base64-encoded string */
+  data: string;
+  /** Mime type of the file */
+  type: string;
+}
+
 export interface ModifyTransferOptions {
   /**
    * @deprecated Use `lock_min_rate_kbps` instead.

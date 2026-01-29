@@ -1,10 +1,12 @@
 /**
  * This JS file is used for code snippet examples.
- * TypeScript file declrarations of toString
+ * TypeScript file declarations of toString
  * do not maintain comments or newlines.
  */
 
 window.selectedFiles = [];
+window.imagePreviewData = null;
+window.selectedImagePath = null;
 
 function initializeAspera(supportMulti, httpGatewayUrl, forceHttpGateway, forceConnect) {
   /** Define desktop settings for initialization */
@@ -78,6 +80,55 @@ function selectItemsAspera(selectFolders) {
     } else {
       console.error('Selecting items failed', error);
       alert(`Selecting items failed\n\n${JSON.stringify(error, undefined, 2)}`);
+    }
+  });
+}
+
+function selectAndPreviewImageAspera() {
+  /**
+   * This demonstrates a typical web application flow:
+   * 1. Use showSelectFileDialog to let the user select a file
+   * 2. Pass the selected file path to readAsArrayBuffer
+   * 3. Display the image preview using the base64-encoded data
+   */
+
+  // Step 1: Show file selection dialog (single file only)
+  asperaSdk.showSelectFileDialog({ multiple: false }).then(response => {
+    /**
+     * Response contains the selected file(s) in response.dataTransfer.files
+     * Each file has a 'name' property which is the absolute path
+     */
+    const selectedFile = response.dataTransfer.files[0];
+
+    if (!selectedFile) {
+      alert('No file was selected');
+      return;
+    }
+
+    const filePath = selectedFile.name;
+    window.selectedImagePath = filePath;
+
+    // Step 2: Read the selected file as an array buffer
+    return asperaSdk.readAsArrayBuffer(filePath);
+  }).then(response => {
+    if (!response) {
+      return; // User canceled or no file selected
+    }
+
+    /**
+     * Response contains:
+     * - data: base64-encoded file contents
+     * - type: MIME type of the file
+     */
+    alert(`Image loaded successfully!\n\nMIME Type: ${response.type}\nData length: ${response.data.length} characters`);
+    window.imagePreviewData = response;
+  }).catch(error => {
+    // Handle errors from either file selection or reading
+    if (error.debugData?.code === -32002) {
+      alert('User canceled file selection');
+    } else {
+      console.error('Failed to select or read file', error);
+      alert(`Failed to select or read file\n\n${JSON.stringify(error, undefined, 2)}`);
     }
   });
 }

@@ -26,4 +26,4 @@ To get started with development, take a look [here](https://ibm.github.io/aspera
 
 You can also view the example web application hosted on GitHub Pages with example code [here](https://ibm.github.io/aspera-sdk-js/all).
 
-Use `npm run start:example` to run the test app locally, which will launch your browser to the test app website.
+Use `npm run dev` to run the test app locally, which will launch your browser to the test app website.

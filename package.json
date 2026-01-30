@@ -9,17 +9,17 @@
     "scripts"
   ],
   "scripts": {
-    "postinstall": "npm --prefix ./example ci",
+    "postinstall": "npm --prefix ./examples ci",
     "build": "rm -rf ./dist && webpack --mode=production",
     "build:module": "tsc --project tsconfig.module.json",
-    "dev": "npm run set:hosts && npm --prefix ./example run start",
+    "dev": "npm run set:hosts && npm --prefix ./examples run start",
     "test": "jest",
     "test:watch": "jest --watchAll",
     "version:update": "./scripts/version.sh",
     "lint": "eslint -c eslint.config.js --ext .ts ./src",
     "docs": "typedoc src/index.ts --out ./sdk-docs",
     "set:hosts": "if ! hostile list | grep \"127.0.0.1 js-sdk.aspera.us\" >/dev/null; then sudo hostile set 127.0.0.1 js-sdk.aspera.us; fi",
-    "build:demo": "npm --prefix ./example run build && npm run docs && cp -R example/dist dist && cp -R sdk-docs dist/docs",
+    "build:demo": "npm --prefix ./examples run build && npm run docs && cp -R examples/dist dist && cp -R sdk-docs dist/docs",
     "pre": "npm run lint && npm run test"
   },
   "repository": {

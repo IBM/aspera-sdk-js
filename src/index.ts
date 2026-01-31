@@ -75,4 +75,46 @@ export {
   getCapabilities,
 };
 
+export type {
+  AsperaSdkSpec,
+  AsperaSdkTransfer,
+  BrowserStyleFile,
+  CustomBrandingOptions,
+  CustomTheme,
+  CustomThemeItems,
+  DataTransferResponse,
+  FileDialogOptions,
+  FileFilter,
+  FolderDialogOptions,
+  InitOptions,
+  InstallerInfo,
+  InstallerInfoResponse,
+  InstallerOptions,
+  InstallerUrlInfo,
+  ModifyTransferOptions,
+  OverwritePolicy,
+  Path,
+  ReadAsArrayBufferResponse,
+  ReadChunkAsArrayBufferResponse,
+  ResumePolicy,
+  ResumeTransferOptions,
+  SafariExtensionEvent,
+  SdkCapabilities,
+  TransferSpec,
+  TransferStatus,
+  WebsocketEvent,
+} from './models/models';
+
+export type {
+  ActivityMessage,
+  ActivityMessageTypes,
+  AsperaSdkClientInfo,
+  AsperaSdkInfo,
+  TransferResponse,
+} from './models/aspera-sdk.model';
+
+export { AsperaSdk, AsperaSdkGlobals } from './models/aspera-sdk.model';
+
+export type { HttpGatewayInfo } from './http-gateway/models';
+
 export default asperaSdk;

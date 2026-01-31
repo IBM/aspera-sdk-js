@@ -9,6 +9,6 @@
     "isolatedModules": true
   },
   "exclude": [
-    "./example"
+    "./examples"
   ]
 }

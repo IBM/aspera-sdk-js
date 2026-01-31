@@ -21,9 +21,8 @@ To include this SDK via `script` tag directly in your web application's HTML, re
 <script src="https://cdn.jsdelivr.net/npm/@ibm-aspera/sdk@0.2.30/dist/js/aspera-sdk.js"></script>
 ```
 
-## Development
-To get started with development, take a look [here](https://ibm.github.io/aspera-sdk-js).
+## Usage
 
-You can also view the example web application hosted on GitHub Pages with example code [here](https://ibm.github.io/aspera-sdk-js/all).
+The full API of this SDK can be found [here](https://ibm.github.io/aspera-sdk-js/docs/) with many [code examples](https://github.com/IBM/aspera-sdk-js/blob/main/examples).
 
-Use `npm run start:example` to run the test app locally, which will launch your browser to the test app website.
+Along with the examples, you can find an example test application [here](https://ibm.github.io/aspera-sdk-js/all).

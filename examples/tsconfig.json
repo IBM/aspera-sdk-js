@@ -22,9 +22,6 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "allowJs": true,
-    "paths": {
-      "@ibm-aspera/sdk": ["./src/*"]
-    }
   },
-  "include": ["src"]
+  "include": ["src", "*.ts"]
 }

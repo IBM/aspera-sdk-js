@@ -9,7 +9,6 @@
     "scripts"
   ],
   "scripts": {
-    "postinstall": "npm --prefix ./examples ci",
     "build": "rm -rf ./dist && webpack --mode=production",
     "build:module": "tsc --project tsconfig.module.json",
     "dev": "npm run set:hosts && npm --prefix ./examples run start",

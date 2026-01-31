@@ -21,12 +21,12 @@ export function initializeAspera(supportMulti: boolean, httpGatewayUrl?: string,
     /** HTTP Gateway settings for fallback or forced usage */
     httpGatewaySettings: httpGatewayUrl ? {
       url: httpGatewayUrl,
-      forceGateway: forceHttpGateway,
+      forceGateway: forceHttpGateway || false,
     } : undefined,
     /** Connect settings. Connect will be used instead of Desktop. Not required if not using Connect. */
     connectSettings: {
-      useConnect: forceConnect,
-      dragDropEnable: true,
+      useConnect: forceConnect || false,
+      dragDropEnabled: true,
     },
   };
 

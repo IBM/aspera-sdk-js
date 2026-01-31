@@ -13,7 +13,7 @@ export function monitorTransfersAspera() {
 
   // Create local store to hold all transfers
   /** @type {Map<string, any>} */
-  const transferStore = new Map();
+  const transferStore: Map<string, any> = new Map();
 
   /**
    * Create a function to parse transfers and place in map.

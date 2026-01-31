@@ -28,7 +28,7 @@ jobs:
 
       - name: Install
         run: |
-          npm ci && npm --prefix examples install
+          npm ci && npm --prefix examples ci
 
       - name: Build Documentation
         run: |

@@ -10,7 +10,7 @@ import {HttpGatewayInfo} from '../http-gateway/models';
 import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
 import {Connect, ConnectInstaller} from '@ibm-aspera/connect-sdk-js';
 
-class AsperaSdkGlobals {
+export class AsperaSdkGlobals {
   /** The URL of the IBM Aspera HTTP server to use with the SDK */
   asperaAppUrl = 'http://127.0.0.1';
   /** The URL of the IBM Aspera Desktop HTTP server to use with the SDK */
@@ -349,6 +349,7 @@ export class AsperaSdk {
   /** Global information about IBM Aspera */
   globals: AsperaSdkGlobals = new AsperaSdkGlobals();
   /** Activity tracking for watching transfers */
+  /** @ignore */
   activityTracking: ActivityTracking = new ActivityTracking();
   /** HTTP Gateway file store. Key is the file name. */
   httpGatewaySelectedFiles: Map<string, File> = new Map();

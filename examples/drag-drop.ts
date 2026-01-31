@@ -47,6 +47,7 @@ export function setupDropAspera(dropZone: string) {
    * While not needed normally. You can also remove the dropdzone.
    * This will remove the listener and no longer accept drops to that element.
    */
+  //@ts-ignore
   const cancelDropzone = () => {
     removeDropzone(dropZone);
   };

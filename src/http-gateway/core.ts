@@ -170,7 +170,7 @@ export const httpGatewaySelectFileFolderDialog = (options?: FileDialogOptions, f
     for (let i = 0; i < element.files.length; i++) {
       const file = element.files[i];
       returnFiles.push(file);
-      asperaSdk.httpGatewaySelectedFiles.set(file.name, file);
+      asperaSdk.httpGatewaySelectedFiles.set(file.webkitRelativePath || file.name, file);
     }
 
     resolver({

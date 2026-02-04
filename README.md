@@ -26,3 +26,7 @@ To include this SDK via `script` tag directly in your web application's HTML, re
 The full API of this SDK can be found [here](https://ibm.github.io/aspera-sdk-js/docs/) with many [code examples](https://github.com/IBM/aspera-sdk-js/blob/main/examples).
 
 Along with the examples, you can find an example test application [here](https://ibm.github.io/aspera-sdk-js/all).
+
+## Migration from Connect SDK
+
+Refer to [MIGRATION](MIGRATION.md) for recommended changes when migrating your web application from the Connect SDK (`@ibm-aspera/connect-sdk-js`).

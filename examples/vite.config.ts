@@ -4,6 +4,9 @@ import path from "path";
 
 export default defineConfig({
   base: '/aspera-sdk-js/',
+  build: {
+    minify: false, // Keep code readable for .toString() display in examples
+  },
   resolve: {
     alias: {
       '~@ibm/plex': path.resolve(__dirname, 'node_modules/@ibm/plex'),

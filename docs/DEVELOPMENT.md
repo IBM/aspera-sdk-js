@@ -36,3 +36,17 @@ $ npm run test
 ```shell
 $ npm run docs
 ```
+
+### Releasing
+
+Releases are handled automatically via GitHub Actions. The process works as follows:
+
+1. **Version bumping is automatic** - When you merge a PR to `main`, the `version.yml` workflow analyzes your commit message and bumps the version:
+   - `feat: ...` → minor bump (0.4.3 → 0.5.0)
+   - `fix: ...` or other → patch bump (0.4.3 → 0.4.4)
+   - `breaking change: ...` → major bump (0.4.3 → 1.0.0)
+
+2. **To publish a release**, run the release script after merging:
+   ```shell
+   $ ./scripts/release.sh
+   ```

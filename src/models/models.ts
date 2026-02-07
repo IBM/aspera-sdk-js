@@ -178,6 +178,12 @@ export interface AsperaSdkSpec {
    * alongside the transfer.
    */
   preview_base64?: string;
+
+  /**
+   * When `false`, IBM Aspera for desktop disables automatic UI prompts, except when the user must authorize
+   * transfers to untrusted hosts.
+   */
+  allow_dialogs?: boolean;
   /**
    * HTTP Gateway Server override. This will not verify server but switch a transfer to use
    * this server instead of the default one that initiated the SDK.

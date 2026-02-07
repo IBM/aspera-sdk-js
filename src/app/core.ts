@@ -1,9 +1,8 @@
 import {messages} from '../constants/messages';
 import {client} from '../helpers/client/client';
 import {errorLog, generateErrorBody, generatePromiseObjects, isSafari, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
-import { httpDownload, httpUpload } from '../http-gateway';
+import {httpDownload, httpUpload, initHttpGateway} from '../http-gateway';
 import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChunkAsArrayBuffer, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, sendTransferUpdate} from '../http-gateway/core';
-import {HttpGatewayInfo} from '../http-gateway/models';
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
 import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities} from '../models/models';
@@ -180,25 +179,21 @@ export const init = (options?: InitOptions): Promise<any> => {
 
         return responseData;
       });
-    }).then((response: HttpGatewayInfo) => {
-      asperaSdk.globals.httpGatewayInfo = response;
-      asperaSdk.globals.httpGatewayVerified = true;
-
-      const iframeContainer = document.createElement('div');
-      iframeContainer.id = 'aspera-http-gateway-iframes';
-      iframeContainer.style = 'display: none;';
-      document.body.appendChild(iframeContainer);
-
-      asperaSdk.globals.httpGatewayIframeContainer = iframeContainer;
-
+    }).then(response => {
+      return initHttpGateway(response);
+    }).then(() => {
       if (options?.httpGatewaySettings?.forceGateway) {
         return Promise.resolve(asperaSdk.globals.sdkResponseData);
-      } else {
-        return options?.connectSettings?.useConnect ? getConnectStartCalls() : getDesktopStartCalls();
       }
+
+      return options?.connectSettings?.useConnect ? getConnectStartCalls() : getDesktopStartCalls();
     }).catch(error => {
-      // If HTTP Gateway fails log and move on to desktop
+      // If HTTP Gateway fails log and move on to transfer client
       errorLog(messages.httpInitFail, error);
+
+      if (options?.httpGatewaySettings?.forceGateway) {
+        throw generateErrorBody(messages.httpInitFail, error);
+      }
 
       return options?.connectSettings?.useConnect ? getConnectStartCalls() : getDesktopStartCalls();
     });

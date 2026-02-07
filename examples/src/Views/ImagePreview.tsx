@@ -55,7 +55,7 @@ export default function ImagePreview() {
           onClick={handleSelectAndPreview}
           disabled={loading}
         >
-          {loading ? 'Loading...' : 'Select file'}
+          {loading ? 'Loading...' : 'Image Preview'}
         </Button>
       </div>
       <div className="ending-content">

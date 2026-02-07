@@ -1,8 +1,9 @@
 import {messages} from '../constants/messages';
 import {generateErrorBody, generatePromiseObjects, randomUUID, safeJsonParse, throwError} from '../helpers/helpers';
 import {asperaSdk} from '../index';
-import {removeTransfer as oldHttpRemoveTransfer, getAllTransfers as oldHttpGetAllTransfers, getTransferById as oldHttpGetTransfer, getFilesForUploadPromise as oldHttpGetFilesForUploadPromise, getFoldersForUploadPromise as oldHttpGetFoldersForUploadPromise} from '@ibm-aspera/http-gateway-sdk-js';
+import {removeTransfer as oldHttpRemoveTransfer, getAllTransfers as oldHttpGetAllTransfers, getTransferById as oldHttpGetTransfer, getFilesForUploadPromise as oldHttpGetFilesForUploadPromise, getFoldersForUploadPromise as oldHttpGetFoldersForUploadPromise, initHttpGateway as oldInitHttpGateway} from '@ibm-aspera/http-gateway-sdk-js';
 import {FileDialogOptions, DataTransferResponse, TransferSpec, AsperaSdkTransfer, ReadAsArrayBufferResponse, ReadChunkAsArrayBufferResponse} from '../models/models';
+import {HttpGatewayInfo} from './models';
 
 // 50MiB which matches the limits in Connect and IBM Aspera for desktop
 const MAX_FILE_SIZE = 50 * 1024 * 1024;
@@ -16,6 +17,32 @@ const MAX_FILE_SIZE = 50 * 1024 * 1024;
  * Most logic is called directly by Desktop SDK functions
  * You may not need to import anything from this file.
  */
+
+/**
+ * Initialize the HTTP Gateway after the /info response has been received and verified.
+ * For v2 gateways, delegates to the old HTTP Gateway SDK.
+ * For v3 gateways, sets up the iframe container for downloads.
+ *
+ * @param response - The /info response from the HTTP Gateway server
+ *
+ * @returns a promise that resolves when the HTTP Gateway is initialized
+ */
+export const initHttpGateway = (response: HttpGatewayInfo): Promise<void> => {
+  asperaSdk.globals.httpGatewayInfo = response;
+  asperaSdk.globals.httpGatewayVerified = true;
+
+  if (asperaSdk.useOldHttpGateway) {
+    return oldInitHttpGateway(asperaSdk.globals.httpGatewayUrl).then(() => {});
+  }
+
+  const iframeContainer = document.createElement('div');
+  iframeContainer.id = 'aspera-http-gateway-iframes';
+  iframeContainer.style = 'display: none;';
+  document.body.appendChild(iframeContainer);
+  asperaSdk.globals.httpGatewayIframeContainer = iframeContainer;
+
+  return Promise.resolve();
+};
 
 /**
  * Remove a transfer from HTTP Gateway systems

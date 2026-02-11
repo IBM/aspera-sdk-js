@@ -5,7 +5,7 @@ import {removeTransfer as oldHttpRemoveTransfer, getAllTransfers as oldHttpGetAl
 import {FileDialogOptions, DataTransferResponse, TransferSpec, AsperaSdkTransfer, ReadAsArrayBufferResponse, ReadChunkAsArrayBufferResponse} from '../models/models';
 import {HttpGatewayInfo} from './models';
 
-// 50MiB which matches the limits in Connect and IBM Aspera for desktop
+// Maximum file size for generating image previews for files. 50MiB matches the limits in both Connect and IBM Aspera for desktop.
 const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
 /**

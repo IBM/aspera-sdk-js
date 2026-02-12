@@ -1,7 +1,7 @@
 import {messages} from '../constants/messages';
 import {generateErrorBody, generatePromiseObjects, randomUUID, safeJsonParse, throwError} from '../helpers/helpers';
 import {asperaSdk} from '../index';
-import {removeTransfer as oldHttpRemoveTransfer, getAllTransfers as oldHttpGetAllTransfers, getTransferById as oldHttpGetTransfer, getFilesForUploadPromise as oldHttpGetFilesForUploadPromise, getFoldersForUploadPromise as oldHttpGetFoldersForUploadPromise, initHttpGateway as oldInitHttpGateway} from '@ibm-aspera/http-gateway-sdk-js';
+import {removeTransfer as oldHttpRemoveTransfer, getAllTransfers as oldHttpGetAllTransfers, getTransferById as oldHttpGetTransfer, getFilesForUploadPromise as oldHttpGetFilesForUploadPromise, getFoldersForUploadPromise as oldHttpGetFoldersForUploadPromise, initHttpGateway as oldInitHttpGateway, registerActivityCallback as oldHttpRegisterActivityCallback} from '@ibm-aspera/http-gateway-sdk-js';
 import {FileDialogOptions, DataTransferResponse, TransferSpec, AsperaSdkTransfer, ReadAsArrayBufferResponse, ReadChunkAsArrayBufferResponse} from '../models/models';
 import {HttpGatewayInfo} from './models';
 
@@ -19,6 +19,19 @@ const MAX_FILE_SIZE = 50 * 1024 * 1024;
  */
 
 /**
+ * Send a transfer update through the SDK
+ *
+ * @param transfer - Transsfer object to send to consumers
+ */
+export const sendTransferUpdate = (transfer: AsperaSdkTransfer): void => {
+  asperaSdk.httpGatewayTransferStore.set(transfer.uuid, transfer);
+  asperaSdk.activityTracking.handleTransferActivity({
+    type: 'transferUpdated',
+    data: {transfers: [transfer]},
+  });
+};
+
+/**
  * Initialize the HTTP Gateway after the /info response has been received and verified.
  * For v2 gateways, delegates to the old HTTP Gateway SDK.
  * For v3 gateways, sets up the iframe container for downloads.
@@ -32,6 +45,13 @@ export const initHttpGateway = (response: HttpGatewayInfo): Promise<void> => {
   asperaSdk.globals.httpGatewayVerified = true;
 
   if (asperaSdk.useOldHttpGateway) {
+    // Watch for old HTTP Gateway transfers in case used.
+    oldHttpRegisterActivityCallback(oldHttpTransfers => {
+      oldHttpTransfers.transfers.forEach(oldHttpTransfer => {
+        sendTransferUpdate(oldHttpTransfer as unknown as AsperaSdkTransfer);
+      });
+    });
+
     return oldInitHttpGateway(asperaSdk.globals.httpGatewayUrl).then(() => {});
   }
 
@@ -251,19 +271,6 @@ export const getSdkTransfer = (transferSpec: TransferSpec): AsperaSdkTransfer =>
     httpGatewayTransfer: true,
     httpDownloadExternalHandle: false,
   };
-};
-
-/**
- * Send a transfer update through the SDK
- *
- * @param transfer - Transsfer object to send to consumers
- */
-export const sendTransferUpdate = (transfer: AsperaSdkTransfer): void => {
-  asperaSdk.httpGatewayTransferStore.set(transfer.uuid, transfer);
-  asperaSdk.activityTracking.handleTransferActivity({
-    type: 'transferUpdated',
-    data: {transfers: [transfer]},
-  });
 };
 
 /**

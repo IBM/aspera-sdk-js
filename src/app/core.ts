@@ -6,7 +6,6 @@ import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChun
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
 import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities} from '../models/models';
-import {registerActivityCallback as oldHttpRegisterActivityCallback} from '@ibm-aspera/http-gateway-sdk-js';
 import {Connect, ConnectInstaller} from '@ibm-aspera/connect-sdk-js';
 import {initConnect} from '../connect/core';
 import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
@@ -18,6 +17,7 @@ import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
  * @returns a promise that resolves if server can connect or rejects if not
  */
 export const testConnection = (): Promise<any> => {
+  // FIXME: If force HTTP gateway is false this ends up preventing SDK from verifying IBM Aspera for desktop is running.
   if (asperaSdk.useHttpGateway || asperaSdk.useConnect) {
     return Promise.resolve(asperaSdk.globals.sdkResponseData);
   }
@@ -109,13 +109,6 @@ export const init = (options?: InitOptions): Promise<any> => {
   const appId = options?.appId ?? randomUUID();
 
   asperaSdk.globals.appId = appId;
-
-  // Watch for old HTTP Gateway transfers in case used.
-  oldHttpRegisterActivityCallback(oldHttpTransfers => {
-    oldHttpTransfers.transfers.forEach(oldHttpTransfer => {
-      sendTransferUpdate(oldHttpTransfer as unknown as AsperaSdkTransfer);
-    });
-  });
 
   // For now ignore multi user support in Safari
   if (options?.supportMultipleUsers && !isSafari()) {

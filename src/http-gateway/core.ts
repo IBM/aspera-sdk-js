@@ -1,10 +1,11 @@
 import {messages} from '../constants/messages';
 import {generateErrorBody, generatePromiseObjects, randomUUID, safeJsonParse, throwError} from '../helpers/helpers';
 import {asperaSdk} from '../index';
-import {removeTransfer as oldHttpRemoveTransfer, getAllTransfers as oldHttpGetAllTransfers, getTransferById as oldHttpGetTransfer, getFilesForUploadPromise as oldHttpGetFilesForUploadPromise, getFoldersForUploadPromise as oldHttpGetFoldersForUploadPromise} from '@ibm-aspera/http-gateway-sdk-js';
+import {removeTransfer as oldHttpRemoveTransfer, getAllTransfers as oldHttpGetAllTransfers, getTransferById as oldHttpGetTransfer, getFilesForUploadPromise as oldHttpGetFilesForUploadPromise, getFoldersForUploadPromise as oldHttpGetFoldersForUploadPromise, initHttpGateway as oldInitHttpGateway, registerActivityCallback as oldHttpRegisterActivityCallback} from '@ibm-aspera/http-gateway-sdk-js';
 import {FileDialogOptions, DataTransferResponse, TransferSpec, AsperaSdkTransfer, ReadAsArrayBufferResponse, ReadChunkAsArrayBufferResponse} from '../models/models';
+import {HttpGatewayInfo} from './models';
 
-// 50MiB which matches the limits in Connect and IBM Aspera for desktop
+// Maximum file size for generating image previews for files. 50MiB matches the limits in both Connect and IBM Aspera for desktop.
 const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
 /**
@@ -16,6 +17,52 @@ const MAX_FILE_SIZE = 50 * 1024 * 1024;
  * Most logic is called directly by Desktop SDK functions
  * You may not need to import anything from this file.
  */
+
+/**
+ * Send a transfer update through the SDK
+ *
+ * @param transfer - Transsfer object to send to consumers
+ */
+export const sendTransferUpdate = (transfer: AsperaSdkTransfer): void => {
+  asperaSdk.httpGatewayTransferStore.set(transfer.uuid, transfer);
+  asperaSdk.activityTracking.handleTransferActivity({
+    type: 'transferUpdated',
+    data: {transfers: [transfer]},
+  });
+};
+
+/**
+ * Initialize the HTTP Gateway after the /info response has been received and verified.
+ * For v2 gateways, delegates to the old HTTP Gateway SDK.
+ * For v3 gateways, sets up the iframe container for downloads.
+ *
+ * @param response - The /info response from the HTTP Gateway server
+ *
+ * @returns a promise that resolves when the HTTP Gateway is initialized
+ */
+export const initHttpGateway = (response: HttpGatewayInfo): Promise<void> => {
+  asperaSdk.globals.httpGatewayInfo = response;
+  asperaSdk.globals.httpGatewayVerified = true;
+
+  if (asperaSdk.useOldHttpGateway) {
+    // Watch for old HTTP Gateway transfers in case used.
+    oldHttpRegisterActivityCallback(oldHttpTransfers => {
+      oldHttpTransfers.transfers.forEach(oldHttpTransfer => {
+        sendTransferUpdate(oldHttpTransfer as unknown as AsperaSdkTransfer);
+      });
+    });
+
+    return oldInitHttpGateway(asperaSdk.globals.httpGatewayUrl).then(() => {});
+  }
+
+  const iframeContainer = document.createElement('div');
+  iframeContainer.id = 'aspera-http-gateway-iframes';
+  iframeContainer.style = 'display: none;';
+  document.body.appendChild(iframeContainer);
+  asperaSdk.globals.httpGatewayIframeContainer = iframeContainer;
+
+  return Promise.resolve();
+};
 
 /**
  * Remove a transfer from HTTP Gateway systems
@@ -224,19 +271,6 @@ export const getSdkTransfer = (transferSpec: TransferSpec): AsperaSdkTransfer =>
     httpGatewayTransfer: true,
     httpDownloadExternalHandle: false,
   };
-};
-
-/**
- * Send a transfer update through the SDK
- *
- * @param transfer - Transsfer object to send to consumers
- */
-export const sendTransferUpdate = (transfer: AsperaSdkTransfer): void => {
-  asperaSdk.httpGatewayTransferStore.set(transfer.uuid, transfer);
-  asperaSdk.activityTracking.handleTransferActivity({
-    type: 'transferUpdated',
-    data: {transfers: [transfer]},
-  });
 };
 
 /**

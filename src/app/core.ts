@@ -211,6 +211,20 @@ export const startTransfer = (transferSpec: TransferSpec, asperaSdkSpec?: Aspera
   if (asperaSdk.useHttpGateway) {
     return transferSpec.direction === 'receive' ? httpDownload(transferSpec, asperaSdkSpec) : httpUpload(transferSpec, asperaSdkSpec);
   } else if (asperaSdk.useConnect) {
+    /**
+     * There is a bug in the Connect transfer client where Connect's HTTP server will no longer return ANY responses if a dialog was opened
+     * when starting the transfer (ex: request or file overwrite confirmation).
+     */
+    if (asperaSdkSpec?.allow_dialogs !== false) {
+      console.warn(
+        '[Aspera SDK] `allow_dialogs` was not set to `false` in AsperaSdkSpec and has been overridden. ' +
+    'Connect dialogs block all subsequent HTTP responses. ' +
+    'Set `allow_dialogs: false` explicitly to suppress this warning. ' +
+    'More info: https://github.com/IBM/aspera-sdk-js/issues/196'
+      );
+      asperaSdkSpec = { ...asperaSdkSpec, allow_dialogs: false };
+    }
+
     return asperaSdk.globals.connect.startTransferPromise(transferSpec as unknown as ConnectTypes.TransferSpec, asperaSdkSpec).then(response => {
       return response.transfer_specs[0] as unknown as AsperaSdkTransfer;
     });

@@ -135,15 +135,19 @@ export class ActivityTracking {
   private lastNotifiedWebSocketEvent: WebsocketEvent = undefined;
 
   /**
-   * Notify all consumers when a message is received from the websocket
+   * Notify all consumers when a message is received from the transfer client.
    *
-   * @param message the message received from the websocket
+   * @param message the message received
    */
   handleTransferActivity(message: ActivityMessage): void {
+    const data = message.data && typeof message.data === 'object' && 'transfers' in message.data
+      ? message.data
+      : {transfers: [message.data]};
+
     if (message.type === 'transferUpdated' || message.type === 'transferRemoved') {
       this.activity_callbacks.forEach(callback => {
         if (typeof callback === 'function') {
-          callback(message.data);
+          callback(data);
         }
       });
     }

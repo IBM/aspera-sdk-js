@@ -43,7 +43,8 @@ describe('Connect SDK', () => {
         paths: [{source: '/remote/file.txt'}],
         token: 'test-token',
       });
-      expect(call.args[1]).toEqual({use_absolute_destination_path: false});
+      // `allow_dialogs` explicitly overridden (https://github.com/IBM/aspera-sdk-js/issues/196).
+      expect(call.args[1]).toEqual({allow_dialogs: false, use_absolute_destination_path: false});
     });
   });
 

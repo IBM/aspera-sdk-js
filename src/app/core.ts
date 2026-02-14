@@ -203,7 +203,7 @@ export const init = (options?: InitOptions): Promise<any> => {
  *
  * @returns a promise that resolves if transfer initiation is successful and rejects if transfer cannot be started
  */
-export const startTransfer = (transferSpec: TransferSpec, asperaSdkSpec: AsperaSdkSpec): Promise<AsperaSdkTransfer> => {
+export const startTransfer = (transferSpec: TransferSpec, asperaSdkSpec?: AsperaSdkSpec): Promise<AsperaSdkTransfer> => {
   if (!isValidTransferSpec(transferSpec)) {
     return throwError(messages.notValidTransferSpec, {transferSpec});
   }
@@ -222,7 +222,7 @@ export const startTransfer = (transferSpec: TransferSpec, asperaSdkSpec: AsperaS
 
   const payload = {
     transfer_spec: transferSpec,
-    desktop_spec: asperaSdkSpec,
+    desktop_spec: asperaSdkSpec || {},
     app_id: asperaSdk.globals.appId,
   };
 

@@ -469,6 +469,53 @@ export interface TransferSpec {
 
 export type TransferStatus = 'failed'|'completed'|'running'|'queued'|'removed'|'canceled'|'orphaned'|'paused';
 
+/** Pagination options for paginated API requests. */
+export interface Pagination {
+  /** Maximum number of entries to return. (Default: 1000) */
+  limit?: number;
+  /** Number of entries to skip from the beginning. (Default: 0) */
+  offset?: number;
+}
+
+/** Paginated response containing file-level transfer progress. */
+export interface PaginatedFilesResponse {
+  /** The file entries for this page. */
+  entries: FileStat[];
+  /** Total number of files in the transfer. */
+  total_count: number;
+  /** The limit used for the request. */
+  limit: number;
+  /** The offset used for the request. */
+  offset: number;
+}
+
+/** Status of an individual file within a transfer. */
+export type FileStatus = 'failed'|'skipped'|'finished'|'running';
+
+/** Error information for a file that failed to transfer. */
+export interface FileError {
+  /** Error code */
+  code: number;
+  /** Human-readable error description */
+  description: string;
+}
+
+/** Progress information for an individual file within a transfer. */
+export interface FileStat {
+  /** The file path */
+  file: string;
+  /** Number of bytes written for this file */
+  bytes_written: number;
+  /** Number of bytes expected for this file */
+  bytes_expected: number;
+  /** Time elapsed in microseconds for this file */
+  elapsed_usec: number;
+  /** Error information if the file failed */
+  error?: FileError;
+  /** Status of this file */
+  status: FileStatus;
+}
+
 export interface AsperaSdkTransfer {
   /** The ID of the transfer */
   uuid: string;

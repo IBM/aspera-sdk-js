@@ -35,4 +35,5 @@ export const messages = {
   readAsArrayBufferFailed: 'Unable to read file as array buffer',
   readChunkAsArrayBufferFailed: 'Unable to read file chunk as array buffer',
   rpcDiscoverFailed: 'Unable to discover RPC endpoints',
+  getFilesListFailed: 'Unable to get files list for transfer',
 };

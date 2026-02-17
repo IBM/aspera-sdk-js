@@ -1,4 +1,4 @@
-import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, InstallerUrlInfo, RpcMethod, SdkCapabilities} from './models';
+import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, InstallerUrlInfo, RpcMethod, SdkCapabilities} from './models';
 import {hiddenStyleList, installerUrl, protocol} from '../constants/constants';
 import {messages} from '../constants/messages';
 import {safariClient} from '../helpers/client/safari-client';
@@ -403,6 +403,8 @@ export class AsperaSdk {
   getInstallerInfo: (options: InstallerOptions) => Promise<InstallerInfoResponse>;
   /** Initialize drag and drop */
   initDragDrop: () => Promise<any>;
+  /** Function to get paginated file-level progress for a transfer */
+  getFilesList: (transferId: string, pagination?: Pagination) => Promise<PaginatedFilesResponse>;
   /** Function to get information about the IBM Aspera instance */
   getInfo: () => Promise<AsperaSdkInfo>;
   /** Function to read an entire file as an array buffer (base64-encoded) */

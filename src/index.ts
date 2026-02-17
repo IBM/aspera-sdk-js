@@ -1,5 +1,5 @@
 import {AsperaSdk} from './models/aspera-sdk.model';
-import {createDropzone, deregisterActivityCallback, deregisterStatusCallback, getAllTransfers, getCapabilities, getInfo, getTransfer, init, initDragDrop, modifyTransfer, readAsArrayBuffer, readChunkAsArrayBuffer, registerActivityCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showDirectory, showPreferences, showSelectFileDialog, showSelectFolderDialog, startTransfer, stopTransfer, testConnection,} from './app/core';
+import {createDropzone, deregisterActivityCallback, deregisterStatusCallback, getAllTransfers, getCapabilities, getFilesList, getInfo, getTransfer, init, initDragDrop, modifyTransfer, readAsArrayBuffer, readChunkAsArrayBuffer, registerActivityCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showDirectory, showPreferences, showSelectFileDialog, showSelectFolderDialog, startTransfer, stopTransfer, testConnection,} from './app/core';
 import {getInstallerInfo} from './app/installer';
 import {getInstallerUrls, isSafari} from './helpers/helpers';
 import * as httpGatewayCalls from './http-gateway';
@@ -17,6 +17,7 @@ asperaSdk.stopTransfer = stopTransfer;
 asperaSdk.resumeTransfer = resumeTransfer;
 asperaSdk.getAllTransfers = getAllTransfers;
 asperaSdk.getTransfer = getTransfer;
+asperaSdk.getFilesList = getFilesList;
 asperaSdk.showSelectFileDialog = showSelectFileDialog;
 asperaSdk.showSelectFolderDialog = showSelectFolderDialog;
 asperaSdk.showPreferences = showPreferences;
@@ -57,6 +58,7 @@ export {
   resumeTransfer,
   getAllTransfers,
   getTransfer,
+  getFilesList,
   showSelectFileDialog,
   showSelectFolderDialog,
   showPreferences,
@@ -84,7 +86,10 @@ export type {
   CustomThemeItems,
   DataTransferResponse,
   FileDialogOptions,
+  FileError,
   FileFilter,
+  FileStat,
+  FileStatus,
   FolderDialogOptions,
   InitOptions,
   InstallerInfo,
@@ -93,6 +98,8 @@ export type {
   InstallerUrlInfo,
   ModifyTransferOptions,
   OverwritePolicy,
+  PaginatedFilesResponse,
+  Pagination,
   Path,
   ReadAsArrayBufferResponse,
   ReadChunkAsArrayBufferResponse,

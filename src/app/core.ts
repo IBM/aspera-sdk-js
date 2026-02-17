@@ -5,7 +5,7 @@ import {httpDownload, httpUpload, initHttpGateway} from '../http-gateway';
 import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChunkAsArrayBuffer, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, sendTransferUpdate} from '../http-gateway/core';
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
-import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities} from '../models/models';
+import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities} from '../models/models';
 import {Connect, ConnectInstaller} from '@ibm-aspera/connect-sdk-js';
 import {initConnect} from '../connect/core';
 import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
@@ -569,6 +569,39 @@ export const getTransfer = (id: string): Promise<AsperaSdkTransfer> => {
     .catch(error => {
       errorLog(messages.getTransferFailed, error);
       promiseInfo.rejecter(generateErrorBody(messages.getTransferFailed, error));
+    });
+
+  return promiseInfo.promise;
+};
+
+/**
+ * Get paginated file-level progress for a specific transfer.
+ *
+ * @param id transfer uuid
+ * @param pagination optional pagination options (limit and offset)
+ *
+ * @returns a promise that resolves with the paginated file progress list
+ */
+export const getFilesList = (id: string, pagination?: Pagination): Promise<PaginatedFilesResponse> => {
+  if (!asperaSdk.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  const promiseInfo = generatePromiseObjects();
+
+  const payload: any = {
+    transfer_id: id,
+  };
+
+  if (pagination) {
+    payload.pagination = pagination;
+  }
+
+  client.request('get_files_list', payload)
+    .then((data: PaginatedFilesResponse) => promiseInfo.resolver(data))
+    .catch(error => {
+      errorLog(messages.getFilesListFailed, error);
+      promiseInfo.rejecter(generateErrorBody(messages.getFilesListFailed, error));
     });
 
   return promiseInfo.promise;

@@ -29,4 +29,4 @@ Along with the examples, you can find an example test application [here](https:/
 
 ## Migration from Connect SDK
 
-Refer to [MIGRATION](MIGRATION.md) for recommended changes when migrating your web application from the Connect SDK (`@ibm-aspera/connect-sdk-js`).
+Refer to [MIGRATION](https://github.com/IBM/aspera-sdk-js/blob/main/MIGRATION.md) for recommended changes when migrating your web application from the Connect SDK (`@ibm-aspera/connect-sdk-js`).

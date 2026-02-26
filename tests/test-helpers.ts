@@ -124,6 +124,7 @@ export function setupSdk(options: SetupOptions) {
       download_endpoint: [],
       endpoints: [],
     };
+    asperaSdk.globals.httpGatewayRoutePrefix = '/v3';
     // Create iframe container for presign flow
     if (typeof document !== 'undefined') {
       let container = document.getElementById('http-gateway-iframe-container') as HTMLDivElement;
@@ -158,6 +159,7 @@ export function resetSdk() {
   // Reset state
   asperaSdk.globals.httpGatewayVerified = false;
   asperaSdk.globals.httpGatewayUrl = undefined;
+  asperaSdk.globals.httpGatewayRoutePrefix = '';
   asperaSdk.globals.httpGatewayInfo = undefined;
   asperaSdk.globals.httpGatewayIframeContainer = undefined;
   asperaSdk.httpGatewaySelectedFiles.clear();

@@ -53,7 +53,7 @@ describe('HTTP Gateway', () => {
       await startTransfer(transferSpec, {});
 
       const call = lastFetchCall();
-      expect(call.url).toBe(`${GATEWAY_URL}/presign`);
+      expect(call.url).toBe(`${GATEWAY_URL}/v3/presign`);
       expect(call.method).toBe('POST');
       expect(call.headers['Content-Type']).toBe('application/json');
       expect(call.body).toEqual({

@@ -34,6 +34,7 @@ const httpDownloadPresigned = (transferSpec: TransferSpec, asperaSdkSpec?: Asper
   };
 
   const url = new URL(asperaSdkSpec?.http_gateway_override_server_url || asperaSdk.globals.httpGatewayUrl);
+  const baseUrl = (url.origin + url.pathname).replace(/\/+$/, '');
 
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
@@ -48,7 +49,7 @@ const httpDownloadPresigned = (transferSpec: TransferSpec, asperaSdkSpec?: Asper
   const protocol = url.protocol === 'https:' ? 'https' : 'http';
 
   return fetch(
-    `${url.toString()}/presign`,
+    `${baseUrl}${asperaSdk.globals.httpGatewayRoutePrefix}/presign`,
     {
       method: 'POST',
       headers,
@@ -131,7 +132,7 @@ const httpDownloadInBrowser = (transferSpec: TransferSpec, asperaSdkSpec?: Asper
     headers['X-Aspera-AccessKey'] = asperaSdkSpec.http_gateway_authentication.access_key;
   }
 
-  fetch(`${asperaSdkSpec?.http_gateway_override_server_url || asperaSdk.globals.httpGatewayUrl}/download`, {method: 'GET', headers}).then(data => {
+  fetch(`${asperaSdkSpec?.http_gateway_override_server_url || asperaSdk.globals.httpGatewayUrl}${asperaSdk.globals.httpGatewayRoutePrefix}/download`, {method: 'GET', headers}).then(data => {
     const responseHeaders = data.headers;
     transferObject.httpRequestId = responseHeaders.get('X-Request-Id');
     const chunks: Uint8Array<ArrayBuffer>[] = [];

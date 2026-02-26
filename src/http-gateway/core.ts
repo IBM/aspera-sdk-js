@@ -44,6 +44,9 @@ export const initHttpGateway = (response: HttpGatewayInfo): Promise<void> => {
   asperaSdk.globals.httpGatewayInfo = response;
   asperaSdk.globals.httpGatewayVerified = true;
 
+  const majorVersion = Number(response.version.split('.')[0] || 3);
+  asperaSdk.globals.httpGatewayRoutePrefix = majorVersion >= 3 ? '/v3' : '';
+
   if (asperaSdk.useOldHttpGateway) {
     // Watch for old HTTP Gateway transfers in case used.
     oldHttpRegisterActivityCallback(oldHttpTransfers => {

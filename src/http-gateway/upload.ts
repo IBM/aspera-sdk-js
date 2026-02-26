@@ -54,7 +54,7 @@ export const httpUpload = (transferSpec: TransferSpec, asperaSdkSpec?: AsperaSdk
     request.setRequestHeader('X-Aspera-AccessKey', asperaSdkSpec.http_gateway_authentication.access_key);
   }
 
-  request.open('POST', `${asperaSdkSpec?.http_gateway_override_server_url || asperaSdk.globals.httpGatewayUrl}/upload`, true);
+  request.open('POST', `${asperaSdkSpec?.http_gateway_override_server_url || asperaSdk.globals.httpGatewayUrl}${asperaSdk.globals.httpGatewayRoutePrefix}/upload`, true);
 
   const triggerUpdate = (): void => {
     sendTransferUpdate(transferObject);

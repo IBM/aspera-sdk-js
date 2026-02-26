@@ -33,6 +33,8 @@ export class AsperaSdkGlobals {
   dropZonesCreated: Map<string, {event: string; callback: (event: any) => void}[]> = new Map();
   /** HTTP Gateway URL after successful passing */
   httpGatewayUrl?: string;
+  /** Version-based route prefix for HTTP Gateway API endpoints (e.g. "/v3" for v3+, "" for v2) */
+  httpGatewayRoutePrefix = '';
   /** Indicate that the HTTP Gateway has been verified as working */
   httpGatewayVerified = false;
   /** HTTP Gateway info */

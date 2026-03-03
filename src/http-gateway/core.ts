@@ -83,11 +83,47 @@ export const httpRemoveTransfer = (id: string): Promise<any> => {
   const transfer = asperaSdk.httpGatewayTransferStore.get(id);
 
   if (transfer) {
+    transfer.status = 'canceled';
+
+    const request = asperaSdk.httpGatewayRequestStore.get(id);
+    if (request) {
+      request.abort();
+      asperaSdk.httpGatewayRequestStore.delete(id);
+    }
+
     asperaSdk.httpGatewayTransferStore.delete(id);
     return Promise.resolve({removed: true});
   } else {
     return Promise.reject(generateErrorBody(messages.removeTransferFailed, {reason: 'Not found'}));
   }
+};
+
+/**
+ * Stop an in-progress HTTP Gateway transfer.
+ * Aborts the underlying HTTP request and sets the transfer status to 'canceled'.
+ *
+ * @param id - ID of the transfer
+ *
+ * @returns Promise indicating success
+ */
+export const httpStopTransfer = (id: string): Promise<any> => {
+  const transfer = asperaSdk.httpGatewayTransferStore.get(id);
+
+  if (!transfer) {
+    return Promise.reject(generateErrorBody(messages.stopTransferFailed, {reason: 'Not found'}));
+  }
+
+  transfer.status = 'canceled';
+
+  const request = asperaSdk.httpGatewayRequestStore.get(id);
+  if (request) {
+    request.abort();
+    asperaSdk.httpGatewayRequestStore.delete(id);
+  }
+
+  sendTransferUpdate(transfer);
+
+  return Promise.resolve({stopped: true});
 };
 
 /**

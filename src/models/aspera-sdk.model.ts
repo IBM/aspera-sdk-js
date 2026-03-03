@@ -425,6 +425,8 @@ export class AsperaSdk {
   httpGatewayCalls: unknown;
   /** Store of HTTP Gateway transfers */
   httpGatewayTransferStore: Map<string, AsperaSdkTransfer> = new Map();
+  /** Store of active HTTP Gateway XMLHttpRequests for cancellation. Key is transfer UUID. */
+  httpGatewayRequestStore: Map<string, XMLHttpRequest> = new Map();
   /** HTTP Gateway in app threshold limit. This can be changed globally for the app. */
   httpGatewayInBrowserDownloadThreshold = 1000000000;
 

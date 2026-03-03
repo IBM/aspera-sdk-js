@@ -164,6 +164,7 @@ export function resetSdk() {
   asperaSdk.globals.httpGatewayIframeContainer = undefined;
   asperaSdk.httpGatewaySelectedFiles.clear();
   asperaSdk.httpGatewayTransferStore.clear();
+  asperaSdk.httpGatewayRequestStore.clear();
   asperaSdk.globals.asperaAppVerified = false;
   asperaSdk.globals.appId = '';
   asperaSdk.globals.rpcPort = 33024;

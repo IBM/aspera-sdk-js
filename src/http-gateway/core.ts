@@ -68,33 +68,6 @@ export const initHttpGateway = (response: HttpGatewayInfo): Promise<void> => {
 };
 
 /**
- * Remove a transfer from HTTP Gateway systems
- * @param id - ID of the transfer
- *
- * @returns Promise indicating success
- */
-export const httpRemoveTransfer = (id: string): Promise<any> => {
-  if (asperaSdk.useOldHttpGateway) {
-    oldHttpRemoveTransfer(id);
-
-    return Promise.resolve({removed: true});
-  }
-
-  /* Cancel the transfer before removing it.
-   *
-   * Note: This is slightly different from the behavior in the v2 JS SDK. When removing
-   * a transfer, v2 will NOT cancel it beforehand. In the desktop and Connect transfer clients,
-   * removing a transfer also stops it, so we do the same here for HTTP Gateway v3.
-   */
-  return httpStopTransfer(id)
-    .catch(() => {})
-    .then(() => {
-      asperaSdk.httpGatewayTransferStore.delete(id);
-      return {removed: true};
-    });
-};
-
-/**
  * Stop an in-progress HTTP Gateway transfer.
  * Aborts the underlying HTTP request and sets the transfer status to 'canceled'.
  *
@@ -126,6 +99,33 @@ export const httpStopTransfer = (id: string): Promise<void> => {
   sendTransferUpdate(transfer);
 
   return Promise.resolve();
+};
+
+/**
+ * Remove a transfer from HTTP Gateway systems
+ * @param id - ID of the transfer
+ *
+ * @returns Promise indicating success
+ */
+export const httpRemoveTransfer = (id: string): Promise<any> => {
+  if (asperaSdk.useOldHttpGateway) {
+    oldHttpRemoveTransfer(id);
+
+    return Promise.resolve({removed: true});
+  }
+
+  /* Cancel the transfer before removing it.
+   *
+   * Note: This is slightly different from the behavior in the v2 JS SDK. When removing
+   * a transfer, v2 will NOT cancel it beforehand. In the desktop and Connect transfer clients,
+   * removing a transfer also stops it, so we do the same here for HTTP Gateway v3.
+   */
+  return httpStopTransfer(id)
+    .catch(() => {})
+    .then(() => {
+      asperaSdk.httpGatewayTransferStore.delete(id);
+      return {removed: true};
+    });
 };
 
 /**

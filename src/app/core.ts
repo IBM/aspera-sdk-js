@@ -924,10 +924,9 @@ export const getChecksum = (options: GetChecksumOptions): Promise<ChecksumFileRe
   //   return httpGatewayGetChecksum(options);
   // }
 
-  // TODO: Add Connect support when available
-  // if (asperaSdk.useConnect) {
-  //   return asperaSdk.globals.connect.getChecksum(options);
-  // }
+  if (asperaSdk.useConnect) {
+    return asperaSdk.globals.connect.getChecksum(options);
+  }
 
   if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);

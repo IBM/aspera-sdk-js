@@ -834,6 +834,8 @@ export interface InitOptions {
     correlationId?: string;
     /** Indicate if default Connect installer window should not be shown */
     hideIncludedInstaller?: boolean;
+    /** Connect installer version to offer for downloads. This option is ignored if `sdkLocation` is specified. Only supports versions `4.x.x`. */
+    version?: string;
   }
 }
 

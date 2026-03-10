@@ -110,8 +110,7 @@ export const init = (options?: InitOptions): Promise<any> => {
 
   asperaSdk.globals.appId = appId;
 
-  // For now ignore multi user support in Safari
-  if (options?.supportMultipleUsers && !isSafari()) {
+  if (options?.supportMultipleUsers) {
     asperaSdk.globals.supportMultipleUsers = true;
     asperaSdk.globals.sessionId = randomUUID();
   }
@@ -132,6 +131,7 @@ export const init = (options?: InitOptions): Promise<any> => {
       sdkLocation: options.connectSettings.sdkLocation,
       correlationId: options.connectSettings.correlationId,
       style: 'carbon',
+      version: options.connectSettings.version,
     });
 
     asperaSdk.globals.connectAW4 = {

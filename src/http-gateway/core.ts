@@ -1,7 +1,7 @@
 import {messages} from '../constants/messages';
 import {generateErrorBody, generatePromiseObjects, randomUUID, safeJsonParse, throwError} from '../helpers/helpers';
 import {asperaSdk} from '../index';
-import {removeTransfer as oldHttpRemoveTransfer, getAllTransfers as oldHttpGetAllTransfers, getTransferById as oldHttpGetTransfer, getFilesForUploadPromise as oldHttpGetFilesForUploadPromise, getFoldersForUploadPromise as oldHttpGetFoldersForUploadPromise, initHttpGateway as oldInitHttpGateway, registerActivityCallback as oldHttpRegisterActivityCallback} from '@ibm-aspera/http-gateway-sdk-js';
+import {removeTransfer as oldHttpRemoveTransfer, getAllTransfers as oldHttpGetAllTransfers, getTransferById as oldHttpGetTransfer, getFilesForUploadPromise as oldHttpGetFilesForUploadPromise, getFoldersForUploadPromise as oldHttpGetFoldersForUploadPromise, initHttpGateway as oldInitHttpGateway, registerActivityCallback as oldHttpRegisterActivityCallback, cancelTransfer as oldHttpCancelTransfer} from '@ibm-aspera/http-gateway-sdk-js';
 import {FileDialogOptions, DataTransferResponse, TransferSpec, AsperaSdkTransfer, ReadAsArrayBufferResponse, ReadChunkAsArrayBufferResponse} from '../models/models';
 import {HttpGatewayInfo} from './models';
 
@@ -80,6 +80,15 @@ export const httpRemoveTransfer = (id: string): Promise<any> => {
     return Promise.resolve({removed: true});
   }
 
+  /* Cancel the transfer before removing it.
+   *
+   * Note: This is slightly different from the behavior in the v2 JS SDK. When removing
+   * a transfer, v2 will NOT cancel it beforehand. In the desktop and Connect transfer clients,
+   * removing a transfer also stops it, so we do the same here for HTTP Gateway v3.
+   *
+   * XXX: Call httpStopTransfer(). If stopping the transfer fails, we should still remove the transfer from
+   * the global store.
+   */
   const transfer = asperaSdk.httpGatewayTransferStore.get(id);
 
   if (transfer) {
@@ -106,7 +115,13 @@ export const httpRemoveTransfer = (id: string): Promise<any> => {
  *
  * @returns Promise indicating success
  */
-export const httpStopTransfer = (id: string): Promise<any> => {
+export const httpStopTransfer = (id: string): Promise<void> => {
+  if (asperaSdk.useOldHttpGateway) {
+    oldHttpCancelTransfer(id);
+
+    return Promise.resolve();
+  }
+
   const transfer = asperaSdk.httpGatewayTransferStore.get(id);
 
   if (!transfer) {
@@ -123,7 +138,7 @@ export const httpStopTransfer = (id: string): Promise<any> => {
 
   sendTransferUpdate(transfer);
 
-  return Promise.resolve({stopped: true});
+  return Promise.resolve();
 };
 
 /**

@@ -5,7 +5,7 @@ import {httpDownload, httpUpload, initHttpGateway} from '../http-gateway';
 import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChunkAsArrayBuffer, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, httpStopTransfer, sendTransferUpdate} from '../http-gateway/core';
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
-import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities} from '../models/models';
+import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse} from '../models/models';
 import {Connect, ConnectInstaller} from '@ibm-aspera/connect-sdk-js';
 import {initConnect} from '../connect/core';
 import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
@@ -911,7 +911,57 @@ export const readChunkAsArrayBuffer = (path: string, offset: number, chunkSize: 
   return promiseInfo.promise;
 };
 
+/**
+ * Get a checksum of the specified chunk size of the file.
+ *
+ * @param options checksum options including path, offset, chunkSize, and checksumMethod
+ *
+ * @returns a promise that resolves with the checksum information
+ */
+export const getChecksum = (options: GetChecksumOptions): Promise<ChecksumFileResponse> => {
+  // TODO: Add HTTP Gateway support when available
+  // if (asperaSdk.useHttpGateway) {
+  //   return httpGatewayGetChecksum(options);
+  // }
+
+  // TODO: Add Connect support when available
+  // if (asperaSdk.useConnect) {
+  //   return asperaSdk.globals.connect.getChecksum(options);
+  // }
+
+  if (!asperaSdk.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  const promiseInfo = generatePromiseObjects();
+
+  const payload = {
+    request: {
+      path: options.path,
+      offset: options.offset || 0,
+      chunkSize: options.chunkSize || 0,
+      checksumMethod: options.checksumMethod || 'md5',
+    },
+    app_id: asperaSdk.globals.appId,
+  };
+
+  client.request('get_checksum', payload)
+    .then((data: ChecksumFileResponse) => promiseInfo.resolver(data))
+    .catch(error => {
+      errorLog(messages.getChecksumFailed, error);
+      promiseInfo.rejecter(generateErrorBody(messages.getChecksumFailed, error));
+    });
+
+  return promiseInfo.promise;
+};
+
 const supportsMethod = (method: string): boolean => {
+  // We currently do not support calculating file checksums when using HTTP Gateway. In theory it should be possible
+  // to calculate this direclty in the browser similar to how `readAsArrayBuffer()` is implemented.
+  if (asperaSdk.useHttpGateway && method === 'get_checksum') {
+    return false;
+  }
+
   // HTTP Gateway and Connect do not have any RPC methods so fallback to true
   if (asperaSdk.useHttpGateway || asperaSdk.useConnect) {
     return true;
@@ -943,5 +993,6 @@ const supportsMethod = (method: string): boolean => {
 export const getCapabilities = (): SdkCapabilities => {
   return {
     imagePreview: supportsMethod('read_as_array_buffer') && supportsMethod('read_chunk_as_array_buffer'),
+    checksum: supportsMethod('get_checksum'),
   };
 };

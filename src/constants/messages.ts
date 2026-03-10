@@ -21,6 +21,7 @@ export const messages = {
   showSelectFolderDialogFailed: 'Unable to show select folder dialog',
   showPreferencesFailed: 'Unable to show preferences',
   stopTransferFailed: 'Unable to stop transfer',
+  stopTransferFailedExternal: 'Unable to stop transfer. The download must be canceled from the browser\'s download manager',
   transferFailed: 'The transfer failed to initiate',
   unableToFindElementOnPage: 'Unable to find the element on the current page',
   unableToReadDropped: 'The dropped item could not be parsed. Please try selecting via the select file/folder option',

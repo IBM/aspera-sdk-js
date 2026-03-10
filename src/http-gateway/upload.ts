@@ -48,6 +48,7 @@ export const httpUpload = (transferSpec: TransferSpec, asperaSdkSpec?: AsperaSdk
   }
 
   const transferObject = getSdkTransfer(transferSpec);
+  asperaSdk.httpGatewayRequestStore.set(transferObject.uuid, request);
 
   if (asperaSdkSpec?.http_gateway_authentication) {
     request.setRequestHeader('Authorization', `Bearer ${asperaSdkSpec.http_gateway_authentication.token}`);
@@ -61,11 +62,16 @@ export const httpUpload = (transferSpec: TransferSpec, asperaSdkSpec?: AsperaSdk
   };
 
   const triggerFailed = (): void => {
+    if (transferObject.status === 'canceled') {
+      return;
+    }
+
     const errorData = getMessageFromError(request.response);
     transferObject.httpRequestId = request.getResponseHeader('X-Request-Id');
     transferObject.status = 'failed';
     transferObject.error_code = errorData.code;
     transferObject.error_desc = errorData.message;
+    asperaSdk.httpGatewayRequestStore.delete(transferObject.uuid);
     triggerUpdate();
   };
 
@@ -103,6 +109,7 @@ export const httpUpload = (transferSpec: TransferSpec, asperaSdkSpec?: AsperaSdk
       transferObject.percentage = (event.loaded / event.total);
     }
 
+    asperaSdk.httpGatewayRequestStore.delete(transferObject.uuid);
     triggerUpdate();
   });
 

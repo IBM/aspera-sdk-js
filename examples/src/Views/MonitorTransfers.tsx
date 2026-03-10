@@ -47,7 +47,7 @@ export default function MonitorTransfers() {
   }
 
   const getTransferContent = (transfer: any): React.ReactNode => {
-    const running = (transfer.status === 'running' || transfer.status === 'queued') && !transfer.httpGatewayTransfer;
+    const running = (transfer.status === 'running' || transfer.status === 'queued');
     const canResume = transfer.status === 'paused' && !transfer.httpGatewayTransfer;
     const canOpen = transfer.status === 'completed' && transfer.transfer_spec.direction === 'receive' && !transfer.httpGatewayTransfer;
 

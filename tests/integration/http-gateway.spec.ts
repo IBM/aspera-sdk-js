@@ -3,6 +3,7 @@ import {
   removeTransfer,
   stopTransfer,
   resumeTransfer,
+  registerActivityCallback,
   showSelectFileDialog,
   showSelectFolderDialog,
   showPreferences,
@@ -118,6 +119,24 @@ describe('HTTP Gateway', () => {
 
       expect(asperaSdk.httpGatewayTransferStore.has(transferId)).toBe(false);
     });
+
+    it('should abort XHR and remove transfer from both stores for an upload', async () => {
+      const mockFile = new File(['upload content'], 'file.txt', {type: 'text/plain'});
+      asperaSdk.httpGatewaySelectedFiles.set('file.txt', mockFile);
+
+      const result = await startTransfer(uploadSpec({paths: [{source: 'file.txt'}]}), {});
+      const transferId = result.uuid;
+
+      expect(asperaSdk.httpGatewayRequestStore.has(transferId)).toBe(true);
+
+      const abortSpy = jest.spyOn(XMLHttpRequest.prototype, 'abort');
+
+      await removeTransfer(transferId);
+
+      expect(abortSpy).toHaveBeenCalled();
+      expect(asperaSdk.httpGatewayTransferStore.has(transferId)).toBe(false);
+      expect(asperaSdk.httpGatewayRequestStore.has(transferId)).toBe(false);
+    });
   });
 
   describe('getAllTransfers', () => {
@@ -202,10 +221,44 @@ describe('HTTP Gateway', () => {
   // ============================================================================
 
   describe('stopTransfer', () => {
-    it('should reject - not supported in HTTP Gateway mode', async () => {
-      await expect(stopTransfer('some-id')).rejects.toEqual({
+    it('should abort XHR and set status to canceled for an in-progress upload', async () => {
+      const mockFile = new File(['upload content'], 'file.txt', {type: 'text/plain'});
+      asperaSdk.httpGatewaySelectedFiles.set('file.txt', mockFile);
+
+      const result = await startTransfer(uploadSpec({paths: [{source: 'file.txt'}]}), {});
+      const transferId = result.uuid;
+
+      expect(asperaSdk.httpGatewayRequestStore.has(transferId)).toBe(true);
+
+      const abortSpy = jest.spyOn(XMLHttpRequest.prototype, 'abort');
+
+      await stopTransfer(transferId);
+
+      expect(abortSpy).toHaveBeenCalled();
+      expect(asperaSdk.httpGatewayTransferStore.has(transferId)).toBe(true);
+      expect(asperaSdk.httpGatewayTransferStore.get(transferId).status).toBe('canceled');
+      expect(asperaSdk.httpGatewayRequestStore.has(transferId)).toBe(false);
+    });
+
+    it('should emit a canceled status update via activity callback', async () => {
+      const mockFile = new File(['upload content'], 'file.txt', {type: 'text/plain'});
+      asperaSdk.httpGatewaySelectedFiles.set('file.txt', mockFile);
+
+      const updates: any[] = [];
+      registerActivityCallback((data) => updates.push(data));
+
+      const result = await startTransfer(uploadSpec({paths: [{source: 'file.txt'}]}), {});
+
+      await stopTransfer(result.uuid);
+
+      const lastUpdate = updates[updates.length - 1];
+      expect(lastUpdate.transfers[0].status).toBe('canceled');
+    });
+
+    it('should reject when transfer not found', async () => {
+      await expect(stopTransfer('nonexistent-id')).rejects.toEqual({
         error: true,
-        message: 'IBM Aspera SDK has not been verified. Run test or init first',
+        message: 'Unable to stop transfer',
       });
     });
   });

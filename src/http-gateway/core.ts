@@ -1,7 +1,7 @@
 import {messages} from '../constants/messages';
 import {generateErrorBody, generatePromiseObjects, randomUUID, safeJsonParse, throwError} from '../helpers/helpers';
 import {asperaSdk} from '../index';
-import {removeTransfer as oldHttpRemoveTransfer, getAllTransfers as oldHttpGetAllTransfers, getTransferById as oldHttpGetTransfer, getFilesForUploadPromise as oldHttpGetFilesForUploadPromise, getFoldersForUploadPromise as oldHttpGetFoldersForUploadPromise, initHttpGateway as oldInitHttpGateway, registerActivityCallback as oldHttpRegisterActivityCallback} from '@ibm-aspera/http-gateway-sdk-js';
+import {removeTransfer as oldHttpRemoveTransfer, getAllTransfers as oldHttpGetAllTransfers, getTransferById as oldHttpGetTransfer, getFilesForUploadPromise as oldHttpGetFilesForUploadPromise, getFoldersForUploadPromise as oldHttpGetFoldersForUploadPromise, initHttpGateway as oldInitHttpGateway, registerActivityCallback as oldHttpRegisterActivityCallback, cancelTransfer as oldHttpCancelTransfer} from '@ibm-aspera/http-gateway-sdk-js';
 import {FileDialogOptions, DataTransferResponse, TransferSpec, AsperaSdkTransfer, ReadAsArrayBufferResponse, ReadChunkAsArrayBufferResponse} from '../models/models';
 import {HttpGatewayInfo} from './models';
 
@@ -68,6 +68,45 @@ export const initHttpGateway = (response: HttpGatewayInfo): Promise<void> => {
 };
 
 /**
+ * Stop an in-progress HTTP Gateway transfer.
+ * Aborts the underlying HTTP request and sets the transfer status to 'canceled'.
+ *
+ * Note: If the download is being directly handled by the browser's download manager, this will return
+ * an error. The user must cancel the download themselves in the browser's download manger.
+ *
+ * @param id - ID of the transfer
+ *
+ * @returns Promise indicating success
+ */
+export const httpStopTransfer = (id: string): Promise<void> => {
+  if (asperaSdk.useOldHttpGateway) {
+    oldHttpCancelTransfer(id);
+
+    return Promise.resolve();
+  }
+
+  const transfer = asperaSdk.httpGatewayTransferStore.get(id);
+
+  if (!transfer) {
+    return Promise.reject(generateErrorBody(messages.stopTransferFailed, {reason: 'Not found'}));
+  } else if (transfer.httpDownloadExternalHandle) {
+    return Promise.reject(generateErrorBody(messages.stopTransferFailedExternal, {reason: 'External handle'}));
+  }
+
+  transfer.status = 'canceled';
+
+  const request = asperaSdk.httpGatewayRequestStore.get(id);
+  if (request) {
+    request.abort();
+    asperaSdk.httpGatewayRequestStore.delete(id);
+  }
+
+  sendTransferUpdate(transfer);
+
+  return Promise.resolve();
+};
+
+/**
  * Remove a transfer from HTTP Gateway systems
  * @param id - ID of the transfer
  *
@@ -80,14 +119,18 @@ export const httpRemoveTransfer = (id: string): Promise<any> => {
     return Promise.resolve({removed: true});
   }
 
-  const transfer = asperaSdk.httpGatewayTransferStore.get(id);
-
-  if (transfer) {
-    asperaSdk.httpGatewayTransferStore.delete(id);
-    return Promise.resolve({removed: true});
-  } else {
-    return Promise.reject(generateErrorBody(messages.removeTransferFailed, {reason: 'Not found'}));
-  }
+  /* Cancel the transfer before removing it.
+   *
+   * Note: This is slightly different from the behavior in the v2 JS SDK. When removing
+   * a transfer, v2 will NOT cancel it beforehand. In the desktop and Connect transfer clients,
+   * removing a transfer also stops it, so we do the same here for HTTP Gateway v3.
+   */
+  return httpStopTransfer(id)
+    .catch(() => {})
+    .then(() => {
+      asperaSdk.httpGatewayTransferStore.delete(id);
+      return {removed: true};
+    });
 };
 
 /**

@@ -2,7 +2,7 @@ import {messages} from '../constants/messages';
 import {client} from '../helpers/client/client';
 import {errorLog, generateErrorBody, generatePromiseObjects, isSafari, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
 import {httpDownload, httpUpload, initHttpGateway} from '../http-gateway';
-import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChunkAsArrayBuffer, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, sendTransferUpdate} from '../http-gateway/core';
+import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChunkAsArrayBuffer, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, httpStopTransfer, sendTransferUpdate} from '../http-gateway/core';
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
 import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities} from '../models/models';
@@ -336,6 +336,10 @@ export const removeTransfer = (id: string): Promise<any> => {
  * @returns a promise that resolves if transfer is stopped and rejects if transfer cannot be stopped
  */
 export const stopTransfer = (id: string): Promise<any> => {
+  if (asperaSdk.useHttpGateway) {
+    return httpStopTransfer(id);
+  }
+
   if (asperaSdk.useConnect) {
     return asperaSdk.globals.connect.stopTransfer(id);
   }

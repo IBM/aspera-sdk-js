@@ -991,6 +991,6 @@ const supportsMethod = (method: string): boolean => {
 export const getCapabilities = (): SdkCapabilities => {
   return {
     imagePreview: supportsMethod('read_as_array_buffer') && supportsMethod('read_chunk_as_array_buffer'),
-    checksum: supportsMethod('get_checksum'),
+    fileChecksum: supportsMethod('get_checksum'),
   };
 };

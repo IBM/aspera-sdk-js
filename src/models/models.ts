@@ -867,8 +867,6 @@ export interface SdkCapabilities {
   imagePreview: boolean,
   /**
    * Whether the SDK can calculate checksums of a file chunk.
-   *
-   * Checkum calculation is supported if the SDK is using Connect or IBM Aspera for desktop.
    */
-  checksum: boolean,
+  fileChecksum: boolean,
 }

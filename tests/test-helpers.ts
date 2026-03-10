@@ -239,6 +239,13 @@ function createConnectMock(): any {
       capture('readChunkAsArrayBuffer')(...args);
       return Promise.resolve({data: '', type: 'application/octet-stream'});
     }),
+    getChecksum: jest.fn().mockImplementation((...args) => {
+      capture('getChecksum')(...args);
+      return Promise.resolve({
+        checksum: 'd41d8cd98f00b204e9800998ecf8427e',
+        checksumMethod: args[0]?.checksumMethod || 'md5',
+      });
+    }),
     // Callback-based methods
     getAllTransfers: jest.fn().mockImplementation((callbacks) => {
       capture('getAllTransfers')([callbacks]);

@@ -919,10 +919,9 @@ export const readChunkAsArrayBuffer = (path: string, offset: number, chunkSize: 
  * @returns a promise that resolves with the checksum information
  */
 export const getChecksum = (options: GetChecksumOptions): Promise<ChecksumFileResponse> => {
-  // TODO: Add HTTP Gateway support when available
-  // if (asperaSdk.useHttpGateway) {
-  //   return httpGatewayGetChecksum(options);
-  // }
+  if (asperaSdk.useHttpGateway) {
+    return throwError(messages.getChecksumNotSupported);
+  }
 
   if (asperaSdk.useConnect) {
     return asperaSdk.globals.connect.getChecksum(options);

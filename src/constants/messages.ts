@@ -38,4 +38,5 @@ export const messages = {
   rpcDiscoverFailed: 'Unable to discover RPC endpoints',
   getFilesListFailed: 'Unable to get files list for transfer',
   getChecksumFailed: 'Unable to get file checksum',
+  getChecksumNotSupported: 'File checksum not supported for current transfer client',
 };

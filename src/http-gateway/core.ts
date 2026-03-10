@@ -71,6 +71,9 @@ export const initHttpGateway = (response: HttpGatewayInfo): Promise<void> => {
  * Stop an in-progress HTTP Gateway transfer.
  * Aborts the underlying HTTP request and sets the transfer status to 'canceled'.
  *
+ * Note: If the download is being directly handled by the browser's download manager, this will return
+ * an error. The user must cancel the download themselves in the browser's download manger.
+ *
  * @param id - ID of the transfer
  *
  * @returns Promise indicating success
@@ -86,6 +89,8 @@ export const httpStopTransfer = (id: string): Promise<void> => {
 
   if (!transfer) {
     return Promise.reject(generateErrorBody(messages.stopTransferFailed, {reason: 'Not found'}));
+  } else if (transfer.httpDownloadExternalHandle) {
+    return Promise.reject(generateErrorBody(messages.stopTransferFailedExternal, {reason: 'External handle'}));
   }
 
   transfer.status = 'canceled';

@@ -85,26 +85,13 @@ export const httpRemoveTransfer = (id: string): Promise<any> => {
    * Note: This is slightly different from the behavior in the v2 JS SDK. When removing
    * a transfer, v2 will NOT cancel it beforehand. In the desktop and Connect transfer clients,
    * removing a transfer also stops it, so we do the same here for HTTP Gateway v3.
-   *
-   * XXX: Call httpStopTransfer(). If stopping the transfer fails, we should still remove the transfer from
-   * the global store.
    */
-  const transfer = asperaSdk.httpGatewayTransferStore.get(id);
-
-  if (transfer) {
-    transfer.status = 'canceled';
-
-    const request = asperaSdk.httpGatewayRequestStore.get(id);
-    if (request) {
-      request.abort();
-      asperaSdk.httpGatewayRequestStore.delete(id);
-    }
-
-    asperaSdk.httpGatewayTransferStore.delete(id);
-    return Promise.resolve({removed: true});
-  } else {
-    return Promise.reject(generateErrorBody(messages.removeTransferFailed, {reason: 'Not found'}));
-  }
+  return httpStopTransfer(id)
+    .catch(() => {})
+    .then(() => {
+      asperaSdk.httpGatewayTransferStore.delete(id);
+      return {removed: true};
+    });
 };
 
 /**

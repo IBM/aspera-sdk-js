@@ -17,6 +17,7 @@ import Other from '../Views/Other';
 import Home from '../Views/Home';
 import AllTogether from '../Views/AllTogether';
 import ImagePreview from '../Views/ImagePreview';
+import FileChecksum from '../Views/FileChecksum';
 
 export const tabItems = [
   {route: '/', name: 'Home', component: <Home />},
@@ -24,7 +25,8 @@ export const tabItems = [
   {route: '/test', name: 'Test', component: <Test />, row: 1},
   {route: '/installer', name: 'Installing', component: <Installer />, row: 4},
   {route: '/select-items', name: 'Select items', component: <SelectItems />, row: 3},
-  {route: '/image-preview', name: 'Image Preview', component: <ImagePreview />, row: 3},
+  {route: '/image-preview', name: 'Image Preview', component: <ImagePreview />},
+  {route: '/file-checksum', name: 'File Checksum', component: <FileChecksum />},
   {route: '/start-transfer', name: 'Start transfer', component: <StartTransfer />, row: 2},
   {route: '/manage-transfer', name: 'Manage transfers', component: <MonitorTransfers />, row: 2},
   {route: '/drag-drop', name: 'Drag & drop', component: <DragDrop />, row: 3},

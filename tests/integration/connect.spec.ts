@@ -12,6 +12,7 @@ import {
   modifyTransfer,
   readAsArrayBuffer,
   readChunkAsArrayBuffer,
+  getChecksum,
 } from '../../src/index';
 import {
   setupSdk,
@@ -156,6 +157,64 @@ describe('Connect SDK', () => {
         path: '/path/to/large-file.bin',
         offset: 1024,
         chunkSize: 4096,
+      });
+    });
+  });
+
+  describe('getChecksum', () => {
+    it('should call getChecksum on Connect SDK with default values', async () => {
+      await getChecksum({path: '/path/to/file.txt'});
+
+      const mock = getConnectMock();
+      // Passes options as-is to Connect SDK
+      expect(mock.getChecksum).toHaveBeenCalledWith({path: '/path/to/file.txt'});
+    });
+
+    it('should call getChecksum on Connect SDK with custom options', async () => {
+      await getChecksum({
+        path: '/path/to/large-file.bin',
+        offset: 2048,
+        chunkSize: 8192,
+        checksumMethod: 'sha256',
+      });
+
+      const mock = getConnectMock();
+      expect(mock.getChecksum).toHaveBeenCalledWith({
+        path: '/path/to/large-file.bin',
+        offset: 2048,
+        chunkSize: 8192,
+        checksumMethod: 'sha256',
+      });
+    });
+
+    it('should call getChecksum on Connect SDK with sha1 algorithm', async () => {
+      await getChecksum({
+        path: '/path/to/document.pdf',
+        checksumMethod: 'sha1',
+      });
+
+      const mock = getConnectMock();
+      // Passes options as-is to Connect SDK
+      expect(mock.getChecksum).toHaveBeenCalledWith({
+        path: '/path/to/document.pdf',
+        checksumMethod: 'sha1',
+      });
+    });
+
+    it('should call getChecksum on Connect SDK with sha512 algorithm', async () => {
+      await getChecksum({
+        path: '/path/to/archive.zip',
+        offset: 0,
+        chunkSize: 1024,
+        checksumMethod: 'sha512',
+      });
+
+      const mock = getConnectMock();
+      expect(mock.getChecksum).toHaveBeenCalledWith({
+        path: '/path/to/archive.zip',
+        offset: 0,
+        chunkSize: 1024,
+        checksumMethod: 'sha512',
       });
     });
   });

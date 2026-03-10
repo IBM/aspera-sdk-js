@@ -13,6 +13,7 @@ import {
   modifyTransfer,
   readAsArrayBuffer,
   readChunkAsArrayBuffer,
+  getChecksum,
   asperaSdk,
 } from '../../src/index';
 import {
@@ -295,6 +296,15 @@ describe('HTTP Gateway', () => {
       await expect(modifyTransfer('some-id', {rate_policy: 'fair'})).rejects.toEqual({
         error: true,
         message: 'IBM Aspera SDK has not been verified. Run test or init first',
+      });
+    });
+  });
+
+  describe('getChecksum', () => {
+    it('should reject - not supported in HTTP Gateway mode', async () => {
+      await expect(getChecksum({path: '/path/to/file.txt'})).rejects.toEqual({
+        error: true,
+        message: 'File checksum not supported for current transfer client',
       });
     });
   });

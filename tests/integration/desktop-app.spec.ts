@@ -12,6 +12,7 @@ import {
   modifyTransfer,
   readAsArrayBuffer,
   readChunkAsArrayBuffer,
+  getChecksum,
 } from '../../src/index';
 import {
   mockFetch,
@@ -183,6 +184,67 @@ describe('Desktop App', () => {
         request: {path: '/path/to/large-file.bin', offset: 1024, chunkSize: 4096},
         app_id: APP_ID,
       });
+    });
+  });
+
+  describe('getChecksum', () => {
+    it('should call get_checksum RPC with default values', async () => {
+      await getChecksum({path: '/path/to/file.txt'});
+
+      const call = lastFetchCall();
+      expect(call.body.method).toBe('get_checksum');
+      expect(call.body.params).toEqual({
+        request: {
+          path: '/path/to/file.txt',
+          offset: 0,
+          chunkSize: 0,
+          checksumMethod: 'md5',
+        },
+        app_id: APP_ID,
+      });
+    });
+
+    it('should call get_checksum RPC with custom offset and chunkSize', async () => {
+      await getChecksum({
+        path: '/path/to/large-file.bin',
+        offset: 1024,
+        chunkSize: 4096,
+        checksumMethod: 'sha256',
+      });
+
+      const call = lastFetchCall();
+      expect(call.body.method).toBe('get_checksum');
+      expect(call.body.params).toEqual({
+        request: {
+          path: '/path/to/large-file.bin',
+          offset: 1024,
+          chunkSize: 4096,
+          checksumMethod: 'sha256',
+        },
+        app_id: APP_ID,
+      });
+    });
+
+    it('should call get_checksum RPC with sha1 algorithm', async () => {
+      await getChecksum({
+        path: '/path/to/document.pdf',
+        checksumMethod: 'sha1',
+      });
+
+      const call = lastFetchCall();
+      expect(call.body.method).toBe('get_checksum');
+      expect(call.body.params.request.checksumMethod).toBe('sha1');
+    });
+
+    it('should call get_checksum RPC with sha512 algorithm', async () => {
+      await getChecksum({
+        path: '/path/to/archive.zip',
+        checksumMethod: 'sha512',
+      });
+
+      const call = lastFetchCall();
+      expect(call.body.method).toBe('get_checksum');
+      expect(call.body.params.request.checksumMethod).toBe('sha512');
     });
   });
 });

@@ -108,6 +108,26 @@ export interface ReadChunkAsArrayBufferResponse {
   type: string;
 }
 
+/** Request to get a file checksum */
+export interface GetChecksumOptions {
+  /** Absolute path to the file */
+  path: string;
+  /** Byte offset to start reading from. Default: 0 */
+  offset?: number;
+  /** Number of bytes to read. If 0, read entire file from offset to end. Default: 0 */
+  chunkSize?: number;
+  /** Hash algorithm to use. Default: 'md5' */
+  checksumMethod?: 'md5'|'sha1'|'sha256'|'sha512';
+}
+
+/** Response containing file checksum information */
+export interface ChecksumFileResponse {
+  /** Hexadecimal string representation of the computed hash */
+  checksum: string;
+  /** The algorithm used */
+  checksumMethod: 'md5'|'sha1'|'sha256'|'sha512';
+}
+
 export interface ModifyTransferOptions {
   /**
    * @deprecated Use `lock_min_rate_kbps` instead.
@@ -845,4 +865,8 @@ export interface SdkCapabilities {
    * with the required RPC methods.
   */
   imagePreview: boolean,
+  /**
+   * Whether the SDK can calculate checksums of a file chunk.
+   */
+  fileChecksum: boolean,
 }

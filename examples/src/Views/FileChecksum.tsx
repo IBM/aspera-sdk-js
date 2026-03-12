@@ -3,14 +3,15 @@ import { Button, CodeSnippet, Dropdown, TextInput } from '@carbon/react';
 import { useEffect, useState } from 'react';
 import hljs from 'highlight.js';
 
-const checksumMethods = ['md5', 'sha1', 'sha256', 'sha512'] as const;
+type ChecksumMethod = 'md5'|'sha1'|'sha256'|'sha512';
+const checksumMethods: ChecksumMethod[] = ['md5', 'sha1', 'sha256', 'sha512'];
 
 export default function FileChecksum() {
   const [selectedFile, setSelectedFile] = useState<string>('');
   const [checksumData, setFileChecksum] = useState<{checksum: string; checksumMethod: string} | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [checksumMethod, setChecksumMethod] = useState<string>('md5');
+  const [checksumMethod, setChecksumMethod] = useState<ChecksumMethod>('md5');
   const [offset, setOffset] = useState<string>('0');
   const [chunkSize, setChunkSize] = useState<string>('0');
 
@@ -66,7 +67,7 @@ export default function FileChecksum() {
           label="Select method"
           items={[...checksumMethods]}
           selectedItem={checksumMethod}
-          onChange={({ selectedItem }) => setChecksumMethod(selectedItem)}
+          onChange={({ selectedItem }) => selectedItem && setChecksumMethod(selectedItem)}
         />
         <TextInput id="checksum-offset" className="code-input" value={offset} onChange={e => setOffset(e.target.value)} labelText="Offset" helperText="Byte offset to start reading from" />
         <TextInput id="checksum-chunk-size" className="code-input" value={chunkSize} onChange={e => setChunkSize(e.target.value)} labelText="Chunk Size" helperText="Number of bytes to read. 0 reads the entire file" />

@@ -746,8 +746,13 @@ export const createDropzone = (
     return;
   }
 
-  const dragEvent = (event: DragEvent) => {
+  const dragOverEvent = (event: DragEvent) => {
     event.preventDefault();
+  };
+
+  const dragEnterEvent = (event: DragEvent) => {
+    event.preventDefault();
+    callback({event, files: null as unknown as DataTransferResponse});
   };
 
   const dropEvent = (event: DragEvent) => {
@@ -782,11 +787,19 @@ export const createDropzone = (
     }
   };
 
+  const registeredListeners: {event: string; callback: (event: any) => void}[] = [
+    {event: 'dragenter', callback: dragEnterEvent},
+    {event: 'dragover', callback: dragOverEvent},
+    {event: 'drop', callback: dropEvent},
+  ];
+
   elements.forEach(element => {
-    element.addEventListener('dragover', dragEvent);
-    element.addEventListener('drop', dropEvent);
-    asperaSdk.globals.dropZonesCreated.set(elementSelector, [{event: 'dragover', callback: dragEvent}, {event: 'drop', callback: dropEvent}]);
+    registeredListeners.forEach(({event, callback: listener}) => {
+      element.addEventListener(event, listener)
+    });
   });
+
+  asperaSdk.globals.dropZonesCreated.set(elementSelector, registeredListeners);
 };
 
 /**
@@ -798,15 +811,17 @@ export const removeDropzone = (elementSelector: string): void => {
   const foundDropzone = asperaSdk.globals.dropZonesCreated.get(elementSelector);
 
   if (foundDropzone) {
-    foundDropzone.forEach(data => {
-      const elements = document.querySelectorAll(elementSelector);
+    const elements = document.querySelectorAll(elementSelector);
 
+    foundDropzone.forEach((data) => {
       if (elements && elements.length) {
         elements.forEach(element => {
           element.removeEventListener(data.event, data.callback);
         });
       }
     });
+
+    asperaSdk.globals.dropZonesCreated.delete(elementSelector);
   }
 };
 

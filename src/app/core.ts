@@ -5,7 +5,7 @@ import {httpDownload, httpUpload, initHttpGateway} from '../http-gateway';
 import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChunkAsArrayBuffer, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, httpStopTransfer, sendTransferUpdate} from '../http-gateway/core';
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
-import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse} from '../models/models';
+import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse} from '../models/models';
 import {Connect, ConnectInstaller} from '@ibm-aspera/connect-sdk-js';
 import {initConnect} from '../connect/core';
 import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
@@ -725,7 +725,7 @@ export const setBranding = (id: string, options: CustomBrandingOptions): Promise
  * @param connectOptions options for connect
  */
 export const createDropzone = (
-  callback: (data: {event: DragEvent; files: DataTransferResponse}) => void,
+  callback: (data: DropzoneEventData) => void,
   elementSelector: string,
   connectOptions?: ConnectTypes.DragDropOptions,
 ): void => {
@@ -746,8 +746,18 @@ export const createDropzone = (
     return;
   }
 
-  const dragEvent = (event: DragEvent) => {
+  const dragOverEvent = (event: DragEvent) => {
     event.preventDefault();
+  };
+
+  const dragEnterEvent = (event: DragEvent) => {
+    event.preventDefault();
+    callback({event});
+  };
+
+  const dragLeaveEvent = (event: DragEvent) => {
+    event.preventDefault();
+    callback({event});
   };
 
   const dropEvent = (event: DragEvent) => {
@@ -782,11 +792,20 @@ export const createDropzone = (
     }
   };
 
+  const registeredListeners: {event: string; callback: (event: any) => void}[] = [
+    {event: 'dragenter', callback: dragEnterEvent},
+    {event: 'dragleave', callback: dragLeaveEvent},
+    {event: 'dragover', callback: dragOverEvent},
+    {event: 'drop', callback: dropEvent},
+  ];
+
   elements.forEach(element => {
-    element.addEventListener('dragover', dragEvent);
-    element.addEventListener('drop', dropEvent);
-    asperaSdk.globals.dropZonesCreated.set(elementSelector, [{event: 'dragover', callback: dragEvent}, {event: 'drop', callback: dropEvent}]);
+    registeredListeners.forEach(({event, callback: listener}) => {
+      element.addEventListener(event, listener)
+    });
   });
+
+  asperaSdk.globals.dropZonesCreated.set(elementSelector, registeredListeners);
 };
 
 /**
@@ -798,15 +817,17 @@ export const removeDropzone = (elementSelector: string): void => {
   const foundDropzone = asperaSdk.globals.dropZonesCreated.get(elementSelector);
 
   if (foundDropzone) {
-    foundDropzone.forEach(data => {
-      const elements = document.querySelectorAll(elementSelector);
+    const elements = document.querySelectorAll(elementSelector);
 
+    foundDropzone.forEach((data) => {
       if (elements && elements.length) {
         elements.forEach(element => {
           element.removeEventListener(data.event, data.callback);
         });
       }
     });
+
+    asperaSdk.globals.dropZonesCreated.delete(elementSelector);
   }
 };
 

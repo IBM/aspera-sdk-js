@@ -65,6 +65,12 @@ export interface DataTransferResponse {
   };
 }
 
+/** Callback data for dropzone drag and drop events. */
+export interface DropzoneEventData {
+  event: DragEvent;
+  files?: DataTransferResponse;
+}
+
 export interface BrowserStyleFile {
   /** Last modified date of the file in milliseconds since the UNIX epoch */
   lastModified: number;

@@ -1,4 +1,4 @@
-import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, InstallerUrlInfo, RpcMethod, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse} from './models';
+import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, AsperaSdkSpec, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, InstallerUrlInfo, RpcMethod, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse} from './models';
 import {hiddenStyleList, installerUrl, protocol} from '../constants/constants';
 import {messages} from '../constants/messages';
 import {safariClient} from '../helpers/client/safari-client';
@@ -398,7 +398,7 @@ export class AsperaSdk {
   /** Function to set custom branding for IBM Aspera */
   setBranding: (id: string, options: CustomBrandingOptions) => Promise<any>;
   /** Create dropzone for drop events of files */
-  createDropzone: (callback: (data: {event: any; files: DataTransferResponse}) => void, elementSelector: string) => void;
+  createDropzone: (callback: (data: DropzoneEventData) => void, elementSelector: string) => void;
   /** Remove dropzone for drop events of files */
   removeDropzone: (elementSelector: string) => void;
   /** Function to get latest installer information */

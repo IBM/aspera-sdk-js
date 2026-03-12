@@ -5,7 +5,7 @@ import {httpDownload, httpUpload, initHttpGateway} from '../http-gateway';
 import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChunkAsArrayBuffer, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, httpStopTransfer, sendTransferUpdate} from '../http-gateway/core';
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
-import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse} from '../models/models';
+import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse} from '../models/models';
 import {Connect, ConnectInstaller} from '@ibm-aspera/connect-sdk-js';
 import {initConnect} from '../connect/core';
 import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
@@ -725,7 +725,7 @@ export const setBranding = (id: string, options: CustomBrandingOptions): Promise
  * @param connectOptions options for connect
  */
 export const createDropzone = (
-  callback: (data: {event: DragEvent; files: DataTransferResponse}) => void,
+  callback: (data: DropzoneEventData) => void,
   elementSelector: string,
   connectOptions?: ConnectTypes.DragDropOptions,
 ): void => {
@@ -752,7 +752,12 @@ export const createDropzone = (
 
   const dragEnterEvent = (event: DragEvent) => {
     event.preventDefault();
-    callback({event, files: null as unknown as DataTransferResponse});
+    callback({event});
+  };
+
+  const dragLeaveEvent = (event: DragEvent) => {
+    event.preventDefault();
+    callback({event});
   };
 
   const dropEvent = (event: DragEvent) => {
@@ -789,6 +794,7 @@ export const createDropzone = (
 
   const registeredListeners: {event: string; callback: (event: any) => void}[] = [
     {event: 'dragenter', callback: dragEnterEvent},
+    {event: 'dragleave', callback: dragLeaveEvent},
     {event: 'dragover', callback: dragOverEvent},
     {event: 'drop', callback: dropEvent},
   ];

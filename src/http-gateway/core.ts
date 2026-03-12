@@ -2,7 +2,7 @@ import {messages} from '../constants/messages';
 import {generateErrorBody, generatePromiseObjects, randomUUID, safeJsonParse, throwError} from '../helpers/helpers';
 import {asperaSdk} from '../index';
 import {removeTransfer as oldHttpRemoveTransfer, getAllTransfers as oldHttpGetAllTransfers, getTransferById as oldHttpGetTransfer, getFilesForUploadPromise as oldHttpGetFilesForUploadPromise, getFoldersForUploadPromise as oldHttpGetFoldersForUploadPromise, initHttpGateway as oldInitHttpGateway, registerActivityCallback as oldHttpRegisterActivityCallback, cancelTransfer as oldHttpCancelTransfer} from '@ibm-aspera/http-gateway-sdk-js';
-import {FileDialogOptions, DataTransferResponse, TransferSpec, AsperaSdkTransfer, ReadAsArrayBufferResponse, ReadChunkAsArrayBufferResponse} from '../models/models';
+import {FileDialogOptions, DataTransferResponse, DropzoneEventData, TransferSpec, AsperaSdkTransfer, ReadAsArrayBufferResponse, ReadChunkAsArrayBufferResponse} from '../models/models';
 import {HttpGatewayInfo} from './models';
 
 // Maximum file size for generating image previews for files. 50MiB matches the limits in both Connect and IBM Aspera for desktop.
@@ -174,7 +174,7 @@ export const createHtmlInputElement = (): HTMLInputElement => {
  * Handle drop events and store files for HTTP Gateway
  * This works on top of desktop.
  */
-export const handleHttpGatewayDrop = (items: DataTransferItemList, callback: (data: {event: DragEvent; files: DataTransferResponse}) => void, event: DragEvent): void => {
+export const handleHttpGatewayDrop = (items: DataTransferItemList, callback: (data: DropzoneEventData) => void, event: DragEvent): void => {
   const files: File[] = [];
   let callbackCount = 0;
   let callbackFinishCount = 0;

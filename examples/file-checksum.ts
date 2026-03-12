@@ -15,7 +15,7 @@ declare global {
 window.checksumData = null;
 window.selectedFilePath = null;
 
-export function selectAndCalculateChecksumAspera() {
+export function selectAndCalculateChecksumAspera(options?: { checksumMethod?: 'md5'|'sha1'|'sha256'|'sha512'; offset?: number; chunkSize?: number }) {
   /**
    * This demonstrates a typical web application flow:
    * 1. Use showSelectFileDialog to let the user select a file
@@ -39,8 +39,13 @@ export function selectAndCalculateChecksumAspera() {
     const filePath = selectedFile.name;
     window.selectedFilePath = filePath;
 
-    // Step 2: Read the selected file as an array buffer
-    return getChecksum({path: filePath});
+    // Step 2: Calculate the checksum for the selected file
+    return getChecksum({
+      path: filePath,
+      checksumMethod: options?.checksumMethod,
+      offset: options?.offset,
+      chunkSize: options?.chunkSize,
+    });
   }).then(response => {
     if (!response) {
       return; // User canceled or no file selected

@@ -5,7 +5,7 @@ import {httpDownload, httpUpload, initHttpGateway} from '../http-gateway';
 import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChunkAsArrayBuffer, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, httpStopTransfer, sendTransferUpdate} from '../http-gateway/core';
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
-import {CustomBrandingOptions, DataTransferResponse, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse} from '../models/models';
+import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse} from '../models/models';
 import {Connect, ConnectInstaller} from '@ibm-aspera/connect-sdk-js';
 import {initConnect} from '../connect/core';
 import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
@@ -722,14 +722,32 @@ export const setBranding = (id: string, options: CustomBrandingOptions): Promise
  *
  * @param callback the function to call once the files are dropped
  * @param elementSelector the selector of the element on the page that should watch for drop events
- * @param connectOptions options for connect
+ * @param options options to configure which drag and drop events trigger the listener
  */
 export const createDropzone = (
-  callback: (data: {event: DragEvent; files: DataTransferResponse}) => void,
+  callback: (data: DropzoneEventData) => void,
   elementSelector: string,
-  connectOptions?: ConnectTypes.DragDropOptions,
+  options?: DropzoneOptions,
 ): void => {
+  const resolvedOptions: Required<DropzoneOptions> = {
+    dragEnter: options?.dragEnter ?? false,
+    dragOver: options?.dragOver ?? false,
+    dragLeave: options?.dragLeave ?? false,
+    drop: options?.drop ?? true,
+    allowPropagation: options?.allowPropagation ?? true,
+    allowDefaultBehavior: options?.allowDefaultBehavior ?? false,
+  };
+
   if (asperaSdk.useConnect) {
+    const connectOptions = {
+      dragenter: resolvedOptions.dragEnter,
+      dragover: resolvedOptions.dragOver,
+      dragleave: resolvedOptions.dragLeave,
+      drop: resolvedOptions.drop,
+      allowPropagation: resolvedOptions.allowPropagation,
+      disablePreventDefault: resolvedOptions.allowDefaultBehavior,
+    } as unknown as ConnectTypes.DragDropOptions;
+
     asperaSdk.globals.connect.setDragDropTargets(elementSelector, connectOptions, result => {
       callback({
         event: result.event,
@@ -746,47 +764,100 @@ export const createDropzone = (
     return;
   }
 
-  const dragEvent = (event: DragEvent) => {
-    event.preventDefault();
-  };
-
-  const dropEvent = (event: DragEvent) => {
-    event.preventDefault();
-    if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length && event.dataTransfer.files[0]) {
-      const files: BrowserStyleFile[] = [];
-
-      for (let i = 0; i < event.dataTransfer.files.length; i++) {
-        const file = event.dataTransfer.files[i];
-        files.push({
-          lastModified: file.lastModified,
-          name: file.name,
-          size: file.size,
-          type: file.type
-        });
-      }
-
-      const payload = {
-        files,
-        app_id: asperaSdk.globals.appId,
-      };
-
-      if (asperaSdk.isReady) {
-        client.request('dropped_files', payload)
-          .then((data: any) => callback({event, files: data}))
-          .catch(error => {
-            errorLog(messages.unableToReadDropped, error);
-          });
-      } else if (asperaSdk.httpGatewayIsReady) {
-        handleHttpGatewayDrop(event.dataTransfer.items, callback, event);
-      }
+  const handleEventDefaults = (event: DragEvent) => {
+    if (!resolvedOptions.allowDefaultBehavior) {
+      event.preventDefault();
+    }
+    if (!resolvedOptions.allowPropagation) {
+      event.stopPropagation();
     }
   };
 
+  const handleRequiredEventDefaults = (event: DragEvent) => {
+    event.preventDefault();
+    if (!resolvedOptions.allowPropagation) {
+      event.stopPropagation();
+    }
+  };
+
+  const registeredListeners: {event: DropzoneEventType; callback: (event: DragEvent) => void}[] = [];
+
+  if (resolvedOptions.dragEnter) {
+    registeredListeners.push({
+      event: 'dragenter',
+      callback: (event: DragEvent) => {
+        handleEventDefaults(event);
+        callback({event});
+      },
+    });
+  }
+
+  if (resolvedOptions.dragLeave) {
+    registeredListeners.push({
+      event: 'dragleave',
+      callback: (event: DragEvent) => {
+        handleEventDefaults(event);
+        callback({event});
+      },
+    });
+  }
+
+  if (resolvedOptions.drop || resolvedOptions.dragOver) {
+    registeredListeners.push({
+      event: 'dragover',
+      callback: (event: DragEvent) => {
+        handleRequiredEventDefaults(event);
+        if (resolvedOptions.dragOver) {
+          callback({event});
+        }
+      },
+    });
+  }
+
+  if (resolvedOptions.drop) {
+    registeredListeners.push({
+      event: 'drop',
+      callback: (event: DragEvent) => {
+        handleRequiredEventDefaults(event);
+        if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length && event.dataTransfer.files[0]) {
+          const files: BrowserStyleFile[] = [];
+
+          for (let i = 0; i < event.dataTransfer.files.length; i++) {
+            const file = event.dataTransfer.files[i];
+            files.push({
+              lastModified: file.lastModified,
+              name: file.name,
+              size: file.size,
+              type: file.type
+            });
+          }
+
+          const payload = {
+            files,
+            app_id: asperaSdk.globals.appId,
+          };
+
+          if (asperaSdk.isReady) {
+            client.request('dropped_files', payload)
+              .then((data: DataTransferResponse) => callback({event, files: data}))
+              .catch(error => {
+                errorLog(messages.unableToReadDropped, error);
+              });
+          } else if (asperaSdk.httpGatewayIsReady) {
+            handleHttpGatewayDrop(event.dataTransfer.items, callback, event);
+          }
+        }
+      },
+    });
+  }
+
   elements.forEach(element => {
-    element.addEventListener('dragover', dragEvent);
-    element.addEventListener('drop', dropEvent);
-    asperaSdk.globals.dropZonesCreated.set(elementSelector, [{event: 'dragover', callback: dragEvent}, {event: 'drop', callback: dropEvent}]);
+    registeredListeners.forEach(({event, callback: listener}) => {
+      element.addEventListener(event, listener);
+    });
   });
+
+  asperaSdk.globals.dropZonesCreated.set(elementSelector, registeredListeners);
 };
 
 /**
@@ -798,15 +869,17 @@ export const removeDropzone = (elementSelector: string): void => {
   const foundDropzone = asperaSdk.globals.dropZonesCreated.get(elementSelector);
 
   if (foundDropzone) {
-    foundDropzone.forEach(data => {
-      const elements = document.querySelectorAll(elementSelector);
+    const elements = document.querySelectorAll(elementSelector);
 
+    foundDropzone.forEach((data) => {
       if (elements && elements.length) {
         elements.forEach(element => {
           element.removeEventListener(data.event, data.callback);
         });
       }
     });
+
+    asperaSdk.globals.dropZonesCreated.delete(elementSelector);
   }
 };
 

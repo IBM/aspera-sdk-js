@@ -1,4 +1,4 @@
-import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, AsperaSdkSpec, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, InstallerUrlInfo, RpcMethod, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse} from './models';
+import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, InstallerUrlInfo, RpcMethod, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse} from './models';
 import {hiddenStyleList, installerUrl, protocol} from '../constants/constants';
 import {messages} from '../constants/messages';
 import {safariClient} from '../helpers/client/safari-client';
@@ -30,7 +30,7 @@ export class AsperaSdkGlobals {
   /** The session ID for the current user */
   sessionId?: string;
   /** Map of drop zones created by querySelector */
-  dropZonesCreated: Map<string, {event: string; callback: (event: any) => void}[]> = new Map();
+  dropZonesCreated: Map<string, {event: DropzoneEventType; callback: (event: DragEvent) => void}[]> = new Map();
   /** HTTP Gateway URL after successful passing */
   httpGatewayUrl?: string;
   /** Version-based route prefix for HTTP Gateway API endpoints (e.g. "/v3" for v3+, "" for v2) */
@@ -398,7 +398,7 @@ export class AsperaSdk {
   /** Function to set custom branding for IBM Aspera */
   setBranding: (id: string, options: CustomBrandingOptions) => Promise<any>;
   /** Create dropzone for drop events of files */
-  createDropzone: (callback: (data: DropzoneEventData) => void, elementSelector: string) => void;
+  createDropzone: (callback: (data: DropzoneEventData) => void, elementSelector: string, options?: DropzoneOptions) => void;
   /** Remove dropzone for drop events of files */
   removeDropzone: (elementSelector: string) => void;
   /** Function to get latest installer information */

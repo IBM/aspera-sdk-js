@@ -89,6 +89,8 @@ export type {
   CustomThemeItems,
   DataTransferResponse,
   DropzoneEventData,
+  DropzoneEventType,
+  DropzoneOptions,
   FileDialogOptions,
   FileError,
   FileFilter,

@@ -65,10 +65,58 @@ export interface DataTransferResponse {
   };
 }
 
+/** Drag and drop event types supported by the dropzone. */
+export type DropzoneEventType = 'dragenter' | 'dragleave' | 'dragover' | 'drop';
+
 /** Callback data for dropzone drag and drop events. */
 export interface DropzoneEventData {
   event: DragEvent;
   files?: DataTransferResponse;
+}
+
+/** Options to configure the behavior of a dropzone created with {@link createDropzone}. */
+export interface DropzoneOptions {
+  /**
+   * Whether the listener is invoked when a drag enters the dropzone element.
+   * Useful for applying visual feedback on the drop target.
+   * Default: false.
+   */
+  dragEnter?: boolean;
+  /**
+   * Whether the listener is invoked while a drag is held over the dropzone element.
+   * Default: false.
+   */
+  dragOver?: boolean;
+  /**
+   * Whether the listener is invoked when a drag leaves the dropzone element.
+   * Useful for reverting visual feedback applied on `dragEnter`.
+   * Default: false.
+   */
+  dragLeave?: boolean;
+  /**
+   * Whether the listener is invoked when files are dropped onto the dropzone element.
+   * The dropped files are provided via the callback's `files` property.
+   * Default: true.
+   */
+  drop?: boolean;
+  /**
+   * Whether drag and drop events propagate to parent elements after being handled.
+   * When false, `event.stopPropagation()` is called on all enabled events (`dragenter`, `dragleave`,
+   * `dragover`, `drop`). Note that `dragover` is always registered internally when `drop` is true,
+   * so this setting also affects that internal listener even if `dragOver` is not enabled.
+   * Set to false when the dropzone is nested inside another draggable or interactive element.
+   * Default: true.
+   */
+  allowPropagation?: boolean;
+  /**
+   * Whether the browser's default action is preserved on `dragenter` and `dragleave` events.
+   * When false (default), the SDK calls `event.preventDefault()` on these events automatically.
+   * When true, the caller is responsible for calling `event.preventDefault()` in the listener.
+   * Note: `dragover` and `drop` always call `event.preventDefault()` regardless of this setting,
+   * as it is required for drops to function correctly in the browser.
+   * Default: false.
+   */
+  allowDefaultBehavior?: boolean;
 }
 
 export interface BrowserStyleFile {

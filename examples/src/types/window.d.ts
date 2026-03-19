@@ -28,6 +28,8 @@ declare global {
     selectedFiles: any[];
     imagePreviewData: any;
     selectedImagePath: string | null;
+    directoryData: any;
+    directoryError: any;
   }
 }
 

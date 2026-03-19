@@ -262,18 +262,18 @@ describe('Desktop App', () => {
   });
 
   describe('readDirectory', () => {
-    it('should call list_directory_contents RPC with path only', async () => {
+    it('should call read_directory RPC with path only', async () => {
       await readDirectory({path: '/path/to/folder'});
 
       const call = lastFetchCall();
-      expect(call.body.method).toBe('list_directory_contents');
+      expect(call.body.method).toBe('read_directory');
       expect(call.body.params).toEqual({
         request: {path: '/path/to/folder', depth: undefined, filters: undefined},
         app_id: APP_ID,
       });
     });
 
-    it('should call list_directory_contents RPC with all options', async () => {
+    it('should call read_directory RPC with all options', async () => {
       await readDirectory({
         path: '/path/to/folder',
         depth: 2,
@@ -281,7 +281,7 @@ describe('Desktop App', () => {
       });
 
       const call = lastFetchCall();
-      expect(call.body.method).toBe('list_directory_contents');
+      expect(call.body.method).toBe('read_directory');
       expect(call.body.params).toEqual({
         request: {
           path: '/path/to/folder',
@@ -295,7 +295,7 @@ describe('Desktop App', () => {
 
   describe('hasCapability', () => {
     it('should return true for capabilities whose RPC methods are discovered', () => {
-      asperaSdk.globals.rpcMethods = ['show_about', 'open_preferences', 'read_as_array_buffer', 'read_chunk_as_array_buffer', 'get_checksum', 'list_directory_contents'];
+      asperaSdk.globals.rpcMethods = ['show_about', 'open_preferences', 'read_as_array_buffer', 'read_chunk_as_array_buffer', 'get_checksum', 'read_directory'];
 
       expect(hasCapability('showAbout')).toBe(true);
       expect(hasCapability('showPreferences')).toBe(true);

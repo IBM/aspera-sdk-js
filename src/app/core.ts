@@ -1091,7 +1091,7 @@ export const readDirectory = (options: ReadDirectoryOptions): Promise<ReadDirect
     app_id: asperaSdk.globals.appId,
   };
 
-  client.request('list_directory_contents', payload)
+  client.request('read_directory', payload)
     .then((data: ReadDirectoryResponse) => promiseInfo.resolver(data))
     .catch(error => {
       errorLog(messages.readDirectoryFailed, error);
@@ -1105,12 +1105,12 @@ const supportsMethod = (method: string): boolean => {
   // We currently do not support calculating file checksums when using HTTP Gateway. In theory it should be possible
   // to calculate this directly in the browser similar to how `readAsArrayBuffer()` is implemented.
   // HTTP Gateway also does not support showing native transfer client UI (about, preferences, etc.).
-  if (asperaSdk.useHttpGateway && (method === 'get_checksum' || method === 'show_about' || method === 'open_preferences' || method === 'list_directory_contents')) {
+  if (asperaSdk.useHttpGateway && (method === 'get_checksum' || method === 'show_about' || method === 'open_preferences' || method === 'read_directory')) {
     return false;
   }
 
   // Reading directory contents is only supported by the Desktop App (not Connect).
-  if (asperaSdk.useConnect && method === 'list_directory_contents') {
+  if (asperaSdk.useConnect && method === 'read_directory') {
     return false;
   }
 
@@ -1148,7 +1148,7 @@ export const getCapabilities = (): SdkCapabilities => {
     fileChecksum: supportsMethod('get_checksum'),
     showAbout: supportsMethod('show_about'),
     showPreferences: supportsMethod('open_preferences'),
-    readDirectory: supportsMethod('list_directory_contents'),
+    readDirectory: supportsMethod('read_directory'),
   };
 };
 

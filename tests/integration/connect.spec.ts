@@ -14,6 +14,7 @@ import {
   readAsArrayBuffer,
   readChunkAsArrayBuffer,
   getChecksum,
+  hasCapability,
 } from '../../src/index';
 import {
   setupSdk,
@@ -226,6 +227,15 @@ describe('Connect SDK', () => {
         chunkSize: 1024,
         checksumMethod: 'sha512',
       });
+    });
+  });
+
+  describe('hasCapability', () => {
+    it('should return true for all capabilities', () => {
+      expect(hasCapability('showAbout')).toBe(true);
+      expect(hasCapability('showPreferences')).toBe(true);
+      expect(hasCapability('imagePreview')).toBe(true);
+      expect(hasCapability('fileChecksum')).toBe(true);
     });
   });
 });

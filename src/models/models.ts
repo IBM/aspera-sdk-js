@@ -926,9 +926,17 @@ export interface SdkCapabilities {
    */
   fileChecksum: boolean,
   /**
-   * Whether the transfer client supports showing native UI (about page, preferences, etc.).
+   * Whether the transfer client supports showing the about page.
    *
-   * This is supported when using Connect or IBM Aspera for desktop, but not HTTP Gateway.
+   * This is supported when using Connect or IBM Aspera for desktop with the required RPC methods,
+   * but not HTTP Gateway.
    */
-  transferClientUI: boolean,
+  showAbout: boolean,
+  /**
+   * Whether the transfer client supports showing the preferences page.
+   *
+   * This is supported when using Connect or IBM Aspera for desktop with the required RPC methods,
+   * but not HTTP Gateway.
+   */
+  showPreferences: boolean,
 }

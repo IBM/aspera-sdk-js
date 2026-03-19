@@ -215,6 +215,10 @@ function createConnectMock(): any {
       capture('showSelectFolderDialogPromise')(...args);
       return Promise.resolve({dataTransfer: {files: []}});
     }),
+    showAbout: jest.fn().mockImplementation((...args) => {
+      capture('showAbout')(...args);
+      return Promise.resolve({});
+    }),
     showPreferences: jest.fn().mockImplementation((...args) => {
       capture('showPreferences')(...args);
       return Promise.resolve({});

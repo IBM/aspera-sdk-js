@@ -39,4 +39,6 @@ export const messages = {
   getFilesListFailed: 'Unable to get files list for transfer',
   getChecksumFailed: 'Unable to get file checksum',
   getChecksumNotSupported: 'File checksum not supported for current transfer client',
+  showAboutFailed: 'Unable to show about page',
+  showAboutNotSupported: 'Show about is not supported for current transfer client',
 };

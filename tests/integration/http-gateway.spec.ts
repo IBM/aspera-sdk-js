@@ -6,6 +6,7 @@ import {
   registerActivityCallback,
   showSelectFileDialog,
   showSelectFolderDialog,
+  showAbout,
   showPreferences,
   getAllTransfers,
   getTransfer,
@@ -269,6 +270,15 @@ describe('HTTP Gateway', () => {
       await expect(resumeTransfer('some-id', {})).rejects.toEqual({
         error: true,
         message: 'IBM Aspera SDK has not been verified. Run test or init first',
+      });
+    });
+  });
+
+  describe('showAbout', () => {
+    it('should reject - not supported in HTTP Gateway mode', async () => {
+      await expect(showAbout()).rejects.toEqual({
+        error: true,
+        message: 'Show about is not supported for current transfer client',
       });
     });
   });

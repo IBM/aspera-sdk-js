@@ -1,5 +1,5 @@
 import {AsperaSdk} from './models/aspera-sdk.model';
-import {createDropzone, deregisterActivityCallback, deregisterStatusCallback, getAllTransfers, getCapabilities, getChecksum, getFilesList, getInfo, getTransfer, init, initDragDrop, modifyTransfer, readAsArrayBuffer, readChunkAsArrayBuffer, registerActivityCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showDirectory, showPreferences, showSelectFileDialog, showSelectFolderDialog, startTransfer, stopTransfer, testConnection,} from './app/core';
+import {createDropzone, deregisterActivityCallback, deregisterStatusCallback, getAllTransfers, getCapabilities, getChecksum, getFilesList, getInfo, getTransfer, init, initDragDrop, modifyTransfer, readAsArrayBuffer, readChunkAsArrayBuffer, registerActivityCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showAbout, showDirectory, showPreferences, showSelectFileDialog, showSelectFolderDialog, startTransfer, stopTransfer, testConnection,} from './app/core';
 import {getInstallerInfo} from './app/installer';
 import {getInstallerUrls, isSafari} from './helpers/helpers';
 import * as httpGatewayCalls from './http-gateway';
@@ -12,6 +12,7 @@ asperaSdk.startTransfer = startTransfer;
 asperaSdk.registerActivityCallback = registerActivityCallback;
 asperaSdk.deregisterActivityCallback = deregisterActivityCallback;
 asperaSdk.removeTransfer = removeTransfer;
+asperaSdk.showAbout = showAbout;
 asperaSdk.showDirectory = showDirectory;
 asperaSdk.stopTransfer = stopTransfer;
 asperaSdk.resumeTransfer = resumeTransfer;
@@ -54,6 +55,7 @@ export {
   registerActivityCallback,
   deregisterActivityCallback,
   removeTransfer,
+  showAbout,
   showDirectory,
   stopTransfer,
   resumeTransfer,

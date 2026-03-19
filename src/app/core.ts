@@ -471,6 +471,38 @@ export const showSelectFolderDialog = (options?: FolderDialogOptions): Promise<D
 };
 
 /**
+ * Shows the about page of the transfer client.
+ *
+ * This is supported when using Connect or IBM Aspera for desktop, but not HTTP Gateway.
+ *
+ * @returns a promise that resolves when the about page is shown.
+ */
+export const showAbout = (): Promise<any> => {
+  if (asperaSdk.useHttpGateway) {
+    return throwError(messages.showAboutNotSupported);
+  }
+
+  if (asperaSdk.useConnect) {
+    return asperaSdk.globals.connect.showAbout();
+  }
+
+  if (!asperaSdk.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  const promiseInfo = generatePromiseObjects();
+
+  client.request('show_about')
+    .then((data: any) => promiseInfo.resolver(data))
+    .catch(error => {
+      errorLog(messages.showAboutFailed, error);
+      promiseInfo.rejecter(generateErrorBody(messages.showAboutFailed, error));
+    });
+
+  return promiseInfo.promise;
+};
+
+/**
  * Opens the IBM Aspera preferences page.
  *
  * @returns a promise that resolves when the preferences page is opened.
@@ -1029,7 +1061,8 @@ export const getChecksum = (options: GetChecksumOptions): Promise<ChecksumFileRe
 const supportsMethod = (method: string): boolean => {
   // We currently do not support calculating file checksums when using HTTP Gateway. In theory it should be possible
   // to calculate this direclty in the browser similar to how `readAsArrayBuffer()` is implemented.
-  if (asperaSdk.useHttpGateway && method === 'get_checksum') {
+  // HTTP Gateway also does not support showing native transfer client UI (about, preferences, etc.).
+  if (asperaSdk.useHttpGateway && (method === 'get_checksum' || method === 'show_about')) {
     return false;
   }
 
@@ -1065,5 +1098,6 @@ export const getCapabilities = (): SdkCapabilities => {
   return {
     imagePreview: supportsMethod('read_as_array_buffer') && supportsMethod('read_chunk_as_array_buffer'),
     fileChecksum: supportsMethod('get_checksum'),
+    transferClientUI: supportsMethod('show_about'),
   };
 };

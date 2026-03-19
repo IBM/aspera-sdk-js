@@ -925,4 +925,10 @@ export interface SdkCapabilities {
    * Whether the SDK can calculate checksums of a file chunk.
    */
   fileChecksum: boolean,
+  /**
+   * Whether the transfer client supports showing native UI (about page, preferences, etc.).
+   *
+   * This is supported when using Connect or IBM Aspera for desktop, but not HTTP Gateway.
+   */
+  transferClientUI: boolean,
 }

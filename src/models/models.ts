@@ -191,6 +191,8 @@ export interface DirectoryListFilters {
   type?: EntryType;
   /** Glob pattern matched against the file name only (e.g., "*.pdf"). */
   namePattern?: string;
+  /** Whether to include hidden files and directories in the results. */
+  hidden?: boolean;
 }
 
 /** Options for reading directory contents */

@@ -14,6 +14,7 @@ import {
   readAsArrayBuffer,
   readChunkAsArrayBuffer,
   getChecksum,
+  readDirectory,
   hasCapability,
 } from '../../src/index';
 import {
@@ -230,12 +231,25 @@ describe('Connect SDK', () => {
     });
   });
 
+  describe('readDirectory', () => {
+    it('should reject - not supported in Connect mode', async () => {
+      await expect(readDirectory({path: '/path/to/folder'})).rejects.toEqual({
+        error: true,
+        message: 'Read directory is not supported for current transfer client',
+      });
+    });
+  });
+
   describe('hasCapability', () => {
     it('should return true for all capabilities', () => {
       expect(hasCapability('showAbout')).toBe(true);
       expect(hasCapability('showPreferences')).toBe(true);
       expect(hasCapability('imagePreview')).toBe(true);
       expect(hasCapability('fileChecksum')).toBe(true);
+    });
+
+    it('should return false for Desktop App only capabilities', () => {
+      expect(hasCapability('readDirectory')).toBe(false);
     });
   });
 });

@@ -41,4 +41,6 @@ export const messages = {
   getChecksumNotSupported: 'File checksum not supported for current transfer client',
   showAboutFailed: 'Unable to show about page',
   showAboutNotSupported: 'Show about is not supported for current transfer client',
+  readDirectoryFailed: 'Unable to read directory contents',
+  readDirectoryNotSupported: 'Read directory is not supported for current transfer client',
 };

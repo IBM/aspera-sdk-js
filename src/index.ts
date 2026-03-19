@@ -1,5 +1,5 @@
 import {AsperaSdk} from './models/aspera-sdk.model';
-import {createDropzone, deregisterActivityCallback, deregisterStatusCallback, getAllTransfers, getCapabilities, getChecksum, getFilesList, getInfo, getTransfer, hasCapability, init, initDragDrop, modifyTransfer, readAsArrayBuffer, readChunkAsArrayBuffer, registerActivityCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showAbout, showDirectory, showPreferences, showSelectFileDialog, showSelectFolderDialog, startTransfer, stopTransfer, testConnection,} from './app/core';
+import {createDropzone, deregisterActivityCallback, deregisterStatusCallback, getAllTransfers, getCapabilities, getChecksum, getFilesList, getInfo, getTransfer, hasCapability, init, initDragDrop, modifyTransfer, readAsArrayBuffer, readChunkAsArrayBuffer, readDirectory, registerActivityCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showAbout, showDirectory, showPreferences, showSelectFileDialog, showSelectFolderDialog, startTransfer, stopTransfer, testConnection,} from './app/core';
 import {getInstallerInfo} from './app/installer';
 import {getInstallerUrls, isSafari} from './helpers/helpers';
 import * as httpGatewayCalls from './http-gateway';
@@ -38,6 +38,7 @@ asperaSdk.getInstallerUrls = getInstallerUrls;
 asperaSdk.getCapabilities = getCapabilities;
 asperaSdk.hasCapability = hasCapability;
 asperaSdk.getChecksum = getChecksum;
+asperaSdk.readDirectory = readDirectory;
 asperaSdk.httpGatewayCalls = httpGatewayCalls;
 
 const launch = asperaSdk.globals.launch;
@@ -81,6 +82,7 @@ export {
   getCapabilities,
   hasCapability,
   getChecksum,
+  readDirectory,
 };
 
 export type {
@@ -88,12 +90,15 @@ export type {
   AsperaSdkTransfer,
   BrowserStyleFile,
   ChecksumFileResponse,
+  DirectoryEntry,
+  DirectoryListFilters,
   CustomBrandingOptions,
   CustomTheme,
   CustomThemeItems,
   DataTransferResponse,
   DropzoneEventData,
   DropzoneEventType,
+  EntryType,
   DropzoneOptions,
   FileDialogOptions,
   FileError,
@@ -114,6 +119,8 @@ export type {
   Path,
   ReadAsArrayBufferResponse,
   ReadChunkAsArrayBufferResponse,
+  ReadDirectoryOptions,
+  ReadDirectoryResponse,
   ResumePolicy,
   ResumeTransferOptions,
   SafariExtensionEvent,

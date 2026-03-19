@@ -26,6 +26,7 @@ import {
 } from './other-functions';
 import { installerAspera } from './installer';
 import { showAboutAspera, showPreferencesAspera } from './ui-functions';
+import { readDirectoryAspera } from './read-directory';
 
 // Extend window interface to include all example functions
 declare global {
@@ -48,6 +49,7 @@ declare global {
     registerStatusCallbackAspera: typeof registerStatusCallbackAspera;
     installerAspera: typeof installerAspera;
     showAboutAspera: typeof showAboutAspera;
+    readDirectoryAspera: typeof readDirectoryAspera;
   }
 }
 
@@ -70,6 +72,7 @@ window.showPreferencesAspera = showPreferencesAspera;
 window.registerStatusCallbackAspera = registerStatusCallbackAspera;
 window.installerAspera = installerAspera;
 window.showAboutAspera = showAboutAspera;
+window.readDirectoryAspera = readDirectoryAspera;
 
 // Export all functions for direct imports if needed
 export {
@@ -90,5 +93,6 @@ export {
   showPreferencesAspera,
   registerStatusCallbackAspera,
   installerAspera,
-  showAboutAspera
+  showAboutAspera,
+  readDirectoryAspera
 };

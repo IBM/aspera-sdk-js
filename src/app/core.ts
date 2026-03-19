@@ -1102,3 +1102,7 @@ export const getCapabilities = (): SdkCapabilities => {
     showPreferences: supportsMethod('open_preferences'),
   };
 };
+
+export const hasCapability = (capability: keyof SdkCapabilities): boolean => {
+  return !!getCapabilities()[capability];
+}

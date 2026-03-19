@@ -421,6 +421,8 @@ export class AsperaSdk {
   getInstallerUrls: () => InstallerUrlInfo;
   /** Function to get the SDK capabilities. */
   getCapabilities: () => SdkCapabilities;
+  /** Function to check whether the SDK supports the specified capability */
+  hasCapability: (capability: keyof SdkCapabilities) => boolean;
   /** Function to get a checksum for a file */
   getChecksum: (options: GetChecksumOptions) => Promise<ChecksumFileResponse>;
   /** Indicate if Safari Extension is enabled. If the extension is disabled during the lifecycle this will not update to disabled. */

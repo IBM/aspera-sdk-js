@@ -18,6 +18,7 @@ import Home from '../Views/Home';
 import AllTogether from '../Views/AllTogether';
 import ImagePreview from '../Views/ImagePreview';
 import FileChecksum from '../Views/FileChecksum';
+import UI from '../Views/UI';
 
 export const tabItems = [
   {route: '/', name: 'Home', component: <Home />},
@@ -30,6 +31,7 @@ export const tabItems = [
   {route: '/start-transfer', name: 'Start transfer', component: <StartTransfer />, row: 2},
   {route: '/manage-transfer', name: 'Manage transfers', component: <MonitorTransfers />, row: 2},
   {route: '/drag-drop', name: 'Drag & drop', component: <DragDrop />, row: 3},
+  {route: '/ui', name: 'UI', component: <UI />},
   {route: '/other', name: 'Other', component: <Other />, row: 1},
   {route: '/all', name: 'All together', component: <AllTogether />},
 ];

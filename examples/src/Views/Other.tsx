@@ -9,7 +9,7 @@ export default function Test() {
     hljs.highlightAll();
   }, []);
 
-  const codeSnippet = [window.getInfoAspera.toString(), window.showPreferencesAspera.toString(), window.registerStatusCallbackAspera.toString()].join('\n\n')
+  const codeSnippet = [window.getInfoAspera.toString(), window.registerStatusCallbackAspera.toString()].join('\n\n')
 
   return (
     <div className="example-pages">
@@ -17,7 +17,6 @@ export default function Test() {
       <CodeSnippet type="multi" feedback="Copied to clipboard" maxCollapsedNumberOfRows={25}>{codeSnippet}</CodeSnippet>
       <h2>Try it out</h2>
       <Button onClick={window.getInfoAspera}>Get info</Button>
-      <Button onClick={window.showPreferencesAspera}>Open preferences</Button>
       <Button onClick={window.registerStatusCallbackAspera}>Status changes</Button>
     </div>
   );

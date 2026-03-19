@@ -1060,7 +1060,7 @@ export const getChecksum = (options: GetChecksumOptions): Promise<ChecksumFileRe
 
 const supportsMethod = (method: string): boolean => {
   // We currently do not support calculating file checksums when using HTTP Gateway. In theory it should be possible
-  // to calculate this direclty in the browser similar to how `readAsArrayBuffer()` is implemented.
+  // to calculate this directly in the browser similar to how `readAsArrayBuffer()` is implemented.
   // HTTP Gateway also does not support showing native transfer client UI (about, preferences, etc.).
   if (asperaSdk.useHttpGateway && (method === 'get_checksum' || method === 'show_about')) {
     return false;

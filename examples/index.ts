@@ -22,10 +22,10 @@ import {
 } from './monitor-transfers';
 import {
   getInfoAspera,
-  showPreferencesAspera,
   registerStatusCallbackAspera
 } from './other-functions';
 import { installerAspera } from './installer';
+import { showAboutAspera, showPreferencesAspera } from './ui-functions';
 
 // Extend window interface to include all example functions
 declare global {
@@ -47,6 +47,7 @@ declare global {
     showPreferencesAspera: typeof showPreferencesAspera;
     registerStatusCallbackAspera: typeof registerStatusCallbackAspera;
     installerAspera: typeof installerAspera;
+    showAboutAspera: typeof showAboutAspera;
   }
 }
 
@@ -68,6 +69,7 @@ window.getInfoAspera = getInfoAspera;
 window.showPreferencesAspera = showPreferencesAspera;
 window.registerStatusCallbackAspera = registerStatusCallbackAspera;
 window.installerAspera = installerAspera;
+window.showAboutAspera = showAboutAspera;
 
 // Export all functions for direct imports if needed
 export {
@@ -87,5 +89,6 @@ export {
   getInfoAspera,
   showPreferencesAspera,
   registerStatusCallbackAspera,
-  installerAspera
+  installerAspera,
+  showAboutAspera
 };

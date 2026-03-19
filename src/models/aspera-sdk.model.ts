@@ -1,4 +1,4 @@
-import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, InstallerUrlInfo, RpcMethod, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse} from './models';
+import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, InstallerUrlInfo, RpcMethod, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse} from './models';
 import {hiddenStyleList, installerUrl, protocol} from '../constants/constants';
 import {messages} from '../constants/messages';
 import {safariClient} from '../helpers/client/safari-client';
@@ -425,6 +425,8 @@ export class AsperaSdk {
   hasCapability: (capability: keyof SdkCapabilities) => boolean;
   /** Function to get a checksum for a file */
   getChecksum: (options: GetChecksumOptions) => Promise<ChecksumFileResponse>;
+  /** Function to read directory contents and return entries as a flat list */
+  readDirectory: (options: ReadDirectoryOptions) => Promise<ReadDirectoryResponse>;
   /** Indicate if Safari Extension is enabled. If the extension is disabled during the lifecycle this will not update to disabled. */
   SAFARI_EXTENSION_STATUS: SafariExtensionEvent = 'DISABLED';
   /** Aspera HTTP Gateway calls. This normally is not needed by clients but expose just in case. */

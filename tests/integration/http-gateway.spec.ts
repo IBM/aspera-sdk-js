@@ -15,6 +15,7 @@ import {
   readAsArrayBuffer,
   readChunkAsArrayBuffer,
   getChecksum,
+  readDirectory,
   hasCapability,
   asperaSdk,
 } from '../../src/index';
@@ -320,11 +321,21 @@ describe('HTTP Gateway', () => {
     });
   });
 
+  describe('readDirectory', () => {
+    it('should reject - not supported in HTTP Gateway mode', async () => {
+      await expect(readDirectory({path: '/path/to/folder'})).rejects.toEqual({
+        error: true,
+        message: 'Read directory is not supported for current transfer client',
+      });
+    });
+  });
+
   describe('hasCapability', () => {
     it('should return false for capabilities not supported by HTTP Gateway', () => {
       expect(hasCapability('showAbout')).toBe(false);
       expect(hasCapability('showPreferences')).toBe(false);
       expect(hasCapability('fileChecksum')).toBe(false);
+      expect(hasCapability('readDirectory')).toBe(false);
     });
 
     it('should return true for capabilities supported by HTTP Gateway', () => {

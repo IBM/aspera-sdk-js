@@ -5,7 +5,7 @@ import {httpDownload, httpUpload, initHttpGateway} from '../http-gateway';
 import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChunkAsArrayBuffer, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, httpStopTransfer, sendTransferUpdate} from '../http-gateway/core';
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
-import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse} from '../models/models';
+import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse} from '../models/models';
 import {Connect, ConnectInstaller} from '@ibm-aspera/connect-sdk-js';
 import {initConnect} from '../connect/core';
 import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
@@ -1058,11 +1058,59 @@ export const getChecksum = (options: GetChecksumOptions): Promise<ChecksumFileRe
   return promiseInfo.promise;
 };
 
+/**
+ * Read the contents of a directory, returning all entries as a flat list.
+ *
+ * This API is only supported when using IBM Aspera for desktop.
+ *
+ * @param options options including the directory path, optional recursion depth, and filters
+ *
+ * @returns a promise that resolves with the directory entries and total count
+ */
+export const readDirectory = (options: ReadDirectoryOptions): Promise<ReadDirectoryResponse> => {
+  if (asperaSdk.useHttpGateway) {
+    return throwError(messages.readDirectoryNotSupported);
+  }
+
+  if (asperaSdk.useConnect) {
+    return throwError(messages.readDirectoryNotSupported);
+  }
+
+  if (!asperaSdk.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  const promiseInfo = generatePromiseObjects();
+
+  const payload = {
+    request: {
+      path: options.path,
+      depth: options.depth,
+      filters: options.filters,
+    },
+    app_id: asperaSdk.globals.appId,
+  };
+
+  client.request('list_directory_contents', payload)
+    .then((data: ReadDirectoryResponse) => promiseInfo.resolver(data))
+    .catch(error => {
+      errorLog(messages.readDirectoryFailed, error);
+      promiseInfo.rejecter(generateErrorBody(messages.readDirectoryFailed, error));
+    });
+
+  return promiseInfo.promise;
+};
+
 const supportsMethod = (method: string): boolean => {
   // We currently do not support calculating file checksums when using HTTP Gateway. In theory it should be possible
   // to calculate this directly in the browser similar to how `readAsArrayBuffer()` is implemented.
   // HTTP Gateway also does not support showing native transfer client UI (about, preferences, etc.).
-  if (asperaSdk.useHttpGateway && (method === 'get_checksum' || method === 'show_about' || method === 'open_preferences')) {
+  if (asperaSdk.useHttpGateway && (method === 'get_checksum' || method === 'show_about' || method === 'open_preferences' || method === 'list_directory_contents')) {
+    return false;
+  }
+
+  // Reading directory contents is only supported by the Desktop App (not Connect).
+  if (asperaSdk.useConnect && method === 'list_directory_contents') {
     return false;
   }
 
@@ -1100,6 +1148,7 @@ export const getCapabilities = (): SdkCapabilities => {
     fileChecksum: supportsMethod('get_checksum'),
     showAbout: supportsMethod('show_about'),
     showPreferences: supportsMethod('open_preferences'),
+    readDirectory: supportsMethod('list_directory_contents'),
   };
 };
 

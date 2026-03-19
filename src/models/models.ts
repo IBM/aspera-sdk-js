@@ -182,6 +182,47 @@ export interface ChecksumFileResponse {
   checksumMethod: 'md5'|'sha1'|'sha256'|'sha512';
 }
 
+/** The type of a directory entry */
+export type EntryType = 'file' | 'directory';
+
+/** Filters to narrow directory listing results */
+export interface DirectoryListFilters {
+  /** Only return entries of this type. Omit to return all. */
+  type?: EntryType;
+  /** Glob pattern matched against the file name only (e.g., "*.pdf"). */
+  namePattern?: string;
+}
+
+/** Options for reading directory contents */
+export interface ReadDirectoryOptions {
+  /** Absolute path to the directory to enumerate. Must have been previously allowed via dialog selection or drag-drop. */
+  path: string;
+  /** Maximum recursion depth. 0 = direct children only (non-recursive). Omit for full recursive traversal. */
+  depth?: number;
+  /** Optional filters to narrow the results. */
+  filters?: DirectoryListFilters;
+}
+
+/** A single entry in a directory listing */
+export interface DirectoryEntry {
+  /** Path relative to the traversal root, using forward slashes on all platforms. */
+  relativePath: string;
+  /** The entry type: "file" or "directory". */
+  type: EntryType;
+  /** Size in bytes. 0 for directories. */
+  size: number;
+  /** Last modified timestamp in milliseconds since the UNIX epoch. */
+  lastModified: number;
+}
+
+/** Response from reading directory contents */
+export interface ReadDirectoryResponse {
+  /** The directory entries matching the request criteria. */
+  entries: DirectoryEntry[];
+  /** The total number of entries returned. If this equals the server maximum, results may have been truncated. */
+  totalCount: number;
+}
+
 export interface ModifyTransferOptions {
   /**
    * @deprecated Use `lock_min_rate_kbps` instead.
@@ -939,4 +980,11 @@ export interface SdkCapabilities {
    * but not HTTP Gateway.
    */
   showPreferences: boolean,
+  /**
+   * Whether the SDK can read directory contents.
+   *
+   * This is supported when using IBM Aspera for desktop with the required RPC methods,
+   * but not Connect or HTTP Gateway.
+   */
+  readDirectory: boolean,
 }

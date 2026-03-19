@@ -14,6 +14,7 @@ import {
   readAsArrayBuffer,
   readChunkAsArrayBuffer,
   getChecksum,
+  hasCapability,
 } from '../../src/index';
 import {
   mockFetch,
@@ -23,6 +24,7 @@ import {
   rpcOk,
   downloadSpec,
 } from '../test-helpers';
+import { asperaSdk } from '../../src/index';
 
 describe('Desktop App', () => {
   const APP_ID = 'test-app-id';
@@ -255,6 +257,35 @@ describe('Desktop App', () => {
       const call = lastFetchCall();
       expect(call.body.method).toBe('get_checksum');
       expect(call.body.params.request.checksumMethod).toBe('sha512');
+    });
+  });
+
+  describe('hasCapability', () => {
+    it('should return true for capabilities whose RPC methods are discovered', () => {
+      asperaSdk.globals.rpcMethods = ['show_about', 'open_preferences', 'read_as_array_buffer', 'read_chunk_as_array_buffer', 'get_checksum'];
+
+      expect(hasCapability('showAbout')).toBe(true);
+      expect(hasCapability('showPreferences')).toBe(true);
+      expect(hasCapability('imagePreview')).toBe(true);
+      expect(hasCapability('fileChecksum')).toBe(true);
+    });
+
+    it('should return false for capabilities whose RPC methods are not discovered', () => {
+      asperaSdk.globals.rpcMethods = [];
+
+      expect(hasCapability('showAbout')).toBe(false);
+      expect(hasCapability('showPreferences')).toBe(false);
+      expect(hasCapability('imagePreview')).toBe(false);
+      expect(hasCapability('fileChecksum')).toBe(false);
+    });
+
+    it('should handle partial RPC method availability', () => {
+      asperaSdk.globals.rpcMethods = ['open_preferences', 'read_as_array_buffer'];
+
+      expect(hasCapability('showAbout')).toBe(false);
+      expect(hasCapability('showPreferences')).toBe(true);
+      // imagePreview requires both read_as_array_buffer AND read_chunk_as_array_buffer
+      expect(hasCapability('imagePreview')).toBe(false);
     });
   });
 });

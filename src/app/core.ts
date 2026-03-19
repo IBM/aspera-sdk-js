@@ -1102,3 +1102,25 @@ export const getCapabilities = (): SdkCapabilities => {
     showPreferences: supportsMethod('open_preferences'),
   };
 };
+
+/**
+ * Check if the SDK and underlying transfer client supports a specific capability.
+ *
+ * Capabilities depend on the transfer client being used (HTTP Gateway, Connect, or IBM Aspera for desktop).
+ * Use this function to conditionally enable/disable features in your application.
+ *
+ * @param capability the capability to check.
+ *
+ * @returns `true` if the capability is supported, `false` otherwise
+ *
+ * @example
+ * ```typescript
+ * // Determine if your web application can render image previews for user selected files
+ * if (asperaSdk.hasCapability('imagePreview')) {
+ *   asperaSdk.readAsArrayBuffer(path);
+ * }
+ * ```
+ */
+export const hasCapability = (capability: keyof SdkCapabilities): boolean => {
+  return !!getCapabilities()[capability];
+};

@@ -15,6 +15,7 @@ import {
   readAsArrayBuffer,
   readChunkAsArrayBuffer,
   getChecksum,
+  hasCapability,
   asperaSdk,
 } from '../../src/index';
 import {
@@ -316,6 +317,18 @@ describe('HTTP Gateway', () => {
         error: true,
         message: 'File checksum not supported for current transfer client',
       });
+    });
+  });
+
+  describe('hasCapability', () => {
+    it('should return false for capabilities not supported by HTTP Gateway', () => {
+      expect(hasCapability('showAbout')).toBe(false);
+      expect(hasCapability('showPreferences')).toBe(false);
+      expect(hasCapability('fileChecksum')).toBe(false);
+    });
+
+    it('should return true for capabilities supported by HTTP Gateway', () => {
+      expect(hasCapability('imagePreview')).toBe(true);
     });
   });
 });

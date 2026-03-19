@@ -391,6 +391,8 @@ export class AsperaSdk {
   showSelectFileDialog: (options?: FileDialogOptions) => Promise<DataTransferResponse>;
   /** Function to display a folder dialog for the user to select folders. */
   showSelectFolderDialog: (options?: FolderDialogOptions) => Promise<DataTransferResponse>;
+  /** Function to show the about page of the transfer client */
+  showAbout: () => Promise<any>;
   /** Function to display the IBM Aspera preferences page */
   showPreferences: () => Promise<any>;
   /** Function to modify a running transfer */

@@ -22,6 +22,7 @@ declare global {
     showPreferencesAspera: () => void;
     registerStatusCallbackAspera: () => void;
     installerAspera: () => void;
+    showAboutAspera: () => void;
 
     // Global state used by examples
     selectedFiles: any[];

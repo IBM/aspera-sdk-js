@@ -5,6 +5,7 @@ import {
   resumeTransfer,
   showSelectFileDialog,
   showSelectFolderDialog,
+  showAbout,
   showPreferences,
   getAllTransfers,
   getTransfer,
@@ -106,6 +107,15 @@ describe('Desktop App', () => {
         options: {multiple: false},
         app_id: APP_ID,
       });
+    });
+  });
+
+  describe('showAbout', () => {
+    it('should call show_about RPC', async () => {
+      await showAbout();
+
+      const call = lastFetchCall();
+      expect(call.body.method).toBe('show_about');
     });
   });
 

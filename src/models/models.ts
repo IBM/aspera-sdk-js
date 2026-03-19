@@ -925,4 +925,18 @@ export interface SdkCapabilities {
    * Whether the SDK can calculate checksums of a file chunk.
    */
   fileChecksum: boolean,
+  /**
+   * Whether the transfer client supports showing the about page.
+   *
+   * This is supported when using Connect or IBM Aspera for desktop with the required RPC methods,
+   * but not HTTP Gateway.
+   */
+  showAbout: boolean,
+  /**
+   * Whether the transfer client supports showing the preferences page.
+   *
+   * This is supported when using Connect or IBM Aspera for desktop with the required RPC methods,
+   * but not HTTP Gateway.
+   */
+  showPreferences: boolean,
 }

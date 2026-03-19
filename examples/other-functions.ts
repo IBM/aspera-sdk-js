@@ -1,9 +1,9 @@
 /**
  * Other useful Aspera SDK functions.
- * This includes getting SDK info, showing preferences, and monitoring app status.
+ * This includes getting SDK info and monitoring app status.
  */
 
-import { getInfo, showPreferences, registerStatusCallback } from '@ibm-aspera/sdk';
+import { getInfo, registerStatusCallback } from '@ibm-aspera/sdk';
 
 export function getInfoAspera() {
   /** Get metadata about the IBM Aspera installation. */
@@ -13,14 +13,6 @@ export function getInfoAspera() {
   }).catch(error => {
     console.error('Get info failed', error);
     alert(`Get info failed\n\n${JSON.stringify(error, undefined, 2)}`);
-  });
-}
-
-export function showPreferencesAspera() {
-  /** Open preference window for IBM Aspera. */
-  showPreferences().catch(error => {
-    console.error('Show preferences failed', error);
-    alert(`Show preferences failed\n\n${JSON.stringify(error, undefined, 2)}`);
   });
 }
 

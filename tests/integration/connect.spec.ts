@@ -5,6 +5,7 @@ import {
   resumeTransfer,
   showSelectFileDialog,
   showSelectFolderDialog,
+  showAbout,
   showPreferences,
   getAllTransfers,
   getTransfer,
@@ -91,6 +92,15 @@ describe('Connect SDK', () => {
 
       const mock = getConnectMock();
       expect(mock.showSelectFolderDialogPromise).toHaveBeenCalledWith({multiple: false});
+    });
+  });
+
+  describe('showAbout', () => {
+    it('should call showAbout on Connect SDK', async () => {
+      await showAbout();
+
+      const mock = getConnectMock();
+      expect(mock.showAbout).toHaveBeenCalled();
     });
   });
 

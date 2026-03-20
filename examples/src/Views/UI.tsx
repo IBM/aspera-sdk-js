@@ -9,7 +9,7 @@ export default function UI() {
     hljs.highlightAll();
   }, []);
 
-  const codeSnippet = [window.showAboutAspera.toString(), window.showPreferencesAspera.toString()].join('\n\n');
+  const codeSnippet = [window.showAboutAspera.toString(), window.showPreferencesAspera.toString(), window.showTransferManagerAspera.toString()].join('\n\n');
 
   return (
     <div className="example-pages">
@@ -20,6 +20,7 @@ export default function UI() {
       <h2>Try it out</h2>
       <Button onClick={window.showAboutAspera}>Open About</Button>
       <Button onClick={window.showPreferencesAspera}>Open Preferences</Button>
+      <Button onClick={window.showTransferManagerAspera}>Open Transfer Manager</Button>
     </div>
   );
 }

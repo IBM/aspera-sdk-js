@@ -983,6 +983,13 @@ export interface SdkCapabilities {
    */
   showPreferences: boolean,
   /**
+   * Whether the transfer client supports showing the transfer manager.
+   *
+   * This is supported when using Connect or IBM Aspera for desktop with the required RPC methods,
+   * but not HTTP Gateway.
+   */
+  showTransferManager: boolean,
+  /**
    * Whether the SDK can read directory contents.
    *
    * This is supported when using IBM Aspera for desktop with the required RPC methods,

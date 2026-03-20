@@ -1,5 +1,5 @@
 import {AsperaSdk} from './models/aspera-sdk.model';
-import {createDropzone, deregisterActivityCallback, deregisterStatusCallback, getAllTransfers, getCapabilities, getChecksum, getFilesList, getInfo, getTransfer, hasCapability, init, initDragDrop, modifyTransfer, readAsArrayBuffer, readChunkAsArrayBuffer, readDirectory, registerActivityCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showAbout, showDirectory, showPreferences, showSelectFileDialog, showSelectFolderDialog, startTransfer, stopTransfer, testConnection,} from './app/core';
+import {createDropzone, deregisterActivityCallback, deregisterStatusCallback, getAllTransfers, getCapabilities, getChecksum, getFilesList, getInfo, getTransfer, hasCapability, init, initDragDrop, modifyTransfer, readAsArrayBuffer, readChunkAsArrayBuffer, readDirectory, registerActivityCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showAbout, showDirectory, showPreferences, showSelectFileDialog, showSelectFolderDialog, showTransferManager, startTransfer, stopTransfer, testConnection,} from './app/core';
 import {getInstallerInfo} from './app/installer';
 import {getInstallerUrls, isSafari} from './helpers/helpers';
 import * as httpGatewayCalls from './http-gateway';
@@ -22,6 +22,7 @@ asperaSdk.getFilesList = getFilesList;
 asperaSdk.showSelectFileDialog = showSelectFileDialog;
 asperaSdk.showSelectFolderDialog = showSelectFolderDialog;
 asperaSdk.showPreferences = showPreferences;
+asperaSdk.showTransferManager = showTransferManager;
 asperaSdk.modifyTransfer = modifyTransfer;
 asperaSdk.createDropzone = createDropzone;
 asperaSdk.removeDropzone = removeDropzone;
@@ -67,6 +68,7 @@ export {
   showSelectFileDialog,
   showSelectFolderDialog,
   showPreferences,
+  showTransferManager,
   modifyTransfer,
   createDropzone,
   removeDropzone,

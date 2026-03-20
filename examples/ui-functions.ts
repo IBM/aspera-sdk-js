@@ -3,7 +3,7 @@
  * These functions interact with the native UI of the transfer client (IBM Aspera for Desktop or Connect).
  */
 
-import { showAbout, showPreferences } from '@ibm-aspera/sdk';
+import { showAbout, showPreferences, showTransferManager } from '@ibm-aspera/sdk';
 
 export function showAboutAspera() {
   /** Show the about page of the transfer client. */
@@ -20,5 +20,15 @@ export function showPreferencesAspera() {
   showPreferences().catch(error => {
     console.error('Show preferences failed', error);
     alert(`Show preferences failed\n\n${JSON.stringify(error, undefined, 2)}`);
+  });
+}
+
+export function showTransferManagerAspera() {
+  /** Open the transfer manager UI of the native transfer client. */
+  showTransferManager().then(response => {
+    console.info('Show transfer manager response', response);
+  }).catch(error => {
+    console.error('Show transfer manager failed', error);
+    alert(`Show transfer manager failed\n\n${JSON.stringify(error, undefined, 2)}`);
   });
 }

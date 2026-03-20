@@ -395,6 +395,8 @@ export class AsperaSdk {
   showAbout: () => Promise<any>;
   /** Function to display the IBM Aspera preferences page */
   showPreferences: () => Promise<any>;
+  /** Function to show the transfer manager UI */
+  showTransferManager: () => Promise<any>;
   /** Function to modify a running transfer */
   modifyTransfer: (transferId: string, options: ModifyTransferOptions) => Promise<AsperaSdkTransfer>;
   /** Function to set custom branding for IBM Aspera */

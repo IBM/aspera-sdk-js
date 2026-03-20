@@ -16,6 +16,7 @@ import {
   readChunkAsArrayBuffer,
   getChecksum,
   readDirectory,
+  showTransferManager,
   hasCapability,
   asperaSdk,
 } from '../../src/index';
@@ -330,10 +331,20 @@ describe('HTTP Gateway', () => {
     });
   });
 
+  describe('showTransferManager', () => {
+    it('should reject - not supported in HTTP Gateway mode', async () => {
+      await expect(showTransferManager()).rejects.toEqual({
+        error: true,
+        message: 'Show transfer manager is not supported for current transfer client',
+      });
+    });
+  });
+
   describe('hasCapability', () => {
     it('should return false for capabilities not supported by HTTP Gateway', () => {
       expect(hasCapability('showAbout')).toBe(false);
       expect(hasCapability('showPreferences')).toBe(false);
+      expect(hasCapability('showTransferManager')).toBe(false);
       expect(hasCapability('fileChecksum')).toBe(false);
       expect(hasCapability('readDirectory')).toBe(false);
     });

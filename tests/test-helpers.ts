@@ -223,6 +223,10 @@ function createConnectMock(): any {
       capture('showPreferences')(...args);
       return Promise.resolve({});
     }),
+    showTransferManager: jest.fn().mockImplementation((...args) => {
+      capture('showTransferManager')(...args);
+      return Promise.resolve({});
+    }),
     getTransfer: jest.fn().mockImplementation((...args) => {
       capture('getTransfer')(...args);
       return Promise.resolve({transfer_info: {uuid: args[0]}});

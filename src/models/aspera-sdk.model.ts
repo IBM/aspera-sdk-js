@@ -1,4 +1,4 @@
-import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, InstallerUrlInfo, RpcMethod, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse} from './models';
+import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, InstallerUrlInfo, RpcMethod, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, OpenPreferencesPageOptions} from './models';
 import {hiddenStyleList, installerUrl, protocol} from '../constants/constants';
 import {messages} from '../constants/messages';
 import {safariClient} from '../helpers/client/safari-client';
@@ -397,6 +397,8 @@ export class AsperaSdk {
   showPreferences: () => Promise<any>;
   /** Function to show the transfer manager UI */
   showTransferManager: () => Promise<any>;
+  /** Function to open a specific preferences page */
+  openPreferencesPage: (options: OpenPreferencesPageOptions) => Promise<any>;
   /** Function to modify a running transfer */
   modifyTransfer: (transferId: string, options: ModifyTransferOptions) => Promise<AsperaSdkTransfer>;
   /** Function to set custom branding for IBM Aspera */

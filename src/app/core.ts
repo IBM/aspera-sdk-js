@@ -5,7 +5,7 @@ import {httpDownload, httpUpload, initHttpGateway} from '../http-gateway';
 import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChunkAsArrayBuffer, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, httpStopTransfer, sendTransferUpdate} from '../http-gateway/core';
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
-import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse} from '../models/models';
+import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, OpenPreferencesPageOptions, PreferencesPage} from '../models/models';
 import {Connect, ConnectInstaller} from '@ibm-aspera/connect-sdk-js';
 import {initConnect} from '../connect/core';
 import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
@@ -555,6 +555,56 @@ export const showTransferManager = (): Promise<any> => {
     .catch(error => {
       errorLog(messages.showTransferManagerFailed, error);
       promiseInfo.rejecter(generateErrorBody(messages.showTransferManagerFailed, error));
+    });
+
+  return promiseInfo.promise;
+};
+
+/**
+ * Maps consumer-facing preference page names to the page names supported by
+ * the IBM Aspera for desktop RPC server.
+ */
+const mapPreferencesPageForDesktop = (page: PreferencesPage): string => {
+  switch (page) {
+  case 'network': return 'proxies';
+  case 'bandwidth': return 'transfers';
+  default: return page;
+  }
+};
+
+/**
+ * Opens the preferences page of the transfer client to a specific tab.
+ *
+ * Supported for Connect and IBM Aspera for desktop. Not supported for HTTP Gateway.
+ *
+ * @param options options including the page (tab) to open
+ *
+ * @returns a promise that resolves when the preferences page is opened.
+ */
+export const showPreferencesPage = (options: OpenPreferencesPageOptions): Promise<any> => {
+  if (asperaSdk.useHttpGateway) {
+    return throwError(messages.openPreferencesPageNotSupported);
+  }
+
+  if (asperaSdk.useConnect) {
+    return asperaSdk.globals.connect.showPreferencesPage(options);
+  }
+
+  if (!asperaSdk.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  const promiseInfo = generatePromiseObjects();
+
+  const payload = {
+    tab: mapPreferencesPageForDesktop(options.page),
+  };
+
+  client.request('open_preferences', payload)
+    .then((data: any) => promiseInfo.resolver(data))
+    .catch(error => {
+      errorLog(messages.openPreferencesPageFailed, error);
+      promiseInfo.rejecter(generateErrorBody(messages.openPreferencesPageFailed, error));
     });
 
   return promiseInfo.promise;

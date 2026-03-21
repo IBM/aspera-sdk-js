@@ -1,15 +1,25 @@
 import './Views.scss';
-import { Button, CodeSnippet } from '@carbon/react';
-import { useEffect } from 'react';
+import { Button, CodeSnippet, Dropdown } from '@carbon/react';
+import { useEffect, useState } from 'react';
 import hljs from 'highlight.js';
 
+const preferencePages = [
+  {id: 'general', text: 'General'},
+  {id: 'transfers', text: 'Transfers'},
+  {id: 'network', text: 'Network'},
+  {id: 'bandwidth', text: 'Bandwidth'},
+  {id: 'security', text: 'Security'},
+];
+
 export default function UI() {
+  const [selectedPage, setSelectedPage] = useState(preferencePages[0]);
+
   useEffect(() => {
     document.querySelector('.cds--snippet-container > pre > code')?.classList.add('language-javascript');
     hljs.highlightAll();
   }, []);
 
-  const codeSnippet = [window.showAboutAspera.toString(), window.showPreferencesAspera.toString(), window.showTransferManagerAspera.toString()].join('\n\n');
+  const codeSnippet = [window.showAboutAspera.toString(), window.showPreferencesAspera.toString(), window.showTransferManagerAspera.toString(), window.openPreferencesPageAspera.toString()].join('\n\n');
 
   return (
     <div className="example-pages">
@@ -21,6 +31,19 @@ export default function UI() {
       <Button onClick={window.showAboutAspera}>Open About</Button>
       <Button onClick={window.showPreferencesAspera}>Open Preferences</Button>
       <Button onClick={window.showTransferManagerAspera}>Open Transfer Manager</Button>
+      <div style={{marginTop: '1rem', display: 'flex', alignItems: 'flex-end', gap: '1rem'}}>
+        <Dropdown
+          id="preferences-page-dropdown"
+          titleText="Preferences page"
+          label="Select a page"
+          items={preferencePages}
+          itemToString={(item: any) => item?.text || ''}
+          selectedItem={selectedPage}
+          onChange={({selectedItem}: any) => setSelectedPage(selectedItem)}
+          style={{minWidth: '14rem'}}
+        />
+        <Button onClick={() => window.openPreferencesPageAspera(selectedPage.id)}>Open Preferences Page</Button>
+      </div>
     </div>
   );
 }

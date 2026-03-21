@@ -16,6 +16,7 @@ import {
   getChecksum,
   readDirectory,
   showTransferManager,
+  openPreferencesPage,
   hasCapability,
 } from '../../src/index';
 import {
@@ -300,6 +301,44 @@ describe('Desktop App', () => {
         },
         app_id: APP_ID,
       });
+    });
+  });
+
+  describe('openPreferencesPage', () => {
+    it('should call open_preferences RPC with tab', async () => {
+      await openPreferencesPage({page: 'general'});
+
+      const call = lastFetchCall();
+      expect(call.body.method).toBe('open_preferences');
+      expect(call.body.params).toEqual({tab: 'general'});
+    });
+
+    it('should pass through "security" as-is', async () => {
+      await openPreferencesPage({page: 'security'});
+
+      const call = lastFetchCall();
+      expect(call.body.params).toEqual({tab: 'security'});
+    });
+
+    it('should pass through "transfers" as-is', async () => {
+      await openPreferencesPage({page: 'transfers'});
+
+      const call = lastFetchCall();
+      expect(call.body.params).toEqual({tab: 'transfers'});
+    });
+
+    it('should map "network" to "proxies" for Desktop App', async () => {
+      await openPreferencesPage({page: 'network'});
+
+      const call = lastFetchCall();
+      expect(call.body.params).toEqual({tab: 'proxies'});
+    });
+
+    it('should map "bandwidth" to "transfers" for Desktop App', async () => {
+      await openPreferencesPage({page: 'bandwidth'});
+
+      const call = lastFetchCall();
+      expect(call.body.params).toEqual({tab: 'transfers'});
     });
   });
 

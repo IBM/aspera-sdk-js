@@ -196,6 +196,15 @@ export interface DirectoryListFilters {
 }
 
 /** Options for reading directory contents */
+/** Valid page names for the preferences page. */
+export type PreferencesPage = 'general' | 'transfers' | 'network' | 'bandwidth' | 'security';
+
+/** Options for opening the preferences page to a specific tab. */
+export interface OpenPreferencesPageOptions {
+  /** The preferences page (tab) to open. */
+  page: PreferencesPage;
+}
+
 export interface ReadDirectoryOptions {
   /** Absolute path to the directory to enumerate. Must have been previously allowed via dialog selection or drag-drop. */
   path: string;

@@ -45,4 +45,6 @@ export const messages = {
   readDirectoryNotSupported: 'Read directory is not supported for current transfer client',
   showTransferManagerFailed: 'Unable to show transfer manager',
   showTransferManagerNotSupported: 'Show transfer manager is not supported for current transfer client',
+  openPreferencesPageFailed: 'Unable to open preferences page',
+  openPreferencesPageNotSupported: 'Open preferences page is not supported for current transfer client',
 };

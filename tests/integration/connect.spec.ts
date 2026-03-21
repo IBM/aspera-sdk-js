@@ -16,6 +16,7 @@ import {
   getChecksum,
   readDirectory,
   showTransferManager,
+  openPreferencesPage,
   hasCapability,
 } from '../../src/index';
 import {
@@ -238,6 +239,29 @@ describe('Connect SDK', () => {
 
       const mock = getConnectMock();
       expect(mock.showTransferManager).toHaveBeenCalled();
+    });
+  });
+
+  describe('openPreferencesPage', () => {
+    it('should call showPreferencesPage on Connect SDK with original page value', async () => {
+      await openPreferencesPage({page: 'general'});
+
+      const mock = getConnectMock();
+      expect(mock.showPreferencesPage).toHaveBeenCalledWith({page: 'general'});
+    });
+
+    it('should pass "network" as-is to Connect SDK (no mapping)', async () => {
+      await openPreferencesPage({page: 'network'});
+
+      const mock = getConnectMock();
+      expect(mock.showPreferencesPage).toHaveBeenCalledWith({page: 'network'});
+    });
+
+    it('should pass "bandwidth" as-is to Connect SDK (no mapping)', async () => {
+      await openPreferencesPage({page: 'bandwidth'});
+
+      const mock = getConnectMock();
+      expect(mock.showPreferencesPage).toHaveBeenCalledWith({page: 'bandwidth'});
     });
   });
 

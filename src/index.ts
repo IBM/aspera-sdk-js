@@ -23,7 +23,7 @@ asperaSdk.showSelectFileDialog = showSelectFileDialog;
 asperaSdk.showSelectFolderDialog = showSelectFolderDialog;
 asperaSdk.showPreferences = showPreferences;
 asperaSdk.showTransferManager = showTransferManager;
-asperaSdk.openPreferencesPage = showPreferencesPage;
+asperaSdk.showPreferencesPage = showPreferencesPage;
 asperaSdk.modifyTransfer = modifyTransfer;
 asperaSdk.createDropzone = createDropzone;
 asperaSdk.removeDropzone = removeDropzone;
@@ -117,7 +117,7 @@ export type {
   InstallerOptions,
   InstallerUrlInfo,
   ModifyTransferOptions,
-  OpenPreferencesPageOptions,
+  ShowPreferencesPageOptions as OpenPreferencesPageOptions,
   OverwritePolicy,
   PaginatedFilesResponse,
   Pagination,

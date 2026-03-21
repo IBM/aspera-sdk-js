@@ -200,7 +200,7 @@ export interface DirectoryListFilters {
 export type PreferencesPage = 'general' | 'transfers' | 'network' | 'bandwidth' | 'security';
 
 /** Options for opening the preferences page to a specific tab. */
-export interface OpenPreferencesPageOptions {
+export interface ShowPreferencesPageOptions {
   /** The preferences page (tab) to open. */
   page: PreferencesPage;
 }

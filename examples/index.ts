@@ -25,7 +25,7 @@ import {
   registerStatusCallbackAspera
 } from './other-functions';
 import { installerAspera } from './installer';
-import { showAboutAspera, showPreferencesAspera, showTransferManagerAspera } from './ui-functions';
+import { showAboutAspera, showPreferencesAspera, showTransferManagerAspera, openPreferencesPageAspera } from './ui-functions';
 import { readDirectoryAspera } from './read-directory';
 
 // Extend window interface to include all example functions
@@ -50,6 +50,7 @@ declare global {
     installerAspera: typeof installerAspera;
     showAboutAspera: typeof showAboutAspera;
     showTransferManagerAspera: typeof showTransferManagerAspera;
+    openPreferencesPageAspera: typeof openPreferencesPageAspera;
     readDirectoryAspera: typeof readDirectoryAspera;
   }
 }
@@ -74,6 +75,7 @@ window.registerStatusCallbackAspera = registerStatusCallbackAspera;
 window.installerAspera = installerAspera;
 window.showAboutAspera = showAboutAspera;
 window.showTransferManagerAspera = showTransferManagerAspera;
+window.openPreferencesPageAspera = openPreferencesPageAspera;
 window.readDirectoryAspera = readDirectoryAspera;
 
 // Export all functions for direct imports if needed
@@ -97,5 +99,6 @@ export {
   installerAspera,
   showAboutAspera,
   showTransferManagerAspera,
+  openPreferencesPageAspera,
   readDirectoryAspera
 };

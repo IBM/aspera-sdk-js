@@ -17,6 +17,7 @@ import {
   getChecksum,
   readDirectory,
   showTransferManager,
+  openPreferencesPage,
   hasCapability,
   asperaSdk,
 } from '../../src/index';
@@ -336,6 +337,15 @@ describe('HTTP Gateway', () => {
       await expect(showTransferManager()).rejects.toEqual({
         error: true,
         message: 'Show transfer manager is not supported for current transfer client',
+      });
+    });
+  });
+
+  describe('openPreferencesPage', () => {
+    it('should reject - not supported in HTTP Gateway mode', async () => {
+      await expect(openPreferencesPage({page: 'general'})).rejects.toEqual({
+        error: true,
+        message: 'Open preferences page is not supported for current transfer client',
       });
     });
   });

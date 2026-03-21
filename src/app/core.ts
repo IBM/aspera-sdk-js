@@ -529,6 +529,38 @@ export const showPreferences = (): Promise<any> => {
 };
 
 /**
+ * Opens the transfer manager UI of the native transfer client.
+ *
+ * Supported for Connect and IBM Aspera for desktop. Not supported for HTTP Gateway.
+ *
+ * @returns a promise that resolves when the transfer manager is opened.
+ */
+export const showTransferManager = (): Promise<any> => {
+  if (asperaSdk.useHttpGateway) {
+    return throwError(messages.showTransferManagerNotSupported);
+  }
+
+  if (asperaSdk.useConnect) {
+    return asperaSdk.globals.connect.showTransferManager();
+  }
+
+  if (!asperaSdk.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  const promiseInfo = generatePromiseObjects();
+
+  client.request('show_transfer_manager')
+    .then((data: any) => promiseInfo.resolver(data))
+    .catch(error => {
+      errorLog(messages.showTransferManagerFailed, error);
+      promiseInfo.rejecter(generateErrorBody(messages.showTransferManagerFailed, error));
+    });
+
+  return promiseInfo.promise;
+};
+
+/**
  * Get all transfers associated with the current application.
  *
  * @returns a promise that resolves with an array of transfers.
@@ -1105,7 +1137,7 @@ const supportsMethod = (method: string): boolean => {
   // We currently do not support calculating file checksums when using HTTP Gateway. In theory it should be possible
   // to calculate this directly in the browser similar to how `readAsArrayBuffer()` is implemented.
   // HTTP Gateway also does not support showing native transfer client UI (about, preferences, etc.).
-  if (asperaSdk.useHttpGateway && (method === 'get_checksum' || method === 'show_about' || method === 'open_preferences' || method === 'read_directory')) {
+  if (asperaSdk.useHttpGateway && (method === 'get_checksum' || method === 'show_about' || method === 'open_preferences' || method === 'show_transfer_manager' || method === 'read_directory')) {
     return false;
   }
 
@@ -1148,6 +1180,7 @@ export const getCapabilities = (): SdkCapabilities => {
     fileChecksum: supportsMethod('get_checksum'),
     showAbout: supportsMethod('show_about'),
     showPreferences: supportsMethod('open_preferences'),
+    showTransferManager: supportsMethod('show_transfer_manager'),
     readDirectory: supportsMethod('read_directory'),
   };
 };

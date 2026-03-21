@@ -15,6 +15,7 @@ import {
   readChunkAsArrayBuffer,
   getChecksum,
   readDirectory,
+  showTransferManager,
   hasCapability,
 } from '../../src/index';
 import {
@@ -231,6 +232,15 @@ describe('Connect SDK', () => {
     });
   });
 
+  describe('showTransferManager', () => {
+    it('should call showTransferManager on Connect SDK', async () => {
+      await showTransferManager();
+
+      const mock = getConnectMock();
+      expect(mock.showTransferManager).toHaveBeenCalled();
+    });
+  });
+
   describe('readDirectory', () => {
     it('should reject - not supported in Connect mode', async () => {
       await expect(readDirectory({path: '/path/to/folder'})).rejects.toEqual({
@@ -244,6 +254,7 @@ describe('Connect SDK', () => {
     it('should return true for all capabilities', () => {
       expect(hasCapability('showAbout')).toBe(true);
       expect(hasCapability('showPreferences')).toBe(true);
+      expect(hasCapability('showTransferManager')).toBe(true);
       expect(hasCapability('imagePreview')).toBe(true);
       expect(hasCapability('fileChecksum')).toBe(true);
     });

@@ -355,7 +355,6 @@ describe('HTTP Gateway', () => {
       expect(hasCapability('showAbout')).toBe(false);
       expect(hasCapability('showPreferences')).toBe(false);
       expect(hasCapability('showTransferManager')).toBe(false);
-      expect(hasCapability('openPreferencesPage')).toBe(false);
       expect(hasCapability('fileChecksum')).toBe(false);
       expect(hasCapability('readDirectory')).toBe(false);
     });

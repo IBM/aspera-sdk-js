@@ -47,4 +47,6 @@ export const messages = {
   showTransferManagerNotSupported: 'Show transfer manager is not supported for current transfer client',
   openPreferencesPageFailed: 'Unable to open preferences page',
   openPreferencesPageNotSupported: 'Open preferences page is not supported for current transfer client',
+  showTransferMonitorFailed: 'Unable to show transfer monitor',
+  showTransferMonitorNotSupported: 'Show transfer monitor is not supported for current transfer client',
 };

@@ -1,5 +1,5 @@
 import {AsperaSdk} from './models/aspera-sdk.model';
-import {createDropzone, deregisterActivityCallback, deregisterStatusCallback, getAllTransfers, getCapabilities, getChecksum, getFilesList, getInfo, getTransfer, hasCapability, init, initDragDrop, modifyTransfer, showPreferencesPage, readAsArrayBuffer, readChunkAsArrayBuffer, readDirectory, registerActivityCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showAbout, showDirectory, showPreferences, showSelectFileDialog, showSelectFolderDialog, showTransferManager, startTransfer, stopTransfer, testConnection,} from './app/core';
+import {createDropzone, deregisterActivityCallback, deregisterStatusCallback, getAllTransfers, getCapabilities, getChecksum, getFilesList, getInfo, getTransfer, hasCapability, init, initDragDrop, modifyTransfer, showPreferencesPage, readAsArrayBuffer, readChunkAsArrayBuffer, readDirectory, registerActivityCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showAbout, showDirectory, showPreferences, showSelectFileDialog, showSelectFolderDialog, showTransferManager, showTransferMonitor, startTransfer, stopTransfer, testConnection,} from './app/core';
 import {getInstallerInfo} from './app/installer';
 import {getInstallerUrls, isSafari} from './helpers/helpers';
 import * as httpGatewayCalls from './http-gateway';
@@ -23,6 +23,7 @@ asperaSdk.showSelectFileDialog = showSelectFileDialog;
 asperaSdk.showSelectFolderDialog = showSelectFolderDialog;
 asperaSdk.showPreferences = showPreferences;
 asperaSdk.showTransferManager = showTransferManager;
+asperaSdk.showTransferMonitor = showTransferMonitor;
 asperaSdk.showPreferencesPage = showPreferencesPage;
 asperaSdk.modifyTransfer = modifyTransfer;
 asperaSdk.createDropzone = createDropzone;
@@ -70,6 +71,7 @@ export {
   showSelectFolderDialog,
   showPreferences,
   showTransferManager,
+  showTransferMonitor,
   showPreferencesPage as openPreferencesPage,
   modifyTransfer,
   createDropzone,

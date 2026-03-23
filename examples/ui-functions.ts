@@ -3,7 +3,7 @@
  * These functions interact with the native UI of the transfer client (IBM Aspera for Desktop or Connect).
  */
 
-import { showAbout, showPreferences, showTransferManager, openPreferencesPage } from '@ibm-aspera/sdk';
+import { showAbout, showPreferences, showTransferManager, showTransferMonitor, openPreferencesPage } from '@ibm-aspera/sdk';
 
 export function showAboutAspera() {
   /** Show the about page of the transfer client. */
@@ -30,6 +30,16 @@ export function showTransferManagerAspera() {
   }).catch(error => {
     console.error('Show transfer manager failed', error);
     alert(`Show transfer manager failed\n\n${JSON.stringify(error, undefined, 2)}`);
+  });
+}
+
+export function showTransferMonitorAspera(transferId: string) {
+  /** Open the transfer rate monitor graph for a specific transfer. */
+  showTransferMonitor(transferId).then(response => {
+    console.info('Show transfer monitor response', response);
+  }).catch(error => {
+    console.error('Show transfer monitor failed', error);
+    alert(`Show transfer monitor failed\n\n${JSON.stringify(error, undefined, 2)}`);
   });
 }
 

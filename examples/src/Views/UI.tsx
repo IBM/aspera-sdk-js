@@ -1,5 +1,5 @@
 import './Views.scss';
-import { Button, CodeSnippet, Dropdown } from '@carbon/react';
+import { Button, CodeSnippet, Dropdown, TextInput } from '@carbon/react';
 import { useEffect, useState } from 'react';
 import hljs from 'highlight.js';
 
@@ -13,13 +13,14 @@ const preferencePages = [
 
 export default function UI() {
   const [selectedPage, setSelectedPage] = useState(preferencePages[0]);
+  const [monitorTransferId, setMonitorTransferId] = useState('');
 
   useEffect(() => {
     document.querySelector('.cds--snippet-container > pre > code')?.classList.add('language-javascript');
     hljs.highlightAll();
   }, []);
 
-  const codeSnippet = [window.showAboutAspera.toString(), window.showPreferencesAspera.toString(), window.showTransferManagerAspera.toString(), window.openPreferencesPageAspera.toString()].join('\n\n');
+  const codeSnippet = [window.showAboutAspera.toString(), window.showPreferencesAspera.toString(), window.showTransferManagerAspera.toString(), window.showTransferMonitorAspera.toString(), window.openPreferencesPageAspera.toString()].join('\n\n');
 
   return (
     <div className="example-pages">
@@ -31,6 +32,17 @@ export default function UI() {
       <Button onClick={window.showAboutAspera}>Open About</Button>
       <Button onClick={window.showPreferencesAspera}>Open Preferences</Button>
       <Button onClick={window.showTransferManagerAspera}>Open Transfer Manager</Button>
+      <div style={{marginTop: '1rem', display: 'flex', alignItems: 'flex-end', gap: '1rem'}}>
+        <TextInput
+          id="transfer-monitor-id"
+          labelText="Transfer ID"
+          placeholder="Enter transfer ID"
+          value={monitorTransferId}
+          onChange={(e: any) => setMonitorTransferId(e.target.value)}
+          style={{minWidth: '14rem'}}
+        />
+        <Button onClick={() => window.showTransferMonitorAspera(monitorTransferId)}>Open Transfer Monitor</Button>
+      </div>
       <div style={{marginTop: '1rem', display: 'flex', alignItems: 'flex-end', gap: '1rem'}}>
         <Dropdown
           id="preferences-page-dropdown"

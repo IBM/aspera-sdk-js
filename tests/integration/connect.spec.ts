@@ -16,6 +16,7 @@ import {
   getChecksum,
   readDirectory,
   showTransferManager,
+  showTransferMonitor,
   openPreferencesPage,
   hasCapability,
 } from '../../src/index';
@@ -242,6 +243,15 @@ describe('Connect SDK', () => {
     });
   });
 
+  describe('showTransferMonitor', () => {
+    it('should call showTransferMonitor on Connect SDK with transfer ID', async () => {
+      await showTransferMonitor('transfer-uuid-123');
+
+      const mock = getConnectMock();
+      expect(mock.showTransferMonitor).toHaveBeenCalledWith('transfer-uuid-123');
+    });
+  });
+
   describe('openPreferencesPage', () => {
     it('should call showPreferencesPage on Connect SDK with original page value', async () => {
       await openPreferencesPage({page: 'general'});
@@ -279,6 +289,7 @@ describe('Connect SDK', () => {
       expect(hasCapability('showAbout')).toBe(true);
       expect(hasCapability('showPreferences')).toBe(true);
       expect(hasCapability('showTransferManager')).toBe(true);
+      expect(hasCapability('showTransferMonitor')).toBe(true);
       expect(hasCapability('imagePreview')).toBe(true);
       expect(hasCapability('fileChecksum')).toBe(true);
     });

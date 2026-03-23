@@ -17,6 +17,7 @@ import {
   getChecksum,
   readDirectory,
   showTransferManager,
+  showTransferMonitor,
   openPreferencesPage,
   hasCapability,
   asperaSdk,
@@ -341,6 +342,15 @@ describe('HTTP Gateway', () => {
     });
   });
 
+  describe('showTransferMonitor', () => {
+    it('should reject - not supported in HTTP Gateway mode', async () => {
+      await expect(showTransferMonitor('transfer-uuid-123')).rejects.toEqual({
+        error: true,
+        message: 'Show transfer monitor is not supported for current transfer client',
+      });
+    });
+  });
+
   describe('openPreferencesPage', () => {
     it('should reject - not supported in HTTP Gateway mode', async () => {
       await expect(openPreferencesPage({page: 'general'})).rejects.toEqual({
@@ -355,6 +365,7 @@ describe('HTTP Gateway', () => {
       expect(hasCapability('showAbout')).toBe(false);
       expect(hasCapability('showPreferences')).toBe(false);
       expect(hasCapability('showTransferManager')).toBe(false);
+      expect(hasCapability('showTransferMonitor')).toBe(false);
       expect(hasCapability('fileChecksum')).toBe(false);
       expect(hasCapability('readDirectory')).toBe(false);
     });

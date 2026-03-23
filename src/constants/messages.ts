@@ -49,4 +49,6 @@ export const messages = {
   openPreferencesPageNotSupported: 'Open preferences page is not supported for current transfer client',
   showTransferMonitorFailed: 'Unable to show transfer monitor',
   showTransferMonitorNotSupported: 'Show transfer monitor is not supported for current transfer client',
+  authenticateFailed: 'Unable to authenticate',
+  authenticateNotSupported: 'Authenticate is not supported for current transfer client',
 };

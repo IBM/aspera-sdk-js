@@ -196,6 +196,40 @@ export const init = (options?: InitOptions): Promise<any> => {
 };
 
 /**
+ * Authenticates a transfer specification against the remote server.
+ *
+ * Supported for Connect and IBM Aspera for desktop. Not supported for HTTP Gateway.
+ *
+ * @param transferSpec the transfer specification to authenticate.
+ *
+ * @returns a promise that resolves if authentication is successful and rejects otherwise.
+ */
+export const authenticate = (transferSpec: TransferSpec): Promise<any> => {
+  if (asperaSdk.useHttpGateway) {
+    return throwError(messages.authenticateNotSupported);
+  }
+
+  if (asperaSdk.useConnect) {
+    return asperaSdk.globals.connect.authenticate(transferSpec as unknown as ConnectTypes.TransferSpec);
+  }
+
+  if (!asperaSdk.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  const promiseInfo = generatePromiseObjects();
+
+  client.request('authenticate', {transfer_spec: transferSpec})
+    .then((data: any) => promiseInfo.resolver(data))
+    .catch(error => {
+      errorLog(messages.authenticateFailed, error);
+      promiseInfo.rejecter(generateErrorBody(messages.authenticateFailed, error));
+    });
+
+  return promiseInfo.promise;
+};
+
+/**
  * Start a transfer
  *
  * @param transferSpec standard transferSpec for transfer
@@ -1221,7 +1255,7 @@ const supportsMethod = (method: string): boolean => {
   // We currently do not support calculating file checksums when using HTTP Gateway. In theory it should be possible
   // to calculate this directly in the browser similar to how `readAsArrayBuffer()` is implemented.
   // HTTP Gateway also does not support showing native transfer client UI (about, preferences, etc.).
-  if (asperaSdk.useHttpGateway && (method === 'get_checksum' || method === 'show_about' || method === 'open_preferences' || method === 'show_transfer_manager' || method === 'show_transfer_monitor' || method === 'read_directory')) {
+  if (asperaSdk.useHttpGateway && (method === 'get_checksum' || method === 'show_about' || method === 'open_preferences' || method === 'show_transfer_manager' || method === 'show_transfer_monitor' || method === 'authenticate' || method === 'read_directory')) {
     return false;
   }
 
@@ -1266,6 +1300,7 @@ export const getCapabilities = (): SdkCapabilities => {
     showPreferences: supportsMethod('open_preferences'),
     showTransferManager: supportsMethod('show_transfer_manager'),
     showTransferMonitor: supportsMethod('show_transfer_monitor'),
+    authenticate: supportsMethod('authenticate'),
     readDirectory: supportsMethod('read_directory'),
   };
 };

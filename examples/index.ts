@@ -10,7 +10,7 @@ import { testAspera } from './test-connection';
 import { selectItemsAspera } from './select-items';
 import { selectAndPreviewImageAspera } from './image-preview';
 import { selectAndCalculateChecksumAspera } from './file-checksum';
-import { startTransferAspera } from './start-transfer';
+import { startTransferAspera, authenticateAspera } from './start-transfer';
 import { setupDropAspera } from './drag-drop';
 import {
   monitorTransfersAspera,
@@ -37,6 +37,7 @@ declare global {
     selectAndPreviewImageAspera: typeof selectAndPreviewImageAspera;
     selectAndCalculateChecksumAspera: typeof selectAndCalculateChecksumAspera;
     startTransferAspera: typeof startTransferAspera;
+    authenticateAspera: typeof authenticateAspera;
     setupDropAspera: typeof setupDropAspera;
     monitorTransfersAspera: typeof monitorTransfersAspera;
     removeTransferAspera: typeof removeTransferAspera;
@@ -63,6 +64,7 @@ window.selectItemsAspera = selectItemsAspera;
 window.selectAndPreviewImageAspera = selectAndPreviewImageAspera;
 window.selectAndCalculateChecksumAspera = selectAndCalculateChecksumAspera;
 window.startTransferAspera = startTransferAspera;
+window.authenticateAspera = authenticateAspera;
 window.setupDropAspera = setupDropAspera;
 window.monitorTransfersAspera = monitorTransfersAspera;
 window.removeTransferAspera = removeTransferAspera;
@@ -88,6 +90,7 @@ export {
   selectAndPreviewImageAspera,
   selectAndCalculateChecksumAspera,
   startTransferAspera,
+  authenticateAspera,
   setupDropAspera,
   monitorTransfersAspera,
   removeTransferAspera,

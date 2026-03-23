@@ -235,6 +235,10 @@ function createConnectMock(): any {
       capture('showTransferMonitor')(...args);
       return Promise.resolve({});
     }),
+    authenticate: jest.fn().mockImplementation((...args) => {
+      capture('authenticate')(...args);
+      return Promise.resolve({});
+    }),
     getTransfer: jest.fn().mockImplementation((...args) => {
       capture('getTransfer')(...args);
       return Promise.resolve({transfer_info: {uuid: args[0]}});

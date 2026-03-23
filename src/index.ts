@@ -1,5 +1,5 @@
 import {AsperaSdk} from './models/aspera-sdk.model';
-import {createDropzone, deregisterActivityCallback, deregisterStatusCallback, getAllTransfers, getCapabilities, getChecksum, getFilesList, getInfo, getTransfer, hasCapability, init, initDragDrop, modifyTransfer, showPreferencesPage, readAsArrayBuffer, readChunkAsArrayBuffer, readDirectory, registerActivityCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showAbout, showDirectory, showPreferences, showSelectFileDialog, showSelectFolderDialog, showTransferManager, showTransferMonitor, startTransfer, stopTransfer, testConnection,} from './app/core';
+import {authenticate, createDropzone, deregisterActivityCallback, deregisterStatusCallback, getAllTransfers, getCapabilities, getChecksum, getFilesList, getInfo, getTransfer, hasCapability, init, initDragDrop, modifyTransfer, showPreferencesPage, readAsArrayBuffer, readChunkAsArrayBuffer, readDirectory, registerActivityCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showAbout, showDirectory, showPreferences, showSelectFileDialog, showSelectFolderDialog, showTransferManager, showTransferMonitor, startTransfer, stopTransfer, testConnection,} from './app/core';
 import {getInstallerInfo} from './app/installer';
 import {getInstallerUrls, isSafari} from './helpers/helpers';
 import * as httpGatewayCalls from './http-gateway';
@@ -7,6 +7,7 @@ import * as httpGatewayCalls from './http-gateway';
 export const asperaSdk: AsperaSdk = new AsperaSdk();
 
 asperaSdk.init = init;
+asperaSdk.authenticate = authenticate;
 asperaSdk.testConnection = testConnection;
 asperaSdk.startTransfer = startTransfer;
 asperaSdk.registerActivityCallback = registerActivityCallback;
@@ -54,6 +55,7 @@ if (typeof (<any>window) === 'object') {
 export {
   isSafari,
   init,
+  authenticate,
   testConnection,
   startTransfer,
   launch,

@@ -5,6 +5,7 @@ import {
   resumeTransfer,
   showSelectFileDialog,
   showSelectFolderDialog,
+  showSaveFileDialog,
   showAbout,
   showPreferences,
   getAllTransfers,
@@ -99,6 +100,18 @@ describe('Connect SDK', () => {
 
       const mock = getConnectMock();
       expect(mock.showSelectFolderDialogPromise).toHaveBeenCalledWith({multiple: false});
+    });
+  });
+
+  describe('showSaveFileDialog', () => {
+    it('should call showSaveFileDialog on Connect SDK with callbacks and options', async () => {
+      await showSaveFileDialog({title: 'Save file', suggestedName: 'report.pdf'});
+
+      const mock = getConnectMock();
+      expect(mock.showSaveFileDialog).toHaveBeenCalledWith(
+        expect.objectContaining({success: expect.any(Function), error: expect.any(Function)}),
+        {title: 'Save file', suggestedName: 'report.pdf'},
+      );
     });
   });
 
@@ -313,6 +326,7 @@ describe('Connect SDK', () => {
       expect(hasCapability('showTransferMonitor')).toBe(true);
       expect(hasCapability('authenticate')).toBe(true);
       expect(hasCapability('testSshPorts')).toBe(true);
+      expect(hasCapability('showSaveFileDialog')).toBe(true);
       expect(hasCapability('imagePreview')).toBe(true);
       expect(hasCapability('fileChecksum')).toBe(true);
     });

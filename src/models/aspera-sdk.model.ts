@@ -1,4 +1,4 @@
-import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, InstallerUrlInfo, RpcMethod, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, ShowPreferencesPageOptions, TestSshPortsOptions} from './models';
+import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, SaveFileDialogOptions, InitOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, InstallerUrlInfo, RpcMethod, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, ShowPreferencesPageOptions, TestSshPortsOptions} from './models';
 import {hiddenStyleList, installerUrl, protocol} from '../constants/constants';
 import {messages} from '../constants/messages';
 import {safariClient} from '../helpers/client/safari-client';
@@ -391,6 +391,8 @@ export class AsperaSdk {
   showSelectFileDialog: (options?: FileDialogOptions) => Promise<DataTransferResponse>;
   /** Function to display a folder dialog for the user to select folders. */
   showSelectFolderDialog: (options?: FolderDialogOptions) => Promise<DataTransferResponse>;
+  /** Function to display a save file dialog for the user to choose a save location */
+  showSaveFileDialog: (options?: SaveFileDialogOptions) => Promise<DataTransferResponse>;
   /** Function to show the about page of the transfer client */
   showAbout: () => Promise<any>;
   /** Function to display the IBM Aspera preferences page */

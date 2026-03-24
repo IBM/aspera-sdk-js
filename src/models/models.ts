@@ -33,6 +33,15 @@ export interface FolderDialogOptions {
   multiple?: boolean;
 }
 
+export interface SaveFileDialogOptions {
+  /** Filter the files displayed by file extension. */
+  allowedFileTypes?: any;
+  /** The filename to pre-fill the dialog with. */
+  suggestedName?: string;
+  /** The name of the dialog window. */
+  title?: string;
+}
+
 /**
  * Options related to fetching the latest Aspera installer information.
  *
@@ -1029,6 +1038,13 @@ export interface SdkCapabilities {
    * but not HTTP Gateway.
    */
   testSshPorts: boolean,
+  /**
+   * Whether the transfer client supports showing the save file dialog.
+   *
+   * This is supported when using Connect or IBM Aspera for desktop with the required RPC methods,
+   * but not HTTP Gateway.
+   */
+  showSaveFileDialog: boolean,
   /**
    * Whether the SDK can read directory contents.
    *

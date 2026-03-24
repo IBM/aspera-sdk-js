@@ -88,7 +88,7 @@ export default function SelectItems() {
     window.readDirectoryAspera(options);
   };
 
-  const codeSnippet = [window.selectItemsAspera.toString(), window.readDirectoryAspera.toString()].join('\n\n');
+  const codeSnippet = [window.selectItemsAspera.toString(), window.showSaveFileDialogAspera.toString(), window.readDirectoryAspera.toString()].join('\n\n');
 
   const visibleEntries = directoryData?.entries.slice(0, MAX_VISIBLE_ENTRIES) ?? [];
   const totalEntries = directoryData?.totalCount ?? 0;
@@ -101,6 +101,7 @@ export default function SelectItems() {
       <h2>Try it out</h2>
       <Button onClick={() => window.selectItemsAspera(false)}>Select files</Button>
       <Button onClick={() => window.selectItemsAspera(true)}>Select folder</Button>
+      <Button onClick={() => window.showSaveFileDialogAspera()}>Save file dialog</Button>
       <div className="ending-content">
         {window.selectedFiles.length ? (
           <UnorderedList>

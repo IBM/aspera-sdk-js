@@ -5,6 +5,7 @@ import {
   resumeTransfer,
   showSelectFileDialog,
   showSelectFolderDialog,
+  showSaveFileDialog,
   showAbout,
   showPreferences,
   getAllTransfers,
@@ -113,6 +114,19 @@ describe('Desktop App', () => {
       expect(call.body.method).toBe('show_folder_dialog');
       expect(call.body.params).toEqual({
         options: {multiple: false},
+        app_id: APP_ID,
+      });
+    });
+  });
+
+  describe('showSaveFileDialog', () => {
+    it('should call show_save_file_dialog RPC', async () => {
+      await showSaveFileDialog({title: 'Save file', suggestedName: 'report.pdf'});
+
+      const call = lastFetchCall();
+      expect(call.body.method).toBe('show_save_file_dialog');
+      expect(call.body.params).toEqual({
+        options: {title: 'Save file', suggestedName: 'report.pdf'},
         app_id: APP_ID,
       });
     });
@@ -386,7 +400,7 @@ describe('Desktop App', () => {
 
   describe('hasCapability', () => {
     it('should return true for capabilities whose RPC methods are discovered', () => {
-      asperaSdk.globals.rpcMethods = ['show_about', 'open_preferences', 'show_transfer_manager', 'show_transfer_monitor', 'authenticate', 'test_ssh_ports', 'read_as_array_buffer', 'read_chunk_as_array_buffer', 'get_checksum', 'read_directory'];
+      asperaSdk.globals.rpcMethods = ['show_about', 'open_preferences', 'show_transfer_manager', 'show_transfer_monitor', 'authenticate', 'test_ssh_ports', 'show_save_file_dialog', 'read_as_array_buffer', 'read_chunk_as_array_buffer', 'get_checksum', 'read_directory'];
 
       expect(hasCapability('showAbout')).toBe(true);
       expect(hasCapability('showPreferences')).toBe(true);
@@ -394,6 +408,7 @@ describe('Desktop App', () => {
       expect(hasCapability('showTransferMonitor')).toBe(true);
       expect(hasCapability('authenticate')).toBe(true);
       expect(hasCapability('testSshPorts')).toBe(true);
+      expect(hasCapability('showSaveFileDialog')).toBe(true);
       expect(hasCapability('imagePreview')).toBe(true);
       expect(hasCapability('fileChecksum')).toBe(true);
       expect(hasCapability('readDirectory')).toBe(true);
@@ -408,6 +423,7 @@ describe('Desktop App', () => {
       expect(hasCapability('showTransferMonitor')).toBe(false);
       expect(hasCapability('authenticate')).toBe(false);
       expect(hasCapability('testSshPorts')).toBe(false);
+      expect(hasCapability('showSaveFileDialog')).toBe(false);
       expect(hasCapability('imagePreview')).toBe(false);
       expect(hasCapability('fileChecksum')).toBe(false);
       expect(hasCapability('readDirectory')).toBe(false);

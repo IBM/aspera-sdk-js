@@ -53,4 +53,6 @@ export const messages = {
   authenticateNotSupported: 'Authenticate is not supported for current transfer client',
   testSshPortsFailed: 'Unable to test SSH ports',
   testSshPortsNotSupported: 'Test SSH ports is not supported for current transfer client',
+  showSaveFileDialogFailed: 'Unable to show save file dialog',
+  showSaveFileDialogNotSupported: 'Show save file dialog is not supported for current transfer client',
 };

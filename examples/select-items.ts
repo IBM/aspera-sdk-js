@@ -3,7 +3,7 @@
  * This example demonstrates how to let users select items from their local filesystem.
  */
 
-import { showSelectFileDialog, showSelectFolderDialog } from '@ibm-aspera/sdk';
+import { showSelectFileDialog, showSelectFolderDialog, showSaveFileDialog } from '@ibm-aspera/sdk';
 
 // Global state for selected files (used by the example app)
 declare global {
@@ -35,6 +35,21 @@ export function selectItemsAspera(selectFolders: boolean) {
     } else {
       console.error('Selecting items failed', error);
       alert(`Selecting items failed\n\n${JSON.stringify(error, undefined, 2)}`);
+    }
+  });
+}
+
+export function showSaveFileDialogAspera() {
+  /** Open a save file dialog for the user to choose a save location. */
+  showSaveFileDialog({title: 'Save file'}).then(response => {
+    console.info('Save file dialog response', response);
+    alert(`Save file dialog response:\n\n${JSON.stringify(response, undefined, 2)}`);
+  }).catch(error => {
+    if (error.debugData?.code === -32002) {
+      alert('User canceled save file dialog');
+    } else {
+      console.error('Save file dialog failed', error);
+      alert(`Save file dialog failed\n\n${JSON.stringify(error, undefined, 2)}`);
     }
   });
 }

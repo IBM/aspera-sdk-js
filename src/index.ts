@@ -1,5 +1,5 @@
 import {AsperaSdk} from './models/aspera-sdk.model';
-import {authenticate, createDropzone, deregisterActivityCallback, deregisterStatusCallback, getAllTransfers, getCapabilities, getChecksum, getFilesList, getInfo, getTransfer, hasCapability, init, initDragDrop, modifyTransfer, showPreferencesPage, readAsArrayBuffer, readChunkAsArrayBuffer, readDirectory, registerActivityCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showAbout, showDirectory, showPreferences, showSelectFileDialog, showSelectFolderDialog, showTransferManager, showTransferMonitor, startTransfer, stopTransfer, testConnection, testSshPorts,} from './app/core';
+import {authenticate, createDropzone, deregisterActivityCallback, deregisterStatusCallback, getAllTransfers, getCapabilities, getChecksum, getFilesList, getInfo, getTransfer, hasCapability, init, initDragDrop, modifyTransfer, showPreferencesPage, readAsArrayBuffer, readChunkAsArrayBuffer, readDirectory, registerActivityCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showAbout, showDirectory, showPreferences, showSaveFileDialog, showSelectFileDialog, showSelectFolderDialog, showTransferManager, showTransferMonitor, startTransfer, stopTransfer, testConnection, testSshPorts,} from './app/core';
 import {getInstallerInfo} from './app/installer';
 import {getInstallerUrls, isSafari} from './helpers/helpers';
 import * as httpGatewayCalls from './http-gateway';
@@ -23,6 +23,7 @@ asperaSdk.getTransfer = getTransfer;
 asperaSdk.getFilesList = getFilesList;
 asperaSdk.showSelectFileDialog = showSelectFileDialog;
 asperaSdk.showSelectFolderDialog = showSelectFolderDialog;
+asperaSdk.showSaveFileDialog = showSaveFileDialog;
 asperaSdk.showPreferences = showPreferences;
 asperaSdk.showTransferManager = showTransferManager;
 asperaSdk.showTransferMonitor = showTransferMonitor;
@@ -73,6 +74,7 @@ export {
   getFilesList,
   showSelectFileDialog,
   showSelectFolderDialog,
+  showSaveFileDialog,
   showPreferences,
   showTransferManager,
   showTransferMonitor,
@@ -116,6 +118,7 @@ export type {
   FileStat,
   FileStatus,
   FolderDialogOptions,
+  SaveFileDialogOptions,
   GetChecksumOptions,
   InitOptions,
   InstallerInfo,

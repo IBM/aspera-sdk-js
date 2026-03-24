@@ -5,7 +5,7 @@ import {httpDownload, httpUpload, initHttpGateway} from '../http-gateway';
 import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChunkAsArrayBuffer, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, httpStopTransfer, sendTransferUpdate} from '../http-gateway/core';
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
-import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, ShowPreferencesPageOptions, PreferencesPage, TestSshPortsOptions} from '../models/models';
+import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, SaveFileDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, ShowPreferencesPageOptions, PreferencesPage, TestSshPortsOptions} from '../models/models';
 import {Connect, ConnectInstaller} from '@ibm-aspera/connect-sdk-js';
 import {initConnect} from '../connect/core';
 import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
@@ -539,6 +539,50 @@ export const showSelectFolderDialog = (options?: FolderDialogOptions): Promise<D
     .catch(error => {
       errorLog(messages.showSelectFolderDialogFailed, error);
       promiseInfo.rejecter(generateErrorBody(messages.showSelectFolderDialogFailed, error));
+    });
+
+  return promiseInfo.promise;
+};
+
+/**
+ * Displays a save file dialog for the user to choose a save location and filename.
+ *
+ * Supported for Connect and IBM Aspera for desktop. Not supported for HTTP Gateway.
+ *
+ * @param options save file dialog options
+ *
+ * @returns a promise that resolves with the selected save path and rejects if user cancels dialog
+ */
+export const showSaveFileDialog = (options?: SaveFileDialogOptions): Promise<DataTransferResponse> => {
+  if (asperaSdk.useHttpGateway) {
+    return throwError(messages.showSaveFileDialogNotSupported);
+  }
+
+  if (asperaSdk.useConnect) {
+    const connectPromiseInfo = generatePromiseObjects();
+    asperaSdk.globals.connect.showSaveFileDialog({
+      success: (data: any) => connectPromiseInfo.resolver(data as unknown as DataTransferResponse),
+      error: (error: any) => connectPromiseInfo.rejecter(error),
+    }, options);
+    return connectPromiseInfo.promise;
+  }
+
+  if (!asperaSdk.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  const promiseInfo = generatePromiseObjects();
+
+  const payload = {
+    options: options || {},
+    app_id: asperaSdk.globals.appId,
+  };
+
+  client.request('show_save_file_dialog', payload)
+    .then((data: any) => promiseInfo.resolver(data))
+    .catch(error => {
+      errorLog(messages.showSaveFileDialogFailed, error);
+      promiseInfo.rejecter(generateErrorBody(messages.showSaveFileDialogFailed, error));
     });
 
   return promiseInfo.promise;
@@ -1295,7 +1339,7 @@ const supportsMethod = (method: string): boolean => {
   // We currently do not support calculating file checksums when using HTTP Gateway. In theory it should be possible
   // to calculate this directly in the browser similar to how `readAsArrayBuffer()` is implemented.
   // HTTP Gateway also does not support showing native transfer client UI (about, preferences, etc.).
-  if (asperaSdk.useHttpGateway && (method === 'get_checksum' || method === 'show_about' || method === 'open_preferences' || method === 'show_transfer_manager' || method === 'show_transfer_monitor' || method === 'authenticate' || method === 'test_ssh_ports' || method === 'read_directory')) {
+  if (asperaSdk.useHttpGateway && (method === 'get_checksum' || method === 'show_about' || method === 'open_preferences' || method === 'show_transfer_manager' || method === 'show_transfer_monitor' || method === 'authenticate' || method === 'test_ssh_ports' || method === 'show_save_file_dialog' || method === 'read_directory')) {
     return false;
   }
 
@@ -1342,6 +1386,7 @@ export const getCapabilities = (): SdkCapabilities => {
     showTransferMonitor: supportsMethod('show_transfer_monitor'),
     authenticate: supportsMethod('authenticate'),
     testSshPorts: supportsMethod('test_ssh_ports'),
+    showSaveFileDialog: supportsMethod('show_save_file_dialog'),
     readDirectory: supportsMethod('read_directory'),
   };
 };

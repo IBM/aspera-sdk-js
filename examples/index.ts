@@ -7,7 +7,7 @@
 // Import all example functions
 import { initializeAspera } from './initialize';
 import { testAspera } from './test-connection';
-import { selectItemsAspera } from './select-items';
+import { selectItemsAspera, showSaveFileDialogAspera } from './select-items';
 import { selectAndPreviewImageAspera } from './image-preview';
 import { selectAndCalculateChecksumAspera } from './file-checksum';
 import { startTransferAspera, authenticateAspera, testSshPortsAspera } from './start-transfer';
@@ -34,6 +34,7 @@ declare global {
     initializeAspera: typeof initializeAspera;
     testAspera: typeof testAspera;
     selectItemsAspera: typeof selectItemsAspera;
+    showSaveFileDialogAspera: typeof showSaveFileDialogAspera;
     selectAndPreviewImageAspera: typeof selectAndPreviewImageAspera;
     selectAndCalculateChecksumAspera: typeof selectAndCalculateChecksumAspera;
     startTransferAspera: typeof startTransferAspera;
@@ -62,6 +63,7 @@ declare global {
 window.initializeAspera = initializeAspera;
 window.testAspera = testAspera;
 window.selectItemsAspera = selectItemsAspera;
+window.showSaveFileDialogAspera = showSaveFileDialogAspera;
 window.selectAndPreviewImageAspera = selectAndPreviewImageAspera;
 window.selectAndCalculateChecksumAspera = selectAndCalculateChecksumAspera;
 window.startTransferAspera = startTransferAspera;
@@ -89,6 +91,7 @@ export {
   initializeAspera,
   testAspera,
   selectItemsAspera,
+  showSaveFileDialogAspera,
   selectAndPreviewImageAspera,
   selectAndCalculateChecksumAspera,
   startTransferAspera,

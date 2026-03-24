@@ -6,6 +6,7 @@ import {
   registerActivityCallback,
   showSelectFileDialog,
   showSelectFolderDialog,
+  showSaveFileDialog,
   showAbout,
   showPreferences,
   getAllTransfers,
@@ -371,6 +372,15 @@ describe('HTTP Gateway', () => {
     });
   });
 
+  describe('showSaveFileDialog', () => {
+    it('should reject - not supported in HTTP Gateway mode', async () => {
+      await expect(showSaveFileDialog({title: 'Save file'})).rejects.toEqual({
+        error: true,
+        message: 'Show save file dialog is not supported for current transfer client',
+      });
+    });
+  });
+
   describe('openPreferencesPage', () => {
     it('should reject - not supported in HTTP Gateway mode', async () => {
       await expect(openPreferencesPage({page: 'general'})).rejects.toEqual({
@@ -388,6 +398,7 @@ describe('HTTP Gateway', () => {
       expect(hasCapability('showTransferMonitor')).toBe(false);
       expect(hasCapability('authenticate')).toBe(false);
       expect(hasCapability('testSshPorts')).toBe(false);
+      expect(hasCapability('showSaveFileDialog')).toBe(false);
       expect(hasCapability('fileChecksum')).toBe(false);
       expect(hasCapability('readDirectory')).toBe(false);
     });

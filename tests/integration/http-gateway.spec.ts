@@ -19,6 +19,7 @@ import {
   showTransferManager,
   showTransferMonitor,
   authenticate,
+  testSshPorts,
   openPreferencesPage,
   hasCapability,
   asperaSdk,
@@ -361,6 +362,15 @@ describe('HTTP Gateway', () => {
     });
   });
 
+  describe('testSshPorts', () => {
+    it('should reject - not supported in HTTP Gateway mode', async () => {
+      await expect(testSshPorts({remote_host: 'files.example.com'})).rejects.toEqual({
+        error: true,
+        message: 'Test SSH ports is not supported for current transfer client',
+      });
+    });
+  });
+
   describe('openPreferencesPage', () => {
     it('should reject - not supported in HTTP Gateway mode', async () => {
       await expect(openPreferencesPage({page: 'general'})).rejects.toEqual({
@@ -377,6 +387,7 @@ describe('HTTP Gateway', () => {
       expect(hasCapability('showTransferManager')).toBe(false);
       expect(hasCapability('showTransferMonitor')).toBe(false);
       expect(hasCapability('authenticate')).toBe(false);
+      expect(hasCapability('testSshPorts')).toBe(false);
       expect(hasCapability('fileChecksum')).toBe(false);
       expect(hasCapability('readDirectory')).toBe(false);
     });

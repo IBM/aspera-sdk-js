@@ -51,4 +51,6 @@ export const messages = {
   showTransferMonitorNotSupported: 'Show transfer monitor is not supported for current transfer client',
   authenticateFailed: 'Unable to authenticate',
   authenticateNotSupported: 'Authenticate is not supported for current transfer client',
+  testSshPortsFailed: 'Unable to test SSH ports',
+  testSshPortsNotSupported: 'Test SSH ports is not supported for current transfer client',
 };

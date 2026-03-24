@@ -29,6 +29,20 @@ export default function StartTransfer() {
     }
   }
 
+  const testSshPortsTransfer = (): void => {
+    try {
+      const parsed = JSON.parse(transferSpec);
+      if (!parsed.remote_host) {
+        alert('Transfer spec must include "remote_host" to test SSH ports');
+        return;
+      }
+      window.testSshPortsAspera(parsed.remote_host);
+    } catch (error) {
+      console.error('Test SSH ports failed to parse transferSpec', {error, transferSpec});
+      alert('Unable to parse transfer spec for testing SSH ports');
+    }
+  }
+
   const setTransferSpecItem = (value: string): void => {
     localStorage.setItem('ASPERA-SDK-TRANSFER-SPEC', value);
     setTransferSpec(value);
@@ -37,12 +51,13 @@ export default function StartTransfer() {
   return (
     <div className="example-pages">
       <h2>Code example</h2>
-      <CodeSnippet type="multi" feedback="Copied to clipboard" maxCollapsedNumberOfRows={25}>{[window.startTransferAspera.toString(), window.authenticateAspera.toString()].join('\n\n')}</CodeSnippet>
+      <CodeSnippet type="multi" feedback="Copied to clipboard" maxCollapsedNumberOfRows={25}>{[window.startTransferAspera.toString(), window.authenticateAspera.toString(), window.testSshPortsAspera.toString()].join('\n\n')}</CodeSnippet>
       <h2>Try it out</h2>
       <TextArea className="code-input" value={transferSpec} onChange={value => setTransferSpecItem(value.target.value)} labelText="Transfer spec" helperText="Paste a transfer spec to test a transfer. For uploads be sure to select the items first on the 'Select items' page." />
       <div style={{display: 'flex', gap: '1rem'}}>
         <Button onClick={startTransfer}>Start transfer</Button>
         <Button onClick={authenticateTransfer} kind="secondary">Authenticate</Button>
+        <Button onClick={testSshPortsTransfer} kind="secondary">Test SSH Ports</Button>
       </div>
     </div>
   );

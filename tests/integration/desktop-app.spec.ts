@@ -18,6 +18,7 @@ import {
   showTransferManager,
   showTransferMonitor,
   authenticate,
+  testSshPorts,
   openPreferencesPage,
   hasCapability,
 } from '../../src/index';
@@ -162,6 +163,24 @@ describe('Desktop App', () => {
       const call = lastFetchCall();
       expect(call.body.method).toBe('authenticate');
       expect(call.body.params).toEqual({transfer_spec: transferSpec});
+    });
+  });
+
+  describe('testSshPorts', () => {
+    it('should call test_ssh_ports RPC with options', async () => {
+      await testSshPorts({remote_host: 'files.example.com', ssh_port: 22, timeout_sec: 5});
+
+      const call = lastFetchCall();
+      expect(call.body.method).toBe('test_ssh_ports');
+      expect(call.body.params).toEqual({remote_host: 'files.example.com', ssh_port: 22, timeout_sec: 5});
+    });
+
+    it('should use default ssh_port and timeout_sec when not provided', async () => {
+      await testSshPorts({remote_host: 'files.example.com'});
+
+      const call = lastFetchCall();
+      expect(call.body.method).toBe('test_ssh_ports');
+      expect(call.body.params).toEqual({remote_host: 'files.example.com', ssh_port: 33001, timeout_sec: 3});
     });
   });
 
@@ -367,13 +386,14 @@ describe('Desktop App', () => {
 
   describe('hasCapability', () => {
     it('should return true for capabilities whose RPC methods are discovered', () => {
-      asperaSdk.globals.rpcMethods = ['show_about', 'open_preferences', 'show_transfer_manager', 'show_transfer_monitor', 'authenticate', 'read_as_array_buffer', 'read_chunk_as_array_buffer', 'get_checksum', 'read_directory'];
+      asperaSdk.globals.rpcMethods = ['show_about', 'open_preferences', 'show_transfer_manager', 'show_transfer_monitor', 'authenticate', 'test_ssh_ports', 'read_as_array_buffer', 'read_chunk_as_array_buffer', 'get_checksum', 'read_directory'];
 
       expect(hasCapability('showAbout')).toBe(true);
       expect(hasCapability('showPreferences')).toBe(true);
       expect(hasCapability('showTransferManager')).toBe(true);
       expect(hasCapability('showTransferMonitor')).toBe(true);
       expect(hasCapability('authenticate')).toBe(true);
+      expect(hasCapability('testSshPorts')).toBe(true);
       expect(hasCapability('imagePreview')).toBe(true);
       expect(hasCapability('fileChecksum')).toBe(true);
       expect(hasCapability('readDirectory')).toBe(true);
@@ -387,6 +407,7 @@ describe('Desktop App', () => {
       expect(hasCapability('showTransferManager')).toBe(false);
       expect(hasCapability('showTransferMonitor')).toBe(false);
       expect(hasCapability('authenticate')).toBe(false);
+      expect(hasCapability('testSshPorts')).toBe(false);
       expect(hasCapability('imagePreview')).toBe(false);
       expect(hasCapability('fileChecksum')).toBe(false);
       expect(hasCapability('readDirectory')).toBe(false);

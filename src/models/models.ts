@@ -195,6 +195,16 @@ export interface DirectoryListFilters {
   hidden?: boolean;
 }
 
+/** Options for testing SSH port connectivity to a transfer server. */
+export interface TestSshPortsOptions {
+  /** Domain name of the transfer server */
+  remote_host: string;
+  /** SSH port */
+  ssh_port?: number;
+  /** Timeout value in seconds */
+  timeout_sec?: number;
+}
+
 /** Options for reading directory contents */
 /** Valid page names for the preferences page. */
 export type PreferencesPage = 'general' | 'transfers' | 'network' | 'bandwidth' | 'security';
@@ -1012,6 +1022,13 @@ export interface SdkCapabilities {
    * but not HTTP Gateway.
    */
   authenticate: boolean,
+  /**
+   * Whether the transfer client supports testing SSH port connectivity.
+   *
+   * This is supported when using Connect or IBM Aspera for desktop with the required RPC methods,
+   * but not HTTP Gateway.
+   */
+  testSshPorts: boolean,
   /**
    * Whether the SDK can read directory contents.
    *

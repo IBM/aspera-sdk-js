@@ -239,6 +239,10 @@ function createConnectMock(): any {
       capture('authenticate')(...args);
       return Promise.resolve({});
     }),
+    testSshPorts: jest.fn().mockImplementation((...args) => {
+      capture('testSshPorts')(...args);
+      return Promise.resolve({});
+    }),
     getTransfer: jest.fn().mockImplementation((...args) => {
       capture('getTransfer')(...args);
       return Promise.resolve({transfer_info: {uuid: args[0]}});

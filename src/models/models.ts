@@ -1006,6 +1006,13 @@ export interface SdkCapabilities {
    */
   showTransferMonitor: boolean,
   /**
+   * Whether the transfer client supports authenticating a transfer specification.
+   *
+   * This is supported when using Connect or IBM Aspera for desktop with the required RPC methods,
+   * but not HTTP Gateway.
+   */
+  authenticate: boolean,
+  /**
    * Whether the SDK can read directory contents.
    *
    * This is supported when using IBM Aspera for desktop with the required RPC methods,

@@ -401,6 +401,8 @@ export class AsperaSdk {
   showPreferencesPage: (options: ShowPreferencesPageOptions) => Promise<any>;
   /** Function to show the transfer rate monitor for a specific transfer */
   showTransferMonitor: (transferId: string) => Promise<any>;
+  /** Function to authenticate a transfer specification against the remote server */
+  authenticate: (transferSpec: TransferSpec) => Promise<any>;
   /** Function to modify a running transfer */
   modifyTransfer: (transferId: string, options: ModifyTransferOptions) => Promise<AsperaSdkTransfer>;
   /** Function to set custom branding for IBM Aspera */

@@ -17,6 +17,7 @@ import {
   readDirectory,
   showTransferManager,
   showTransferMonitor,
+  authenticate,
   openPreferencesPage,
   hasCapability,
 } from '../../src/index';
@@ -252,6 +253,16 @@ describe('Connect SDK', () => {
     });
   });
 
+  describe('authenticate', () => {
+    it('should call authenticate on Connect SDK with transfer spec', async () => {
+      const transferSpec = {remote_host: 'files.example.com', direction: 'send' as const, paths: [{source: '/file.txt'}]};
+      await authenticate(transferSpec);
+
+      const mock = getConnectMock();
+      expect(mock.authenticate).toHaveBeenCalledWith(transferSpec);
+    });
+  });
+
   describe('openPreferencesPage', () => {
     it('should call showPreferencesPage on Connect SDK with original page value', async () => {
       await openPreferencesPage({page: 'general'});
@@ -290,6 +301,7 @@ describe('Connect SDK', () => {
       expect(hasCapability('showPreferences')).toBe(true);
       expect(hasCapability('showTransferManager')).toBe(true);
       expect(hasCapability('showTransferMonitor')).toBe(true);
+      expect(hasCapability('authenticate')).toBe(true);
       expect(hasCapability('imagePreview')).toBe(true);
       expect(hasCapability('fileChecksum')).toBe(true);
     });

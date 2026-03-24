@@ -17,6 +17,7 @@ import {
   readDirectory,
   showTransferManager,
   showTransferMonitor,
+  authenticate,
   openPreferencesPage,
   hasCapability,
 } from '../../src/index';
@@ -150,6 +151,17 @@ describe('Desktop App', () => {
       const call = lastFetchCall();
       expect(call.body.method).toBe('show_transfer_monitor');
       expect(call.body.params).toEqual({transfer_id: 'transfer-uuid-123'});
+    });
+  });
+
+  describe('authenticate', () => {
+    it('should call authenticate RPC with transfer_spec', async () => {
+      const transferSpec = {remote_host: 'files.example.com', direction: 'send' as const, paths: [{source: '/file.txt'}]};
+      await authenticate(transferSpec);
+
+      const call = lastFetchCall();
+      expect(call.body.method).toBe('authenticate');
+      expect(call.body.params).toEqual({transfer_spec: transferSpec});
     });
   });
 
@@ -355,12 +367,13 @@ describe('Desktop App', () => {
 
   describe('hasCapability', () => {
     it('should return true for capabilities whose RPC methods are discovered', () => {
-      asperaSdk.globals.rpcMethods = ['show_about', 'open_preferences', 'show_transfer_manager', 'show_transfer_monitor', 'read_as_array_buffer', 'read_chunk_as_array_buffer', 'get_checksum', 'read_directory'];
+      asperaSdk.globals.rpcMethods = ['show_about', 'open_preferences', 'show_transfer_manager', 'show_transfer_monitor', 'authenticate', 'read_as_array_buffer', 'read_chunk_as_array_buffer', 'get_checksum', 'read_directory'];
 
       expect(hasCapability('showAbout')).toBe(true);
       expect(hasCapability('showPreferences')).toBe(true);
       expect(hasCapability('showTransferManager')).toBe(true);
       expect(hasCapability('showTransferMonitor')).toBe(true);
+      expect(hasCapability('authenticate')).toBe(true);
       expect(hasCapability('imagePreview')).toBe(true);
       expect(hasCapability('fileChecksum')).toBe(true);
       expect(hasCapability('readDirectory')).toBe(true);
@@ -373,6 +386,7 @@ describe('Desktop App', () => {
       expect(hasCapability('showPreferences')).toBe(false);
       expect(hasCapability('showTransferManager')).toBe(false);
       expect(hasCapability('showTransferMonitor')).toBe(false);
+      expect(hasCapability('authenticate')).toBe(false);
       expect(hasCapability('imagePreview')).toBe(false);
       expect(hasCapability('fileChecksum')).toBe(false);
       expect(hasCapability('readDirectory')).toBe(false);

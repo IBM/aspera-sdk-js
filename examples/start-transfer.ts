@@ -3,7 +3,7 @@
  * This example shows how to initiate file transfers.
  */
 
-import { startTransfer } from '@ibm-aspera/sdk';
+import { startTransfer, authenticate } from '@ibm-aspera/sdk';
 
 export function startTransferAspera(transferSpec: any) {
   /** The AsperaSpec defines rules on how the client app should work with transfers */
@@ -16,5 +16,16 @@ export function startTransferAspera(transferSpec: any) {
     // Transfer not accepted by the Aspera app
     console.error('Start transfer failed', error);
     alert(`Start transfer failed\n\n${JSON.stringify(error, undefined, 2)}`);
+  });
+}
+
+export function authenticateAspera(transferSpec: any) {
+  /** Authenticate a transfer specification against the remote server. */
+  authenticate(transferSpec).then(response => {
+    console.info('Authenticate response', response);
+    alert(`Authentication successful:\n\n${JSON.stringify(response, undefined, 2)}`);
+  }).catch(error => {
+    console.error('Authenticate failed', error);
+    alert(`Authentication failed\n\n${JSON.stringify(error, undefined, 2)}`);
   });
 }

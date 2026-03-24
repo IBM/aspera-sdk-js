@@ -5,7 +5,7 @@ import {httpDownload, httpUpload, initHttpGateway} from '../http-gateway';
 import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChunkAsArrayBuffer, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, httpStopTransfer, sendTransferUpdate} from '../http-gateway/core';
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
-import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, ShowPreferencesPageOptions, PreferencesPage} from '../models/models';
+import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, ShowPreferencesPageOptions, PreferencesPage, TestSshPortsOptions} from '../models/models';
 import {Connect, ConnectInstaller} from '@ibm-aspera/connect-sdk-js';
 import {initConnect} from '../connect/core';
 import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
@@ -193,6 +193,46 @@ export const init = (options?: InitOptions): Promise<any> => {
   }
 
   return options?.connectSettings?.useConnect ? getConnectStartCalls() : getDesktopStartCalls();
+};
+
+/**
+ * Tests SSH port connectivity to a transfer server.
+ *
+ * Supported for Connect and IBM Aspera for desktop. Not supported for HTTP Gateway.
+ *
+ * @param options options including the remote host, SSH port, and timeout.
+ *
+ * @returns a promise that resolves if the SSH port test is successful and rejects otherwise.
+ */
+export const testSshPorts = (options: TestSshPortsOptions): Promise<any> => {
+  if (asperaSdk.useHttpGateway) {
+    return throwError(messages.testSshPortsNotSupported);
+  }
+
+  if (asperaSdk.useConnect) {
+    return asperaSdk.globals.connect.testSshPorts(options);
+  }
+
+  if (!asperaSdk.isReady) {
+    return throwError(messages.serverNotVerified);
+  }
+
+  const promiseInfo = generatePromiseObjects();
+
+  const payload = {
+    remote_host: options.remote_host,
+    ssh_port: options.ssh_port ?? 33001,
+    timeout_sec: options.timeout_sec ?? 3,
+  };
+
+  client.request('test_ssh_ports', payload)
+    .then((data: any) => promiseInfo.resolver(data))
+    .catch(error => {
+      errorLog(messages.testSshPortsFailed, error);
+      promiseInfo.rejecter(generateErrorBody(messages.testSshPortsFailed, error));
+    });
+
+  return promiseInfo.promise;
 };
 
 /**
@@ -1255,7 +1295,7 @@ const supportsMethod = (method: string): boolean => {
   // We currently do not support calculating file checksums when using HTTP Gateway. In theory it should be possible
   // to calculate this directly in the browser similar to how `readAsArrayBuffer()` is implemented.
   // HTTP Gateway also does not support showing native transfer client UI (about, preferences, etc.).
-  if (asperaSdk.useHttpGateway && (method === 'get_checksum' || method === 'show_about' || method === 'open_preferences' || method === 'show_transfer_manager' || method === 'show_transfer_monitor' || method === 'authenticate' || method === 'read_directory')) {
+  if (asperaSdk.useHttpGateway && (method === 'get_checksum' || method === 'show_about' || method === 'open_preferences' || method === 'show_transfer_manager' || method === 'show_transfer_monitor' || method === 'authenticate' || method === 'test_ssh_ports' || method === 'read_directory')) {
     return false;
   }
 
@@ -1301,6 +1341,7 @@ export const getCapabilities = (): SdkCapabilities => {
     showTransferManager: supportsMethod('show_transfer_manager'),
     showTransferMonitor: supportsMethod('show_transfer_monitor'),
     authenticate: supportsMethod('authenticate'),
+    testSshPorts: supportsMethod('test_ssh_ports'),
     readDirectory: supportsMethod('read_directory'),
   };
 };

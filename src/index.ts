@@ -1,5 +1,5 @@
 import {AsperaSdk} from './models/aspera-sdk.model';
-import {authenticate, createDropzone, deregisterActivityCallback, deregisterStatusCallback, getAllTransfers, getCapabilities, getChecksum, getFilesList, getInfo, getTransfer, hasCapability, init, initDragDrop, modifyTransfer, showPreferencesPage, readAsArrayBuffer, readChunkAsArrayBuffer, readDirectory, registerActivityCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showAbout, showDirectory, showPreferences, showSelectFileDialog, showSelectFolderDialog, showTransferManager, showTransferMonitor, startTransfer, stopTransfer, testConnection,} from './app/core';
+import {authenticate, createDropzone, deregisterActivityCallback, deregisterStatusCallback, getAllTransfers, getCapabilities, getChecksum, getFilesList, getInfo, getTransfer, hasCapability, init, initDragDrop, modifyTransfer, showPreferencesPage, readAsArrayBuffer, readChunkAsArrayBuffer, readDirectory, registerActivityCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showAbout, showDirectory, showPreferences, showSelectFileDialog, showSelectFolderDialog, showTransferManager, showTransferMonitor, startTransfer, stopTransfer, testConnection, testSshPorts,} from './app/core';
 import {getInstallerInfo} from './app/installer';
 import {getInstallerUrls, isSafari} from './helpers/helpers';
 import * as httpGatewayCalls from './http-gateway';
@@ -8,6 +8,7 @@ export const asperaSdk: AsperaSdk = new AsperaSdk();
 
 asperaSdk.init = init;
 asperaSdk.authenticate = authenticate;
+asperaSdk.testSshPorts = testSshPorts;
 asperaSdk.testConnection = testConnection;
 asperaSdk.startTransfer = startTransfer;
 asperaSdk.registerActivityCallback = registerActivityCallback;
@@ -56,6 +57,7 @@ export {
   isSafari,
   init,
   authenticate,
+  testSshPorts,
   testConnection,
   startTransfer,
   launch,
@@ -135,6 +137,7 @@ export type {
   ResumeTransferOptions,
   SafariExtensionEvent,
   SdkCapabilities,
+  TestSshPortsOptions,
   TransferSpec,
   TransferStatus,
   WebsocketEvent,

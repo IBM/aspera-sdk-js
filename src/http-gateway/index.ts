@@ -1,6 +1,6 @@
 import {httpDownload} from './download';
 import {httpUpload} from './upload';
-import {handleHttpGatewayDrop, httpGatewaySelectFileFolderDialog, createHtmlInputElement, initHttpGateway} from './core';
+import {handleHttpGatewayDrop, httpGatewaySelectFileFolderDialog, createHtmlInputElement, initHttpGateway, setupHttpGateway} from './core';
 
 /**
  * HTTP Gateway Exports
@@ -17,4 +17,5 @@ export {
   httpGatewaySelectFileFolderDialog,
   createHtmlInputElement,
   initHttpGateway,
+  setupHttpGateway,
 };

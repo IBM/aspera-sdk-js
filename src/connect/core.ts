@@ -1,6 +1,7 @@
 import {asperaSdk} from '../index';
-import {Connect} from '@ibm-aspera/connect-sdk-js';
+import {Connect, ConnectInstaller} from '@ibm-aspera/connect-sdk-js';
 import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
+import {InitOptions} from '../models/models';
 
 let transferMonitorActivated = false;
 let installerFlowActivated = false;
@@ -56,7 +57,23 @@ export const connectInstallationFlow = (): void => {
   asperaSdk.globals.connect.addEventListener(asperaSdk.globals.connectAW4.Connect.EVENT.STATUS, handleInstallerEvent);
 };
 
-export const initConnect = (useIncludedInstaller?: boolean): Promise<unknown> => {
+export const initConnect = (connectSettings: InitOptions['connectSettings']): Promise<unknown> => {
+  asperaSdk.globals.connect = new Connect({
+    minVersion: connectSettings.minVersion || '3.10.1',
+    dragDropEnabled: connectSettings.dragDropEnabled,
+    connectMethod: connectSettings.method,
+  });
+  asperaSdk.globals.connectInstaller = new ConnectInstaller({
+    sdkLocation: connectSettings.sdkLocation,
+    correlationId: connectSettings.correlationId,
+    style: 'carbon',
+    version: connectSettings.version,
+  });
+  asperaSdk.globals.connectAW4 = {
+    Connect,
+    ConnectInstaller,
+  };
+
   asperaSdk.globals.connect.addEventListener(Connect.EVENT.STATUS, (eventType, eventStatus: ConnectTypes.ConnectStatusStrings) => {
     if (eventType === Connect.EVENT.STATUS) {
       asperaSdk.globals.connectStatus = eventStatus;
@@ -74,10 +91,9 @@ export const initConnect = (useIncludedInstaller?: boolean): Promise<unknown> =>
 
   asperaSdk.globals.connect.initSession(asperaSdk.globals.appId);
 
-  if (useIncludedInstaller) {
+  if (!connectSettings.hideIncludedInstaller) {
     connectInstallationFlow();
   }
-
 
   return Promise.resolve({connectMode: true});
 };

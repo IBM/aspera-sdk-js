@@ -1,13 +1,12 @@
 import {messages} from '../constants/messages';
 import {client} from '../helpers/client/client';
 import {errorLog, generateErrorBody, generatePromiseObjects, isSafari, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
-import {httpDownload, httpUpload, initHttpGateway} from '../http-gateway';
+import {httpDownload, httpUpload, setupHttpGateway} from '../http-gateway';
 import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChunkAsArrayBuffer, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, httpStopTransfer, sendTransferUpdate} from '../http-gateway/core';
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
-import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, SaveFileDialogOptions, InitOptions, InitSessionOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, SdkStatus, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, ShowPreferencesPageOptions, PreferencesPage, TestSshPortsOptions} from '../models/models';
+import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, SaveFileDialogOptions, InitOptions, InitSessionOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, SdkStatus, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, ShowPreferencesPageOptions, PreferencesPage, TestSshPortsOptions} from '../models/models';
 import {statusService} from './status';
-import {Connect, ConnectInstaller} from '@ibm-aspera/connect-sdk-js';
 import {initConnect} from '../connect/core';
 import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
 
@@ -97,25 +96,21 @@ export const getStatus = (): SdkStatus | undefined => {
   return statusService.getStatus();
 };
 
-const startConnectInit = (options: InitSessionOptions): void => {
-  asperaSdk.globals.connect = new Connect({
-    minVersion: options.connectSettings.minVersion || '3.10.1',
-    dragDropEnabled: options.connectSettings.dragDropEnabled,
-    connectMethod: options.connectSettings.method,
-  });
-  asperaSdk.globals.connectInstaller = new ConnectInstaller({
-    sdkLocation: options.connectSettings.sdkLocation,
-    correlationId: options.connectSettings.correlationId,
-    style: 'carbon',
-    version: options.connectSettings.version,
-  });
+const setupAppId = (options?: {appId?: string; supportMultipleUsers?: boolean}): void => {
+  asperaSdk.globals.appId = options?.appId ?? randomUUID();
 
-  asperaSdk.globals.connectAW4 = {
-    Connect,
-    ConnectInstaller,
-  };
+  if (options?.supportMultipleUsers) {
+    asperaSdk.globals.supportMultipleUsers = true;
+    asperaSdk.globals.sessionId = randomUUID();
+  }
+};
 
-  initConnect(!options.connectSettings.hideIncludedInstaller);
+const connectDesktop = (): Promise<void> => {
+  return asperaSdk.activityTracking.setup()
+    .then(() => testConnection())
+    .then(() => rpcDiscover())
+    .then(() => initDragDrop(true))
+    .then((): void => undefined);
 };
 
 /**
@@ -137,14 +132,7 @@ const startConnectInit = (options: InitSessionOptions): void => {
  * rejects if unable to connect
  */
 export const init = (options?: InitOptions): Promise<any> => {
-  const appId = options?.appId ?? randomUUID();
-
-  asperaSdk.globals.appId = appId;
-
-  if (options?.supportMultipleUsers) {
-    asperaSdk.globals.supportMultipleUsers = true;
-    asperaSdk.globals.sessionId = randomUUID();
-  }
+  setupAppId(options);
 
   const handleErrors = (error: unknown) => {
     errorLog(messages.serverError, error);
@@ -152,78 +140,35 @@ export const init = (options?: InitOptions): Promise<any> => {
     throw generateErrorBody(messages.serverError, error);
   };
 
-  const getConnectStartCalls = (): Promise<unknown> => {
-    asperaSdk.globals.connect = new Connect({
-      minVersion: options.connectSettings.minVersion || '3.10.1',
-      dragDropEnabled: options.connectSettings.dragDropEnabled,
-      connectMethod: options.connectSettings.method,
-    });
-    asperaSdk.globals.connectInstaller = new ConnectInstaller({
-      sdkLocation: options.connectSettings.sdkLocation,
-      correlationId: options.connectSettings.correlationId,
-      style: 'carbon',
-      version: options.connectSettings.version,
-    });
-
-    asperaSdk.globals.connectAW4 = {
-      Connect,
-      ConnectInstaller,
-    };
-
-    return initConnect(!options.connectSettings.hideIncludedInstaller);
-  };
-
   const getDesktopStartCalls = (): Promise<unknown> => {
-    return asperaSdk.activityTracking.setup()
-      .then(() => testConnection())
-      .then(() => rpcDiscover())
-      .then(() => initDragDrop(true))
+    return connectDesktop()
       .then(() => asperaSdk.globals.sdkResponseData)
       .catch(handleErrors);
   };
 
+  const getTransferClientCalls = (): Promise<unknown> => {
+    return options?.connectSettings?.useConnect ? initConnect(options.connectSettings) : getDesktopStartCalls();
+  };
+
   if (options?.httpGatewaySettings?.url && !asperaSdk.globals.httpGatewayVerified) {
-    let finalHttpGatewayUrl = options.httpGatewaySettings.url.trim();
-
-    if (finalHttpGatewayUrl.indexOf('http') !== 0) {
-      finalHttpGatewayUrl = `https://${finalHttpGatewayUrl}`;
-    }
-
-    if (finalHttpGatewayUrl.endsWith('/')) {
-      finalHttpGatewayUrl = finalHttpGatewayUrl.slice(0, -1);
-    }
-
-    asperaSdk.globals.httpGatewayUrl = finalHttpGatewayUrl;
-
-    return fetch(`${asperaSdk.globals.httpGatewayUrl}/info`, {method: 'GET'}).then(response => {
-      return response.json().then(responseData => {
-        if (response.status >= 400) {
-          throw Error(responseData);
-        }
-
-        return responseData;
-      });
-    }).then(response => {
-      return initHttpGateway(response);
-    }).then(() => {
+    return setupHttpGateway(options.httpGatewaySettings.url).then(() => {
       if (options?.httpGatewaySettings?.forceGateway) {
         return Promise.resolve(asperaSdk.globals.sdkResponseData);
       }
 
-      return options?.connectSettings?.useConnect ? getConnectStartCalls() : getDesktopStartCalls();
+      return getTransferClientCalls();
     }).catch(error => {
-      // If HTTP Gateway fails log and move on to transfer client
       errorLog(messages.httpInitFail, error);
 
       if (options?.httpGatewaySettings?.forceGateway) {
         throw generateErrorBody(messages.httpInitFail, error);
       }
 
-      return options?.connectSettings?.useConnect ? getConnectStartCalls() : getDesktopStartCalls();
+      return getTransferClientCalls();
     });
   }
 
-  return options?.connectSettings?.useConnect ? getConnectStartCalls() : getDesktopStartCalls();
+  return getTransferClientCalls();
 };
 
 /**
@@ -234,64 +179,34 @@ export const init = (options?: InitOptions): Promise<any> => {
  * @param options initialization options
  */
 export const initSession = (options?: InitSessionOptions): void => {
-  const appId = options?.appId ?? randomUUID();
-  asperaSdk.globals.appId = appId;
-
-  if (options?.supportMultipleUsers) {
-    asperaSdk.globals.supportMultipleUsers = true;
-    asperaSdk.globals.sessionId = randomUUID();
-  }
+  setupAppId(options);
 
   const retryInterval = options?.retryInterval ?? 2000;
   const retryTimeout = options?.retryTimeout ?? 5000;
 
   const startDesktopDetection = (): void => {
-    const detectDesktop = (): Promise<void> => {
-      return asperaSdk.activityTracking.setup()
-        .then(() => testConnection())
-        .then(() => rpcDiscover())
-        .then(() => initDragDrop(true))
-        .then((): void => undefined);
-    };
+    statusService.startPolling(connectDesktop, retryInterval, retryTimeout);
+  };
 
-    statusService.startPolling(detectDesktop, retryInterval, retryTimeout);
+  const startTransferClient = (): void => {
+    if (options?.connectSettings?.useConnect) {
+      initConnect(options.connectSettings);
+    } else {
+      startDesktopDetection();
+    }
   };
 
   // HTTP Gateway path
   if (options?.httpGatewaySettings?.url && !asperaSdk.globals.httpGatewayVerified) {
-    let finalHttpGatewayUrl = options.httpGatewaySettings.url.trim();
-
-    if (finalHttpGatewayUrl.indexOf('http') !== 0) {
-      finalHttpGatewayUrl = `https://${finalHttpGatewayUrl}`;
-    }
-
-    if (finalHttpGatewayUrl.endsWith('/')) {
-      finalHttpGatewayUrl = finalHttpGatewayUrl.slice(0, -1);
-    }
-
-    asperaSdk.globals.httpGatewayUrl = finalHttpGatewayUrl;
     statusService.setStatus('INITIALIZING');
 
-    fetch(`${asperaSdk.globals.httpGatewayUrl}/info`, {method: 'GET'}).then(response => {
-      return response.json().then(responseData => {
-        if (response.status >= 400) {
-          throw Error(responseData);
-        }
-        return responseData;
-      });
-    }).then(response => {
-      return initHttpGateway(response);
-    }).then(() => {
+    setupHttpGateway(options.httpGatewaySettings.url).then(() => {
       if (options?.httpGatewaySettings?.forceGateway) {
         statusService.setStatus('RUNNING');
         return;
       }
 
-      if (options?.connectSettings?.useConnect) {
-        startConnectInit(options);
-      } else {
-        startDesktopDetection();
-      }
+      startTransferClient();
     }).catch(error => {
       errorLog(messages.httpInitFail, error);
 
@@ -300,23 +215,12 @@ export const initSession = (options?: InitSessionOptions): void => {
         return;
       }
 
-      if (options?.connectSettings?.useConnect) {
-        startConnectInit(options);
-      } else {
-        startDesktopDetection();
-      }
+      startTransferClient();
     });
     return;
   }
 
-  // Connect path
-  if (options?.connectSettings?.useConnect) {
-    startConnectInit(options);
-    return;
-  }
-
-  // Desktop path
-  startDesktopDetection();
+  startTransferClient();
 };
 
 /**

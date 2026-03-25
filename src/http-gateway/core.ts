@@ -68,6 +68,40 @@ export const initHttpGateway = (response: HttpGatewayInfo): Promise<void> => {
 };
 
 /**
+ * Set up the HTTP Gateway by normalizing the URL, fetching the /info endpoint,
+ * and calling initHttpGateway with the response.
+ *
+ * @param url - The HTTP Gateway URL provided by the consumer
+ *
+ * @returns a promise that resolves when the HTTP Gateway is initialized
+ */
+export const setupHttpGateway = (url: string): Promise<void> => {
+  let finalUrl = url.trim();
+
+  if (finalUrl.indexOf('http') !== 0) {
+    finalUrl = `https://${finalUrl}`;
+  }
+
+  if (finalUrl.endsWith('/')) {
+    finalUrl = finalUrl.slice(0, -1);
+  }
+
+  asperaSdk.globals.httpGatewayUrl = finalUrl;
+
+  return fetch(`${finalUrl}/info`, {method: 'GET'}).then(response => {
+    return response.json().then(responseData => {
+      if (response.status >= 400) {
+        throw Error(responseData);
+      }
+
+      return responseData;
+    });
+  }).then(response => {
+    return initHttpGateway(response);
+  });
+};
+
+/**
  * Stop an in-progress HTTP Gateway transfer.
  * Aborts the underlying HTTP request and sets the transfer status to 'canceled'.
  *

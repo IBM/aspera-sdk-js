@@ -34,10 +34,9 @@ The following guide assumes you were previously using the `@ibm-aspera/connect-s
 <script src="https://d3gcli72yxqn2z.cloudfront.net/@ibm-aspera/connect-sdk-js/latest/connect-sdk.js"></script>
 
 <!-- After -->
- <!-- Check npmjs.com for latest version (https://www.npmjs.com/package/@ibm-aspera/sdk) -->
- <script src="https://cdn.jsdelivr.net/npm/@ibm-aspera/sdk@0.2.30/dist/js/aspera-sdk.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/@ibm-aspera/sdk@0.2.30/dist/js/aspera-sdk.js"></script>
 ```
+Check npmjs.com for the latest version (https://www.npmjs.com/package/@ibm-aspera/sdk).
 
 ## Step 1: Update the Package
 
@@ -53,54 +52,42 @@ npm install @ibm-aspera/sdk
 ```javascript
 import { Connect, ConnectInstaller } from '@ibm-aspera/connect-sdk-js';
 
-const connect = new Connect({
-  minVersion: '3.10.1',
-  dragDropEnabled: true,
-});
-
-const installer = new ConnectInstaller({
-  sdkLocation: '/path/to/sdk',
-});
+const connect = new Connect();
+const installer = new ConnectInstaller();
 
 connect.addEventListener(Connect.EVENT.STATUS, (event, status) => {
   if (event === 'status') {
       if (status === 'RUNNING') {
-        // Connect is running
+        installer.connected();
+      } else if (status === 'FAILED') {
+        installer.showDownload();
       } else {
         // Handle other status events
       }
   }
 });
 
-connect.initSession('my-application-id');
+connect.initSession('my-app-id');
 ```
 
 ### After
 
 ```javascript
-import { init } from '@ibm-aspera/sdk';
-init({
-  appId: 'my-application-id',
+import { initSession } from '@ibm-aspera/sdk';
+initSession({
+  appId: 'my-app-id',
   connectSettings: {
     useConnect: true,  // This keeps you on Connect
-    minVersion: '3.10.1',
-    dragDropEnabled: true,
-    sdkLocation: '/path/to/sdk',
-  },
-}).then(() => {
-  // init finished but will monitor for Connect status changes
-}).catch((error) => {
-  console.error('Initialization failed', error);
+  }
 });
 ```
 
-When `useConnect` is set to `true` the `init` function will handle initializing `ConnectInstaller` and showing the default Aspera-provided
-installer modal.
+When `useConnect` is set to `true` the `initSession` function will handle initializing `ConnectInstaller` and showing the default Aspera-provided installer modal.
 
-If you have your own custom installer UI for your web application, you can turn off the default behavior and receive status events yourself. For example:
+If you have your own custom installer UI or status event handling logic for your web application, you can turn off the default behavior and receive status events yourself. For example:
 
 ```javascript
-import { init, registerStatusCallback } from '@ibm-aspera/sdk';
+import { initSession, registerStatusCallback } from '@ibm-aspera/sdk';
 
 // Register a callback for Connect status events
 registerStatusCallback(status => {
@@ -111,19 +98,12 @@ registerStatusCallback(status => {
   }
 });
 
-init({
+initSession({
   appId: 'my-app-id',
   connectSettings: {
     useConnect: true,
-    minVersion: '3.10.1',
-    dragDropEnabled: true,
-    sdkLocation: '/path/to/sdk',
     hideIncludedInstaller: true, // This disables the default installer modal
-  },
-}).then(() => {
-  // Connect is ready
-}).catch((error) => {
-  console.error('Initialization failed', error);
+  }
 });
 ```
 
@@ -137,19 +117,16 @@ The unified SDK allows you to support both IBM Aspera Connect and IBM Aspera for
 You can dynamically choose which client to use based on user preferences, feature flags, or application settings:
 
 ```javascript
-import { init } from '@ibm-aspera/sdk';
+import { initSession } from '@ibm-aspera/sdk';
 
 // Example: Allow users to choose their preferred client
 const shouldUseConnect = getUserPreference('useConnect'); // Your app's logic
 
-init({
-  appId: 'my-application-id',
-  connectSettings: shouldUseConnect ? {
-    useConnect: true,
-    sdkLocation: '/path/to/sdk',
-  } : undefined,
-}).then(() => {
-  // SDK is ready - works the same regardless of which client is used
+initSession({
+  appId: 'my-app-id',
+  connectSettings: {
+    useConnect: shouldUseConnect,
+  }
 });
 ```
 
@@ -194,8 +171,8 @@ connect.addEventListener('transfer', (event, data) => {
 ```javascript
 import { registerActivityCallback } from '@ibm-aspera/sdk';
 
-registerActivityCallback(transfers => {
-  console.log('Transfer updated', transfers[0]);
+registerActivityCallback(data => {
+  console.log('Transfer updated', data.transfers[0]);
 });
 ```
 
@@ -230,8 +207,8 @@ Note: Most callback-based functions have been migrated to promises-based functio
 
 | `@ibm-aspera/connect-sdk-js` | `@ibm-aspera/sdk` | Notes |
 | --- | --- | --- |
-| `new Connect()` + `initSession()` | `init()` ||
-| `new ConnectInstaller()` | `init()` with `connectSettings` | Installer handling is built into `init()` |
+| `new Connect()` + `initSession()` | `initSession()` ||
+| `new ConnectInstaller()` | `initSession()` with `connectSettings` | Installer handling is built into `initSession()` |
 | `addEventListener(Connect.EVENT.STATUS, ...)` | `registerStatusCallback()` ||
 | `addEventListener(Connect.EVENT.TRANSFER, ...)` | `registerActivityCallback()` ||
 | `removeEventListener()` | `deregisterStatusCallback()` / `deregisterActivityCallback()` ||
@@ -250,21 +227,16 @@ Note: Most callback-based functions have been migrated to promises-based functio
 | `readAsArrayBuffer()` | `readAsArrayBuffer()` ||
 | `readChunkAsArrayBuffer()` | `readChunkAsArrayBuffer()` ||
 | `version()` | `getInfo()` | Returns SDK and client info |
-| `getStatus()` | `asperaSdk.globals.connectStatus` | Read property directly for Connect only. No direct equivalent for IBM Aspera for Desktop as it is assumed to be running if `init` resolves. |
-| `showAbout()` | — | Not available |
-| `showPreferencesPage()` | — | Not available |
-| `showSaveFileDialog()` | — | Not available |
-| `showTransferManager()` | — | Not available |
-| `showTransferMonitor()` | — | Not available |
-| `authenticate()` | — | Not available |
-| `getChecksum()` | — | Not available |
-| `testSshPorts()` | - | Not available |
-| `start()` / `stop()` | — | Handled internally by `init()` |
-
-Note: If you need access to any of the older Connect APIs, you can directly access the Connect client via `asperaSdk.globals.connect`. For example:
-```javascript
-asperaSdk.globals.connect.showAbout();
-```
+| `getStatus()` | `getStatus()` ||
+| `showAbout()` | `showAbout()` ||
+| `showPreferencesPage()` | `showPreferencesPage()` ||
+| `showSaveFileDialog()` | `showSaveFileDialog()` ||
+| `showTransferManager()` | `showTransferManager()` ||
+| `showTransferMonitor()` | `showTransferMonitor()` ||
+| `authenticate()` | `authenticate()` ||
+| `getChecksum()` | `getChecksum()` ||
+| `testSshPorts()` | `testSshPorts()` ||
+| `start()` / `stop()` | — | Not available|
 
 ---
 
@@ -281,14 +253,14 @@ IBM Aspera for desktop is the recommended transfer client going forward. It offe
 
 ## Step 1: Update Initialization
 
-Remove `connectSettings` from your `init()` call:
+Remove `connectSettings` from your `initSession()` call:
 
 ```javascript
-import { init } from '@ibm-aspera/sdk';
+import { initSession } from '@ibm-aspera/sdk';
 
 // Before (Connect mode)
-init({
-  appId: 'my-application-id',
+initSession({
+  appId: 'my-app-id',
   connectSettings: {
     useConnect: true,
     // ... other Connect settings
@@ -296,8 +268,8 @@ init({
 });
 
 // After (Desktop mode)
-init({
-  appId: 'my-application-id',
+initSession({
+  appId: 'my-app-id',
 });
 ```
 

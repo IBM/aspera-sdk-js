@@ -31,12 +31,16 @@ export const testConnection = (): Promise<any> => {
 };
 
 /**
- * RPC discovery used internally when initializing the SDK.
+ * RPC discovery used internally during IBM Aspera for desktop initialization to determine
+ * the supported RPC methods of the user's version of IBM Aspera for desktop.
+ *
+ * For convenience, this function will return an empty [] if the SDK is currently configured to use
+ * either HTTP Gateway or Connect transfer clients.
  *
  * @returns a promise that resolves if discovery is successful
  */
 const rpcDiscover = (): Promise<any> => {
-  if (asperaSdk.useConnect || asperaSdk.useHttpGateway) {
+  if (asperaSdk.useHttpGateway || asperaSdk.useConnect) {
     return Promise.resolve({methods: []});
   }
 

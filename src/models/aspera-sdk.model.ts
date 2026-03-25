@@ -398,9 +398,9 @@ export class AsperaSdk {
   httpGatewayInBrowserDownloadThreshold = 1000000000;
 
   /**
-   * Check if IBM Aspera is ready to be used and has been verified.
+   * Check if IBM Aspera for desktop is ready to be used and has been verified.
    *
-   * @returns a boolean indicating if SDK can be used for requests
+   * @returns a boolean indicating if IBM Aspera for desktop can be used for requests
    */
   get isReady(): boolean {
     return this.globals.asperaAppVerified && this.globals.appId !== '';

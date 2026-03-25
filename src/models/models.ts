@@ -735,6 +735,15 @@ export type WebsocketTopics = 'subscribe_transfer_activity' | 'transfer_activity
 export type WebsocketEvent = 'CLOSED' | 'RECONNECT';
 export type SafariExtensionEvent = 'ENABLED' | 'DISABLED';
 
+export type SdkStatus =
+  | 'INITIALIZING'
+  | 'RETRYING'
+  | 'RUNNING'
+  | 'FAILED'
+  | 'OUTDATED'
+  | 'EXTENSION_INSTALL'
+  | 'DISCONNECTED';
+
 export interface WebsocketMessage {
   jsonrpc: '2.0';
   method: WebsocketTopics;
@@ -936,6 +945,10 @@ export interface InitOptions {
   appId?: string;
   /** Indicate if the computer is running multiple users possibly (avoid port crossing). */
   supportMultipleUsers?: boolean;
+  /** Timeout in ms before status transitions to FAILED. Default: 5000. */
+  retryTimeout?: number;
+  /** Interval in ms between detection attempts. Default: 2000. */
+  retryInterval?: number;
   /** HTTP Gateway Settings */
   httpGatewaySettings?: {
     /** Aspera HTTP Gateway URL to use if desktop is not available. Include gateway route but not versions (example: https://example.com/aspera/http-gwy). */

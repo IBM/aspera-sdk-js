@@ -3,7 +3,7 @@
  * This example demonstrates how to configure the SDK for different scenarios.
  */
 
-import { init } from '@ibm-aspera/sdk';
+import { initSession, registerStatusCallback } from '@ibm-aspera/sdk';
 
 export function initializeAspera(supportMulti: boolean, httpGatewayUrl?: string, forceHttpGateway?: boolean, forceConnect?: boolean) {
   /** Define desktop settings for initialization */
@@ -30,17 +30,14 @@ export function initializeAspera(supportMulti: boolean, httpGatewayUrl?: string,
     },
   };
 
+  registerStatusCallback(status => {
+    console.info('Status:', status);
+  });
+
   /**
    * HTTP Gateway URL can be set to support fallback to a gateway.
    * You can also force it to not start the desktop app.
    * Connect can be forced to not use Desktop and use Connect only
    */
-  init(settings).then(response => {
-    // The SDK started. Transfers and file picker can now be used.
-    alert(`SDK started\n\n${JSON.stringify(response, undefined, 2)}`)
-  }).catch(error => {
-    // The SDK could not start. The app may not be running.
-    console.error('SDK could not start', error);
-    alert(`Init failed\n\n${JSON.stringify(error, undefined, 2)}`);
-  });
+  initSession(settings);
 }

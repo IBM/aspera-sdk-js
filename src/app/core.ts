@@ -1,12 +1,12 @@
 import {messages} from '../constants/messages';
 import {client} from '../helpers/client/client';
 import {errorLog, generateErrorBody, generatePromiseObjects, isSafari, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
-import {httpDownload, httpUpload, initHttpGateway} from '../http-gateway';
+import {httpDownload, httpUpload, setupHttpGateway} from '../http-gateway';
 import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChunkAsArrayBuffer, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, httpStopTransfer, sendTransferUpdate} from '../http-gateway/core';
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
-import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, SaveFileDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, ShowPreferencesPageOptions, PreferencesPage, TestSshPortsOptions} from '../models/models';
-import {Connect, ConnectInstaller} from '@ibm-aspera/connect-sdk-js';
+import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, SaveFileDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, SdkStatus, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, ShowPreferencesPageOptions, PreferencesPage, TestSshPortsOptions} from '../models/models';
+import {statusService} from './status';
 import {initConnect} from '../connect/core';
 import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
 
@@ -31,12 +31,16 @@ export const testConnection = (): Promise<any> => {
 };
 
 /**
- * RPC discovery used internally when initializing the SDK.
+ * RPC discovery used internally during IBM Aspera for desktop initialization to determine
+ * the supported RPC methods of the user's version of IBM Aspera for desktop.
+ *
+ * For convenience, this function will return an empty [] if the SDK is currently configured to use
+ * either HTTP Gateway or Connect transfer clients.
  *
  * @returns a promise that resolves if discovery is successful
  */
 const rpcDiscover = (): Promise<any> => {
-  if (asperaSdk.useConnect || asperaSdk.useHttpGateway) {
+  if (asperaSdk.useHttpGateway || asperaSdk.useConnect) {
     return Promise.resolve({methods: []});
   }
 
@@ -88,32 +92,62 @@ export const initDragDrop = (initCall?: boolean): Promise<boolean> => {
 };
 
 /**
- * Initialize IBM Aspera client. If client cannot (reject/catch), then
- * client should attempt fixing server URL or trying again. If still fails disable UI elements.
+ * Get the current SDK lifecycle status synchronously.
  *
- * @param options initialization options:
- *
- * - `appId` the unique ID for the website. Transfers initiated during this session
- * will be associated with this ID. It is recommended to use a unique ID to keep transfer
- * information private from other websites.
- *
- * - `supportMultipleUsers` when enabled (defaults to false), the SDK will iterate over a port
- * range and generate a session id to determine the running instance of the desktop app for the
- * current user. This is needed when multiple users may be logged into the same machine
- * simultaneously, for example on a Windows Server.
- *
- * @returns a promise that resolves if IBM Aspera Desktop is running properly or
- * rejects if unable to connect
+ * @returns the current status, or undefined if no init has been called yet
  */
-export const init = (options?: InitOptions): Promise<any> => {
-  const appId = options?.appId ?? randomUUID();
+export const getStatus = (): SdkStatus | undefined => {
+  return statusService.getStatus();
+};
 
-  asperaSdk.globals.appId = appId;
+const setupAppId = (options?: {appId?: string; supportMultipleUsers?: boolean}): void => {
+  asperaSdk.globals.appId = options?.appId ?? randomUUID();
 
   if (options?.supportMultipleUsers) {
     asperaSdk.globals.supportMultipleUsers = true;
     asperaSdk.globals.sessionId = randomUUID();
   }
+};
+
+const connectDesktop = (): Promise<void> => {
+  return asperaSdk.activityTracking.setup()
+    .then(() => testConnection())
+    .then(() => rpcDiscover())
+    .then(() => initDragDrop(true))
+    .then((): void => undefined);
+};
+
+/**
+ * Initialize the SDK and connect to a transfer client. Returns a promise that resolves
+ * when the transfer client is ready, or rejects if it cannot be reached.
+ *
+ * By default, the SDK connects to IBM Aspera for desktop. Set `connectSettings.useConnect`
+ * to use IBM Aspera Connect instead. If `httpGatewaySettings` is provided, the gateway is
+ * set up first — when `forceGateway` is true it becomes the sole transport; when false it
+ * is set up as a supplementary transport and the primary client (Desktop or Connect) is
+ * still initialized afterward.
+ *
+ * Note that the promise behavior varies by transfer client. For Desktop, the promise
+ * remains pending until the application is detected. For Connect, the promise resolves
+ * immediately after initialization begins — use {@link registerStatusCallback} to track
+ * when Connect is actually ready. For a non-blocking alternative that provides consistent
+ * lifecycle status events across all transfer clients, see {@link initSession}.
+ *
+ * @param options - Initialization options. See {@link InitOptions}.
+ *
+ * @returns a promise that resolves with SDK metadata when the transfer client is ready
+ *
+ * @example
+ * init({ appId: 'my-app' })
+ *   .then(() => {
+ *     // Transfer client is ready — enable UI
+ *   })
+ *   .catch(error => {
+ *     // Could not connect — prompt user to install or launch
+ *   });
+ */
+export const init = (options?: InitOptions): Promise<any> => {
+  setupAppId(options);
 
   const handleErrors = (error: unknown) => {
     errorLog(messages.serverError, error);
@@ -121,78 +155,166 @@ export const init = (options?: InitOptions): Promise<any> => {
     throw generateErrorBody(messages.serverError, error);
   };
 
-  const getConnectStartCalls = (): Promise<unknown> => {
-    asperaSdk.globals.connect = new Connect({
-      minVersion: options.connectSettings.minVersion || '3.10.1',
-      dragDropEnabled: options.connectSettings.dragDropEnabled,
-      connectMethod: options.connectSettings.method,
-    });
-    asperaSdk.globals.connectInstaller = new ConnectInstaller({
-      sdkLocation: options.connectSettings.sdkLocation,
-      correlationId: options.connectSettings.correlationId,
-      style: 'carbon',
-      version: options.connectSettings.version,
-    });
-
-    asperaSdk.globals.connectAW4 = {
-      Connect,
-      ConnectInstaller,
-    };
-
-    return initConnect(!options.connectSettings.hideIncludedInstaller);
-  };
-
   const getDesktopStartCalls = (): Promise<unknown> => {
-    return asperaSdk.activityTracking.setup()
-      .then(() => testConnection())
-      .then(() => rpcDiscover())
-      .then(() => initDragDrop(true))
+    return connectDesktop()
       .then(() => asperaSdk.globals.sdkResponseData)
       .catch(handleErrors);
   };
 
+  const getTransferClientCalls = (): Promise<unknown> => {
+    return options?.connectSettings?.useConnect ? initConnect(options.connectSettings) : getDesktopStartCalls();
+  };
+
   if (options?.httpGatewaySettings?.url && !asperaSdk.globals.httpGatewayVerified) {
-    let finalHttpGatewayUrl = options.httpGatewaySettings.url.trim();
-
-    if (finalHttpGatewayUrl.indexOf('http') !== 0) {
-      finalHttpGatewayUrl = `https://${finalHttpGatewayUrl}`;
-    }
-
-    if (finalHttpGatewayUrl.endsWith('/')) {
-      finalHttpGatewayUrl = finalHttpGatewayUrl.slice(0, -1);
-    }
-
-    asperaSdk.globals.httpGatewayUrl = finalHttpGatewayUrl;
-
-    return fetch(`${asperaSdk.globals.httpGatewayUrl}/info`, {method: 'GET'}).then(response => {
-      return response.json().then(responseData => {
-        if (response.status >= 400) {
-          throw Error(responseData);
-        }
-
-        return responseData;
-      });
-    }).then(response => {
-      return initHttpGateway(response);
-    }).then(() => {
+    return setupHttpGateway(options.httpGatewaySettings.url).then(() => {
       if (options?.httpGatewaySettings?.forceGateway) {
         return Promise.resolve(asperaSdk.globals.sdkResponseData);
       }
 
-      return options?.connectSettings?.useConnect ? getConnectStartCalls() : getDesktopStartCalls();
+      return getTransferClientCalls();
     }).catch(error => {
-      // If HTTP Gateway fails log and move on to transfer client
       errorLog(messages.httpInitFail, error);
 
       if (options?.httpGatewaySettings?.forceGateway) {
         throw generateErrorBody(messages.httpInitFail, error);
       }
 
-      return options?.connectSettings?.useConnect ? getConnectStartCalls() : getDesktopStartCalls();
+      return getTransferClientCalls();
     });
   }
 
-  return options?.connectSettings?.useConnect ? getConnectStartCalls() : getDesktopStartCalls();
+  return getTransferClientCalls();
+};
+
+/**
+ * Initialize the SDK and begin detecting a transfer client. This function returns
+ * immediately — lifecycle status is communicated asynchronously via {@link registerStatusCallback}.
+ *
+ * The SDK supports three transfer clients. By default, IBM Aspera for desktop is used.
+ * Set `connectSettings.useConnect` to use IBM Aspera Connect instead. Desktop and Connect
+ * are mutually exclusive — one or the other is detected, not both.
+ *
+ * ## HTTP Gateway
+ *
+ * HTTP Gateway is a server-side component that enables browser-based transfers without
+ * a desktop application. It can be used in two modes:
+ *
+ * - **Sole transport** (`forceGateway: true`): HTTP Gateway is the only transport.
+ *   No Desktop or Connect detection occurs. Status transitions to `RUNNING` when the
+ *   gateway responds successfully, or `FAILED` if it does not.
+ *
+ * - **Supplementary transport** (`forceGateway: false`): HTTP Gateway is set up first
+ *   as an additional transport for browser-based uploads and downloads. The primary
+ *   transfer client (Desktop or Connect) is then detected separately. If HTTP Gateway
+ *   setup fails, the primary client is still detected. Features that require a desktop
+ *   application (native file dialogs, drag and drop, etc.) are only available when the
+ *   primary client is running.
+ *
+ * ## Status lifecycle
+ *
+ * Use {@link registerStatusCallback} to receive status updates. Use {@link getStatus} to
+ * read the current status synchronously at any time.
+ *
+ * **Desktop path**: `INITIALIZING` → `RUNNING` (app detected) or `FAILED` (timeout).
+ * Detection continues in the background after `FAILED`. If the user launches the app
+ * later, the status transitions to `RUNNING`.
+ *
+ * **Connect path**: `INITIALIZING` → `RUNNING`, `FAILED`, `OUTDATED`, or
+ * `EXTENSION_INSTALL` depending on the state of the Connect browser extension
+ * and application.
+ *
+ * **HTTP Gateway path** (`forceGateway: true`): `INITIALIZING` → `RUNNING` or `FAILED`.
+ *
+ * @param options - Initialization options. See {@link InitOptions}.
+ *
+ * @example
+ * // Detect IBM Aspera for desktop (default)
+ * initSession({ appId: 'my-app' });
+ *
+ * @example
+ * // Detect IBM Aspera for desktop with status handling
+ * registerStatusCallback(status => {
+ *   if (status === 'RUNNING') {
+ *     // Transfer client is ready — enable UI
+ *   } else if (status === 'FAILED') {
+ *     // Not detected — prompt user to install or launch
+ *   }
+ * });
+ *
+ * initSession({ appId: 'my-app' });
+ *
+ * @example
+ * // Use IBM Aspera Connect
+ * initSession({
+ *   appId: 'my-app',
+ *   connectSettings: {
+ *     useConnect: true,
+ *   },
+ * });
+ *
+ * @example
+ * // Use HTTP Gateway as the sole transport (no desktop app needed)
+ * initSession({
+ *   appId: 'my-app',
+ *   httpGatewaySettings: {
+ *     url: 'https://example.com/aspera/http-gwy',
+ *     forceGateway: true,
+ *   },
+ * });
+ *
+ * @example
+ * // HTTP Gateway as supplementary transport with Desktop as primary
+ * initSession({
+ *   appId: 'my-app',
+ *   httpGatewaySettings: {
+ *     url: 'https://example.com/aspera/http-gwy',
+ *     forceGateway: false,
+ *   },
+ * });
+ */
+export const initSession = (options?: InitOptions): void => {
+  setupAppId(options);
+
+  const retryInterval = options?.retryInterval ?? 2000;
+  const retryTimeout = options?.retryTimeout ?? 5000;
+
+  const startDesktopDetection = (): void => {
+    statusService.startPolling(connectDesktop, retryInterval, retryTimeout);
+  };
+
+  const startTransferClient = (): void => {
+    if (options?.connectSettings?.useConnect) {
+      initConnect(options.connectSettings);
+    } else {
+      startDesktopDetection();
+    }
+  };
+
+  // HTTP Gateway path
+  if (options?.httpGatewaySettings?.url && !asperaSdk.globals.httpGatewayVerified) {
+    statusService.setStatus('INITIALIZING');
+
+    setupHttpGateway(options.httpGatewaySettings.url).then(() => {
+      if (options?.httpGatewaySettings?.forceGateway) {
+        statusService.setStatus('RUNNING');
+        return;
+      }
+
+      startTransferClient();
+    }).catch(error => {
+      errorLog(messages.httpInitFail, error);
+
+      if (options?.httpGatewaySettings?.forceGateway) {
+        statusService.setStatus('FAILED');
+        return;
+      }
+
+      startTransferClient();
+    });
+    return;
+  }
+
+  startTransferClient();
 };
 
 /**
@@ -351,12 +473,12 @@ export const deregisterActivityCallback = (id: string): void => {
  * is re-established. This can be useful if you want to handle the case where the user quits IBM Aspera
  * after `init` has already been called, and want to prompt the user to relaunch the application.
  *
- * @param callback callback function to receive events
+ * @param callback callback function to receive status events
  *
  * @returns ID representing the callback for deregistration purposes
  */
-export const registerStatusCallback = (callback: (status: WebsocketEvent) => void): string => {
-  return asperaSdk.activityTracking.setWebSocketEventCallback(callback);
+export const registerStatusCallback = (callback: (status: SdkStatus) => void): string => {
+  return statusService.registerCallback(callback);
 };
 
 /**
@@ -365,7 +487,7 @@ export const registerStatusCallback = (callback: (status: WebsocketEvent) => voi
  * @param id the ID returned by `registerStatusCallback`
  */
 export const deregisterStatusCallback = (id: string): void => {
-  asperaSdk.activityTracking.removeWebSocketEventCallback(id);
+  statusService.deregisterCallback(id);
 };
 
 /**

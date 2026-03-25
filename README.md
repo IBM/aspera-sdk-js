@@ -20,6 +20,7 @@ To include this SDK via `script` tag directly in your web application's HTML, re
 ```html
 <script src="https://cdn.jsdelivr.net/npm/@ibm-aspera/sdk@0.2.30/dist/js/aspera-sdk.js"></script>
 ```
+Check npmjs.com for the latest version (https://www.npmjs.com/package/@ibm-aspera/sdk).
 
 ## Usage
 

@@ -133,39 +133,25 @@ export default function App() {
   );
 
   const startApp = (): void => {
-    let testResolved = false;
-
     const initCallback = (): void => {
       if (initialized) {
         return;
       }
 
-      // Seeing issue in Safari where calling init doesn't catch or then...
-      setTimeout(() => {
-        init({appId: 'my-application-unique-id'}).then(() => {
-          initialized = true;
-        }).catch((error: unknown) => {
-          console.error('SDK could not start from quick launch', error);
-        })
-      }, 3000);
+      init({appId: 'my-application-unique-id'}).then(() => {
+        initialized = true;
+      }).catch((error: unknown) => {
+        console.error('SDK could not start from quick launch', error);
+      })
     };
 
+    // Quick check to determine if IBM Aspera for desktop is running. If not, call launch() first. TODO: This should not be required.
     testConnection().then(() => {
-      testResolved = true;
       initCallback();
     }).catch(() => {
-      testResolved = true;
       launch();
       initCallback();
     });
-
-    setTimeout(() => {
-      // Test never resolved. Launch
-      if (!testResolved) {
-        launch();
-        initCallback();
-      }
-    }, 2000);
   };
 
   const currentTabIndex = tabItems.findIndex(item => item.route === location.pathname);

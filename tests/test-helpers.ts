@@ -3,6 +3,7 @@
  */
 
 import {asperaSdk, TransferSpec} from '../src/index';
+import {statusService} from '../src/app/status';
 
 // ============================================================================
 // Fetch Mock
@@ -171,6 +172,7 @@ export function resetSdk() {
   asperaSdk.globals.connectStatus = 'WAITING';
   asperaSdk.globals.connect = undefined;
   connectCalls = [];
+  statusService.reset();
 }
 
 // ============================================================================

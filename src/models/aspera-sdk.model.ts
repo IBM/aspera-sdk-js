@@ -1,4 +1,5 @@
-import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, SaveFileDialogOptions, InitOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, SafariExtensionEvent, TransferSpec, WebsocketEvent, InstallerUrlInfo, RpcMethod, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, ShowPreferencesPageOptions, TestSshPortsOptions} from './models';
+import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, SaveFileDialogOptions, InitOptions, InitSessionOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, SafariExtensionEvent, SdkStatus, TransferSpec, WebsocketEvent, InstallerUrlInfo, RpcMethod, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, ShowPreferencesPageOptions, TestSshPortsOptions} from './models';
+import {statusService} from '../app/status';
 import {hiddenStyleList, installerUrl, protocol} from '../constants/constants';
 import {messages} from '../constants/messages';
 import {safariClient} from '../helpers/client/safari-client';
@@ -129,12 +130,6 @@ export interface ActivityMessage {
 export class ActivityTracking {
   /** Map of callbacks that receive transfer update events */
   private activity_callbacks: Map<string, Function> = new Map();
-  /** Map of callbacks that receive connection events */
-  private event_callbacks: Map<string, Function> = new Map();
-  /** Keep track of the last WebSocket event **/
-  private lastWebSocketEvent: WebsocketEvent = 'CLOSED';
-  /** Keep track of the last notified WebSocket event **/
-  private lastNotifiedWebSocketEvent: WebsocketEvent = undefined;
 
   /**
    * Notify all consumers when a message is received from the transfer client.
@@ -156,47 +151,27 @@ export class ActivityTracking {
   }
 
   /**
-   * Handle and notify if needed when a connection webSocketEvent occurs. For example, when the SDK
+   * Handle and notify when a connection webSocketEvent occurs. For example, when the SDK
    * websocket connection to IBM Aspera App is closed or reconnected.
+   *
+   * Bridges WebSocket events to StatusService as SdkStatus values.
    *
    * @param webSocketEvent the event type.
    */
   handleWebSocketEvents(webSocketEvent: WebsocketEvent): void {
-    if (this.lastWebSocketEvent === webSocketEvent) {
-      return;
+    if (webSocketEvent === 'CLOSED') {
+      statusService.setStatus('DISCONNECTED');
+    } else if (webSocketEvent === 'RECONNECT') {
+      statusService.setStatus('RUNNING');
     }
-
-    this.lastWebSocketEvent = webSocketEvent;
-
-    this.notifyWebSocketEvent(webSocketEvent);
   }
 
   /**
-   * Notify all consumers when a connection webSocketEvent occurs.
-   *
-   * @param webSocketEvent the event type.
+   * Trigger manual event for other event types (e.g. Connect status strings).
+   * Bridges to StatusService.
    */
-  private notifyWebSocketEvent(webSocketEvent: WebsocketEvent): void {
-    if (this.lastNotifiedWebSocketEvent === webSocketEvent) {
-      return;
-    }
-
-    this.lastNotifiedWebSocketEvent = webSocketEvent;
-
-    this.event_callbacks.forEach(callback => {
-      if (typeof callback === 'function') {
-        callback(webSocketEvent);
-      }
-    });
-  }
-
-  /** Trigger manual event for other event types. */
   sendManualEventCallback(status: string): void {
-    this.event_callbacks.forEach(callback => {
-      if (typeof callback === 'function') {
-        callback(status);
-      }
-    });
+    statusService.setStatus(status as SdkStatus);
   }
 
   /**
@@ -206,15 +181,9 @@ export class ActivityTracking {
    * @param running whether the client is running or not.
    */
   handleClientEvents(running: boolean): void {
-    let webSocketEvent: WebsocketEvent;
-
     if (!running) {
-      webSocketEvent = 'CLOSED';
-    } else {
-      webSocketEvent = this.lastWebSocketEvent;
+      statusService.setStatus('DISCONNECTED');
     }
-
-    this.notifyWebSocketEvent(webSocketEvent);
   }
 
   /**
@@ -312,32 +281,6 @@ export class ActivityTracking {
     this.activity_callbacks.delete(id);
   }
 
-  /**
-   * Register a callback for getting websocket events back to the consumer
-   *
-   * @param callback the function to call with the websocket event
-   *
-   * @returns the ID of the callback index
-   */
-  setWebSocketEventCallback(callback: (status: WebsocketEvent) => void): string {
-    if (typeof callback !== 'function') {
-      errorLog(messages.callbackIsNotFunction);
-      return;
-    }
-    const id = `callback-${this.event_callbacks.size + 1}`;
-    this.event_callbacks.set(id, callback);
-    callback(this.lastWebSocketEvent);
-    return id;
-  }
-
-  /**
-   * Remove the callback (deregister) from the list of callbacks
-   *
-   * @param id the string of the callback to remove
-   */
-  removeWebSocketEventCallback(id: string): void {
-    this.event_callbacks.delete(id);
-  }
 
   private registerDesktopAppSession(): void {
     const iframe = document.createElement('iframe');
@@ -372,9 +315,13 @@ export class AsperaSdk {
   /** Deregister callback to remove it from the callbacks getting transfer data */
   deregisterActivityCallback: (id: string) => void;
   /** Register callback for connection status events from the app */
-  registerStatusCallback: (callback: (status: WebsocketEvent) => void) => string;
+  registerStatusCallback: (callback: (status: SdkStatus) => void) => string;
   /** Deregister callback to remove it from the callbacks getting connection events */
   deregisterStatusCallback: (id: string) => void;
+  /** Non-blocking initialization. Status events communicate lifecycle via registerStatusCallback. */
+  initSession: (options?: InitSessionOptions) => void;
+  /** Get current SDK lifecycle status synchronously. */
+  getStatus: () => SdkStatus | undefined;
   /** Function to remove a transfer */
   removeTransfer: (transferId: string) => Promise<any>;
   /** Function to show the transfer's download directory in Finder or Windows Explorer */

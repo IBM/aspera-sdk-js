@@ -5,7 +5,8 @@ import {httpDownload, httpUpload, initHttpGateway} from '../http-gateway';
 import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChunkAsArrayBuffer, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, httpStopTransfer, sendTransferUpdate} from '../http-gateway/core';
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
-import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, SaveFileDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, ShowPreferencesPageOptions, PreferencesPage, TestSshPortsOptions} from '../models/models';
+import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, SaveFileDialogOptions, InitOptions, InitSessionOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, WebsocketEvent, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, SdkStatus, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, ShowPreferencesPageOptions, PreferencesPage, TestSshPortsOptions} from '../models/models';
+import {statusService} from './status';
 import {Connect, ConnectInstaller} from '@ibm-aspera/connect-sdk-js';
 import {initConnect} from '../connect/core';
 import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
@@ -351,12 +352,12 @@ export const deregisterActivityCallback = (id: string): void => {
  * is re-established. This can be useful if you want to handle the case where the user quits IBM Aspera
  * after `init` has already been called, and want to prompt the user to relaunch the application.
  *
- * @param callback callback function to receive events
+ * @param callback callback function to receive status events
  *
  * @returns ID representing the callback for deregistration purposes
  */
-export const registerStatusCallback = (callback: (status: WebsocketEvent) => void): string => {
-  return asperaSdk.activityTracking.setWebSocketEventCallback(callback);
+export const registerStatusCallback = (callback: (status: SdkStatus) => void): string => {
+  return statusService.registerCallback(callback);
 };
 
 /**
@@ -365,7 +366,130 @@ export const registerStatusCallback = (callback: (status: WebsocketEvent) => voi
  * @param id the ID returned by `registerStatusCallback`
  */
 export const deregisterStatusCallback = (id: string): void => {
-  asperaSdk.activityTracking.removeWebSocketEventCallback(id);
+  statusService.deregisterCallback(id);
+};
+
+/**
+ * Get the current SDK lifecycle status synchronously.
+ *
+ * @returns the current status, or undefined if no init has been called yet
+ */
+export const getStatus = (): SdkStatus | undefined => {
+  return statusService.getStatus();
+};
+
+const startConnectInit = (options: InitSessionOptions): void => {
+  asperaSdk.globals.connect = new Connect({
+    minVersion: options.connectSettings.minVersion || '3.10.1',
+    dragDropEnabled: options.connectSettings.dragDropEnabled,
+    connectMethod: options.connectSettings.method,
+  });
+  asperaSdk.globals.connectInstaller = new ConnectInstaller({
+    sdkLocation: options.connectSettings.sdkLocation,
+    correlationId: options.connectSettings.correlationId,
+    style: 'carbon',
+    version: options.connectSettings.version,
+  });
+
+  asperaSdk.globals.connectAW4 = {
+    Connect,
+    ConnectInstaller,
+  };
+
+  initConnect(!options.connectSettings.hideIncludedInstaller);
+};
+
+/**
+ * Initialize IBM Aspera client (non-blocking). Status events are communicated via
+ * `registerStatusCallback`. Use this instead of `init()` for a non-blocking initialization
+ * that provides rich lifecycle status events.
+ *
+ * @param options initialization options
+ */
+export const initSession = (options?: InitSessionOptions): void => {
+  const appId = options?.appId ?? randomUUID();
+  asperaSdk.globals.appId = appId;
+
+  if (options?.supportMultipleUsers) {
+    asperaSdk.globals.supportMultipleUsers = true;
+    asperaSdk.globals.sessionId = randomUUID();
+  }
+
+  const retryInterval = options?.retryInterval ?? 2000;
+  const retryTimeout = options?.retryTimeout ?? 5000;
+
+  const startDesktopDetection = (): void => {
+    const detectDesktop = (): Promise<void> => {
+      return asperaSdk.activityTracking.setup()
+        .then(() => testConnection())
+        .then(() => rpcDiscover())
+        .then(() => initDragDrop(true))
+        .then((): void => undefined);
+    };
+
+    statusService.startPolling(detectDesktop, retryInterval, retryTimeout);
+  };
+
+  // HTTP Gateway path
+  if (options?.httpGatewaySettings?.url && !asperaSdk.globals.httpGatewayVerified) {
+    let finalHttpGatewayUrl = options.httpGatewaySettings.url.trim();
+
+    if (finalHttpGatewayUrl.indexOf('http') !== 0) {
+      finalHttpGatewayUrl = `https://${finalHttpGatewayUrl}`;
+    }
+
+    if (finalHttpGatewayUrl.endsWith('/')) {
+      finalHttpGatewayUrl = finalHttpGatewayUrl.slice(0, -1);
+    }
+
+    asperaSdk.globals.httpGatewayUrl = finalHttpGatewayUrl;
+    statusService.setStatus('INITIALIZING');
+
+    fetch(`${asperaSdk.globals.httpGatewayUrl}/info`, {method: 'GET'}).then(response => {
+      return response.json().then(responseData => {
+        if (response.status >= 400) {
+          throw Error(responseData);
+        }
+        return responseData;
+      });
+    }).then(response => {
+      return initHttpGateway(response);
+    }).then(() => {
+      if (options?.httpGatewaySettings?.forceGateway) {
+        statusService.setStatus('RUNNING');
+        return;
+      }
+
+      if (options?.connectSettings?.useConnect) {
+        startConnectInit(options);
+      } else {
+        startDesktopDetection();
+      }
+    }).catch(error => {
+      errorLog(messages.httpInitFail, error);
+
+      if (options?.httpGatewaySettings?.forceGateway) {
+        statusService.setStatus('FAILED');
+        return;
+      }
+
+      if (options?.connectSettings?.useConnect) {
+        startConnectInit(options);
+      } else {
+        startDesktopDetection();
+      }
+    });
+    return;
+  }
+
+  // Connect path
+  if (options?.connectSettings?.useConnect) {
+    startConnectInit(options);
+    return;
+  }
+
+  // Desktop path
+  startDesktopDetection();
 };
 
 /**

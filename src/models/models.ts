@@ -735,6 +735,15 @@ export type WebsocketTopics = 'subscribe_transfer_activity' | 'transfer_activity
 export type WebsocketEvent = 'CLOSED' | 'RECONNECT';
 export type SafariExtensionEvent = 'ENABLED' | 'DISABLED';
 
+export type SdkStatus =
+  | 'INITIALIZING'
+  | 'RETRYING'
+  | 'RUNNING'
+  | 'FAILED'
+  | 'OUTDATED'
+  | 'EXTENSION_INSTALL'
+  | 'DISCONNECTED';
+
 export interface WebsocketMessage {
   jsonrpc: '2.0';
   method: WebsocketTopics;
@@ -962,6 +971,21 @@ export interface InitOptions {
     /** Connect installer version to offer for downloads. This option is ignored if `sdkLocation` is specified. Only supports versions `4.x.x`. */
     version?: string;
   }
+}
+
+export interface InitSessionOptions {
+  /** The application ID to link to. This should be unique for each app/user. If not provided, a UUID is generated. */
+  appId?: string;
+  /** Indicate if the computer is running multiple users possibly (avoid port crossing). */
+  supportMultipleUsers?: boolean;
+  /** Timeout in ms before status transitions to FAILED. Default: 5000. */
+  retryTimeout?: number;
+  /** Interval in ms between detection attempts. Default: 2000. */
+  retryInterval?: number;
+  /** HTTP Gateway Settings */
+  httpGatewaySettings?: InitOptions['httpGatewaySettings'];
+  /** Connect Settings */
+  connectSettings?: InitOptions['connectSettings'];
 }
 
 export interface InstallerUrlInfo {

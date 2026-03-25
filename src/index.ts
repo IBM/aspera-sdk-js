@@ -1,5 +1,5 @@
 import {AsperaSdk} from './models/aspera-sdk.model';
-import {authenticate, createDropzone, deregisterActivityCallback, deregisterStatusCallback, getAllTransfers, getCapabilities, getChecksum, getFilesList, getInfo, getTransfer, hasCapability, init, initDragDrop, modifyTransfer, showPreferencesPage, readAsArrayBuffer, readChunkAsArrayBuffer, readDirectory, registerActivityCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showAbout, showDirectory, showPreferences, showSaveFileDialog, showSelectFileDialog, showSelectFolderDialog, showTransferManager, showTransferMonitor, startTransfer, stopTransfer, testConnection, testSshPorts,} from './app/core';
+import {authenticate, createDropzone, deregisterActivityCallback, deregisterStatusCallback, getAllTransfers, getCapabilities, getChecksum, getFilesList, getInfo, getStatus, getTransfer, hasCapability, init, initDragDrop, initSession, modifyTransfer, showPreferencesPage, readAsArrayBuffer, readChunkAsArrayBuffer, readDirectory, registerActivityCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showAbout, showDirectory, showPreferences, showSaveFileDialog, showSelectFileDialog, showSelectFolderDialog, showTransferManager, showTransferMonitor, startTransfer, stopTransfer, testConnection, testSshPorts,} from './app/core';
 import {getInstallerInfo} from './app/installer';
 import {getInstallerUrls, isSafari} from './helpers/helpers';
 import * as httpGatewayCalls from './http-gateway';
@@ -34,6 +34,8 @@ asperaSdk.removeDropzone = removeDropzone;
 asperaSdk.getInstallerInfo = getInstallerInfo;
 asperaSdk.registerStatusCallback = registerStatusCallback;
 asperaSdk.deregisterStatusCallback = deregisterStatusCallback;
+asperaSdk.initSession = initSession;
+asperaSdk.getStatus = getStatus;
 asperaSdk.initDragDrop = initDragDrop;
 asperaSdk.setBranding = setBranding;
 asperaSdk.getInfo = getInfo;
@@ -86,6 +88,8 @@ export {
   getInstallerInfo,
   registerStatusCallback,
   deregisterStatusCallback,
+  initSession,
+  getStatus,
   setBranding,
   getInfo,
   readAsArrayBuffer,
@@ -143,6 +147,8 @@ export type {
   TestSshPortsOptions,
   TransferSpec,
   TransferStatus,
+  SdkStatus,
+  InitSessionOptions,
   WebsocketEvent,
 } from './models/models';
 

@@ -945,6 +945,10 @@ export interface InitOptions {
   appId?: string;
   /** Indicate if the computer is running multiple users possibly (avoid port crossing). */
   supportMultipleUsers?: boolean;
+  /** Timeout in ms before status transitions to FAILED. Default: 5000. */
+  retryTimeout?: number;
+  /** Interval in ms between detection attempts. Default: 2000. */
+  retryInterval?: number;
   /** HTTP Gateway Settings */
   httpGatewaySettings?: {
     /** Aspera HTTP Gateway URL to use if desktop is not available. Include gateway route but not versions (example: https://example.com/aspera/http-gwy). */
@@ -971,21 +975,6 @@ export interface InitOptions {
     /** Connect installer version to offer for downloads. This option is ignored if `sdkLocation` is specified. Only supports versions `4.x.x`. */
     version?: string;
   }
-}
-
-export interface InitSessionOptions {
-  /** The application ID to link to. This should be unique for each app/user. If not provided, a UUID is generated. */
-  appId?: string;
-  /** Indicate if the computer is running multiple users possibly (avoid port crossing). */
-  supportMultipleUsers?: boolean;
-  /** Timeout in ms before status transitions to FAILED. Default: 5000. */
-  retryTimeout?: number;
-  /** Interval in ms between detection attempts. Default: 2000. */
-  retryInterval?: number;
-  /** HTTP Gateway Settings */
-  httpGatewaySettings?: InitOptions['httpGatewaySettings'];
-  /** Connect Settings */
-  connectSettings?: InitOptions['connectSettings'];
 }
 
 export interface InstallerUrlInfo {

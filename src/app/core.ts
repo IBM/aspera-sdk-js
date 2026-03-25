@@ -89,6 +89,36 @@ export const initDragDrop = (initCall?: boolean): Promise<boolean> => {
 };
 
 /**
+ * Get the current SDK lifecycle status synchronously.
+ *
+ * @returns the current status, or undefined if no init has been called yet
+ */
+export const getStatus = (): SdkStatus | undefined => {
+  return statusService.getStatus();
+};
+
+const startConnectInit = (options: InitSessionOptions): void => {
+  asperaSdk.globals.connect = new Connect({
+    minVersion: options.connectSettings.minVersion || '3.10.1',
+    dragDropEnabled: options.connectSettings.dragDropEnabled,
+    connectMethod: options.connectSettings.method,
+  });
+  asperaSdk.globals.connectInstaller = new ConnectInstaller({
+    sdkLocation: options.connectSettings.sdkLocation,
+    correlationId: options.connectSettings.correlationId,
+    style: 'carbon',
+    version: options.connectSettings.version,
+  });
+
+  asperaSdk.globals.connectAW4 = {
+    Connect,
+    ConnectInstaller,
+  };
+
+  initConnect(!options.connectSettings.hideIncludedInstaller);
+};
+
+/**
  * Initialize IBM Aspera client. If client cannot (reject/catch), then
  * client should attempt fixing server URL or trying again. If still fails disable UI elements.
  *
@@ -194,6 +224,99 @@ export const init = (options?: InitOptions): Promise<any> => {
   }
 
   return options?.connectSettings?.useConnect ? getConnectStartCalls() : getDesktopStartCalls();
+};
+
+/**
+ * Initialize IBM Aspera client (non-blocking). Status events are communicated via
+ * `registerStatusCallback`. Use this instead of `init()` for a non-blocking initialization
+ * that provides rich lifecycle status events.
+ *
+ * @param options initialization options
+ */
+export const initSession = (options?: InitSessionOptions): void => {
+  const appId = options?.appId ?? randomUUID();
+  asperaSdk.globals.appId = appId;
+
+  if (options?.supportMultipleUsers) {
+    asperaSdk.globals.supportMultipleUsers = true;
+    asperaSdk.globals.sessionId = randomUUID();
+  }
+
+  const retryInterval = options?.retryInterval ?? 2000;
+  const retryTimeout = options?.retryTimeout ?? 5000;
+
+  const startDesktopDetection = (): void => {
+    const detectDesktop = (): Promise<void> => {
+      return asperaSdk.activityTracking.setup()
+        .then(() => testConnection())
+        .then(() => rpcDiscover())
+        .then(() => initDragDrop(true))
+        .then((): void => undefined);
+    };
+
+    statusService.startPolling(detectDesktop, retryInterval, retryTimeout);
+  };
+
+  // HTTP Gateway path
+  if (options?.httpGatewaySettings?.url && !asperaSdk.globals.httpGatewayVerified) {
+    let finalHttpGatewayUrl = options.httpGatewaySettings.url.trim();
+
+    if (finalHttpGatewayUrl.indexOf('http') !== 0) {
+      finalHttpGatewayUrl = `https://${finalHttpGatewayUrl}`;
+    }
+
+    if (finalHttpGatewayUrl.endsWith('/')) {
+      finalHttpGatewayUrl = finalHttpGatewayUrl.slice(0, -1);
+    }
+
+    asperaSdk.globals.httpGatewayUrl = finalHttpGatewayUrl;
+    statusService.setStatus('INITIALIZING');
+
+    fetch(`${asperaSdk.globals.httpGatewayUrl}/info`, {method: 'GET'}).then(response => {
+      return response.json().then(responseData => {
+        if (response.status >= 400) {
+          throw Error(responseData);
+        }
+        return responseData;
+      });
+    }).then(response => {
+      return initHttpGateway(response);
+    }).then(() => {
+      if (options?.httpGatewaySettings?.forceGateway) {
+        statusService.setStatus('RUNNING');
+        return;
+      }
+
+      if (options?.connectSettings?.useConnect) {
+        startConnectInit(options);
+      } else {
+        startDesktopDetection();
+      }
+    }).catch(error => {
+      errorLog(messages.httpInitFail, error);
+
+      if (options?.httpGatewaySettings?.forceGateway) {
+        statusService.setStatus('FAILED');
+        return;
+      }
+
+      if (options?.connectSettings?.useConnect) {
+        startConnectInit(options);
+      } else {
+        startDesktopDetection();
+      }
+    });
+    return;
+  }
+
+  // Connect path
+  if (options?.connectSettings?.useConnect) {
+    startConnectInit(options);
+    return;
+  }
+
+  // Desktop path
+  startDesktopDetection();
 };
 
 /**
@@ -367,129 +490,6 @@ export const registerStatusCallback = (callback: (status: SdkStatus) => void): s
  */
 export const deregisterStatusCallback = (id: string): void => {
   statusService.deregisterCallback(id);
-};
-
-/**
- * Get the current SDK lifecycle status synchronously.
- *
- * @returns the current status, or undefined if no init has been called yet
- */
-export const getStatus = (): SdkStatus | undefined => {
-  return statusService.getStatus();
-};
-
-const startConnectInit = (options: InitSessionOptions): void => {
-  asperaSdk.globals.connect = new Connect({
-    minVersion: options.connectSettings.minVersion || '3.10.1',
-    dragDropEnabled: options.connectSettings.dragDropEnabled,
-    connectMethod: options.connectSettings.method,
-  });
-  asperaSdk.globals.connectInstaller = new ConnectInstaller({
-    sdkLocation: options.connectSettings.sdkLocation,
-    correlationId: options.connectSettings.correlationId,
-    style: 'carbon',
-    version: options.connectSettings.version,
-  });
-
-  asperaSdk.globals.connectAW4 = {
-    Connect,
-    ConnectInstaller,
-  };
-
-  initConnect(!options.connectSettings.hideIncludedInstaller);
-};
-
-/**
- * Initialize IBM Aspera client (non-blocking). Status events are communicated via
- * `registerStatusCallback`. Use this instead of `init()` for a non-blocking initialization
- * that provides rich lifecycle status events.
- *
- * @param options initialization options
- */
-export const initSession = (options?: InitSessionOptions): void => {
-  const appId = options?.appId ?? randomUUID();
-  asperaSdk.globals.appId = appId;
-
-  if (options?.supportMultipleUsers) {
-    asperaSdk.globals.supportMultipleUsers = true;
-    asperaSdk.globals.sessionId = randomUUID();
-  }
-
-  const retryInterval = options?.retryInterval ?? 2000;
-  const retryTimeout = options?.retryTimeout ?? 5000;
-
-  const startDesktopDetection = (): void => {
-    const detectDesktop = (): Promise<void> => {
-      return asperaSdk.activityTracking.setup()
-        .then(() => testConnection())
-        .then(() => rpcDiscover())
-        .then(() => initDragDrop(true))
-        .then((): void => undefined);
-    };
-
-    statusService.startPolling(detectDesktop, retryInterval, retryTimeout);
-  };
-
-  // HTTP Gateway path
-  if (options?.httpGatewaySettings?.url && !asperaSdk.globals.httpGatewayVerified) {
-    let finalHttpGatewayUrl = options.httpGatewaySettings.url.trim();
-
-    if (finalHttpGatewayUrl.indexOf('http') !== 0) {
-      finalHttpGatewayUrl = `https://${finalHttpGatewayUrl}`;
-    }
-
-    if (finalHttpGatewayUrl.endsWith('/')) {
-      finalHttpGatewayUrl = finalHttpGatewayUrl.slice(0, -1);
-    }
-
-    asperaSdk.globals.httpGatewayUrl = finalHttpGatewayUrl;
-    statusService.setStatus('INITIALIZING');
-
-    fetch(`${asperaSdk.globals.httpGatewayUrl}/info`, {method: 'GET'}).then(response => {
-      return response.json().then(responseData => {
-        if (response.status >= 400) {
-          throw Error(responseData);
-        }
-        return responseData;
-      });
-    }).then(response => {
-      return initHttpGateway(response);
-    }).then(() => {
-      if (options?.httpGatewaySettings?.forceGateway) {
-        statusService.setStatus('RUNNING');
-        return;
-      }
-
-      if (options?.connectSettings?.useConnect) {
-        startConnectInit(options);
-      } else {
-        startDesktopDetection();
-      }
-    }).catch(error => {
-      errorLog(messages.httpInitFail, error);
-
-      if (options?.httpGatewaySettings?.forceGateway) {
-        statusService.setStatus('FAILED');
-        return;
-      }
-
-      if (options?.connectSettings?.useConnect) {
-        startConnectInit(options);
-      } else {
-        startDesktopDetection();
-      }
-    });
-    return;
-  }
-
-  // Connect path
-  if (options?.connectSettings?.useConnect) {
-    startConnectInit(options);
-    return;
-  }
-
-  // Desktop path
-  startDesktopDetection();
 };
 
 /**

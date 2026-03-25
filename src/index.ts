@@ -148,7 +148,6 @@ export type {
   TransferSpec,
   TransferStatus,
   SdkStatus,
-  InitSessionOptions,
   WebsocketEvent,
 } from './models/models';
 

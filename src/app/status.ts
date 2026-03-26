@@ -1,5 +1,6 @@
 import {SdkStatus} from '../models/models';
 import {randomUUID} from '../helpers/helpers';
+import {asperaSdk} from '../index';
 
 type StatusCallback = (status: SdkStatus) => void;
 
@@ -14,8 +15,20 @@ class StatusService {
   }
 
   setStatus(status: SdkStatus): void {
+    // When Desktop disconnects, remap to DEGRADED if HTTP Gateway is available
+    if (status === 'DISCONNECTED' && asperaSdk.httpGatewayIsReady) {
+      status = 'DEGRADED';
+    }
+
     if (this.currentStatus === status) {
       return;
+    }
+
+    // Manage Desktop verification state based on status transitions
+    if (status === 'DISCONNECTED' || status === 'DEGRADED') {
+      asperaSdk.globals.asperaAppVerified = false;
+    } else if (status === 'RUNNING' && (this.currentStatus === 'DISCONNECTED' || this.currentStatus === 'DEGRADED')) {
+      asperaSdk.globals.asperaAppVerified = true;
     }
 
     this.currentStatus = status;
@@ -40,7 +53,7 @@ class StatusService {
    *
    * @param detectFn async function that resolves if Desktop is found, rejects if not
    * @param interval ms between attempts
-   * @param failTimeout ms before transitioning to FAILED
+   * @param failTimeout ms before transitioning to FAILED or DEGRADED
    */
   startPolling(detectFn: () => Promise<void>, interval: number, failTimeout: number): void {
     this.stopPolling();
@@ -48,7 +61,11 @@ class StatusService {
 
     this.failTimeoutId = setTimeout(() => {
       if (this.currentStatus !== 'RUNNING') {
-        this.setStatus('FAILED');
+        if (asperaSdk.httpGatewayIsReady) {
+          this.setStatus('DEGRADED');
+        } else {
+          this.setStatus('FAILED');
+        }
       }
     }, failTimeout);
 

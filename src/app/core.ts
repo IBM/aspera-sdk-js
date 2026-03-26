@@ -17,8 +17,7 @@ import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
  * @returns a promise that resolves if server can connect or rejects if not
  */
 export const testConnection = (): Promise<any> => {
-  // FIXME: If force HTTP gateway is false this ends up preventing SDK from verifying IBM Aspera for desktop is running.
-  if (asperaSdk.useHttpGateway || asperaSdk.useConnect) {
+  if (asperaSdk.isReady || asperaSdk.useConnect) {
     return Promise.resolve(asperaSdk.globals.sdkResponseData);
   }
 
@@ -215,9 +214,10 @@ export const init = (options?: InitOptions): Promise<any> => {
  * Use {@link registerStatusCallback} to receive status updates. Use {@link getStatus} to
  * read the current status synchronously at any time.
  *
- * **Desktop path**: `INITIALIZING` → `RUNNING` (app detected) or `FAILED` (timeout).
- * Detection continues in the background after `FAILED`. If the user launches the app
- * later, the status transitions to `RUNNING`.
+ * **Desktop path**: `INITIALIZING` → `RUNNING` (app detected), `DEGRADED` (timeout but
+ * HTTP Gateway is available as a supplementary transport), or `FAILED` (timeout, no
+ * fallback). Detection continues in the background after `DEGRADED` or `FAILED` — if the
+ * user launches the app later, the status transitions to `RUNNING`.
  *
  * **Connect path**: `INITIALIZING` → `RUNNING`, `FAILED`, `OUTDATED`, or
  * `EXTENSION_INSTALL` depending on the state of the Connect browser extension

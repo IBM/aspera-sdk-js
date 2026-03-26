@@ -1,9 +1,12 @@
 import {statusService} from '../src/app/status';
 import {SdkStatus} from '../src/models/models';
+import {asperaSdk} from '../src/index';
 
 describe('StatusService', () => {
   afterEach(() => {
     statusService.reset();
+    asperaSdk.globals.httpGatewayVerified = false;
+    asperaSdk.globals.asperaAppVerified = false;
     jest.useRealTimers();
   });
 
@@ -46,6 +49,69 @@ describe('StatusService', () => {
       statusService.setStatus('DISCONNECTED');
 
       expect(cb).toHaveBeenCalledWith('DISCONNECTED');
+    });
+
+    test('remaps DISCONNECTED to DEGRADED when HTTP Gateway is ready', () => {
+      asperaSdk.globals.httpGatewayVerified = true;
+      statusService.setStatus('RUNNING');
+
+      statusService.setStatus('DISCONNECTED');
+
+      expect(statusService.getStatus()).toBe('DEGRADED');
+    });
+
+    test('keeps DISCONNECTED when HTTP Gateway is not ready', () => {
+      statusService.setStatus('RUNNING');
+
+      statusService.setStatus('DISCONNECTED');
+
+      expect(statusService.getStatus()).toBe('DISCONNECTED');
+    });
+
+    test('resets asperaAppVerified on DISCONNECTED', () => {
+      asperaSdk.globals.asperaAppVerified = true;
+      statusService.setStatus('RUNNING');
+
+      statusService.setStatus('DISCONNECTED');
+
+      expect(asperaSdk.globals.asperaAppVerified).toBe(false);
+    });
+
+    test('resets asperaAppVerified on DEGRADED', () => {
+      asperaSdk.globals.asperaAppVerified = true;
+      asperaSdk.globals.httpGatewayVerified = true;
+      statusService.setStatus('RUNNING');
+
+      statusService.setStatus('DISCONNECTED'); // remapped to DEGRADED
+
+      expect(asperaSdk.globals.asperaAppVerified).toBe(false);
+    });
+
+    test('restores asperaAppVerified when transitioning from DEGRADED to RUNNING', () => {
+      asperaSdk.globals.httpGatewayVerified = true;
+      statusService.setStatus('DEGRADED');
+      expect(asperaSdk.globals.asperaAppVerified).toBe(false);
+
+      statusService.setStatus('RUNNING');
+
+      expect(asperaSdk.globals.asperaAppVerified).toBe(true);
+    });
+
+    test('restores asperaAppVerified when transitioning from DISCONNECTED to RUNNING', () => {
+      statusService.setStatus('DISCONNECTED');
+      expect(asperaSdk.globals.asperaAppVerified).toBe(false);
+
+      statusService.setStatus('RUNNING');
+
+      expect(asperaSdk.globals.asperaAppVerified).toBe(true);
+    });
+
+    test('does not set asperaAppVerified when transitioning to RUNNING from other states', () => {
+      statusService.setStatus('INITIALIZING');
+
+      statusService.setStatus('RUNNING');
+
+      expect(asperaSdk.globals.asperaAppVerified).toBe(false);
     });
   });
 
@@ -160,6 +226,65 @@ describe('StatusService', () => {
       jest.advanceTimersByTime(4000);
       await Promise.resolve();
       expect(detectFn).toHaveBeenCalledTimes(1);
+    });
+
+    test('transitions to DEGRADED when HTTP Gateway is ready', async () => {
+      jest.useFakeTimers();
+      asperaSdk.globals.httpGatewayVerified = true;
+
+      const detectFn = jest.fn().mockRejectedValue(new Error('not found'));
+      statusService.startPolling(detectFn, 2000, 5000);
+
+      jest.advanceTimersByTime(5000);
+      expect(statusService.getStatus()).toBe('DEGRADED');
+    });
+
+    test('transitions to FAILED when HTTP Gateway is not ready', async () => {
+      jest.useFakeTimers();
+
+      const detectFn = jest.fn().mockRejectedValue(new Error('not found'));
+      statusService.startPolling(detectFn, 2000, 5000);
+
+      jest.advanceTimersByTime(5000);
+      expect(statusService.getStatus()).toBe('FAILED');
+    });
+
+    test('transitions from DEGRADED to RUNNING when detectFn eventually resolves', async () => {
+      jest.useFakeTimers();
+      asperaSdk.globals.httpGatewayVerified = true;
+
+      let callCount = 0;
+      const detectFn = jest.fn().mockImplementation(() => {
+        callCount++;
+        if (callCount <= 3) {
+          return Promise.reject(new Error('not found'));
+        }
+        return Promise.resolve();
+      });
+
+      const statuses: SdkStatus[] = [];
+      statusService.registerCallback((s) => statuses.push(s));
+
+      statusService.startPolling(detectFn, 2000, 5000);
+
+      // First attempt fails
+      await Promise.resolve();
+      expect(statusService.getStatus()).toBe('INITIALIZING');
+
+      // Advance past timeout
+      jest.advanceTimersByTime(5000);
+      await Promise.resolve();
+      expect(statusService.getStatus()).toBe('DEGRADED');
+
+      // Next poll interval triggers attempt that succeeds
+      jest.advanceTimersByTime(2000);
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(statusService.getStatus()).toBe('RUNNING');
+      expect(statuses).toContain('INITIALIZING');
+      expect(statuses).toContain('DEGRADED');
+      expect(statuses).toContain('RUNNING');
     });
 
     test('transitions from FAILED to RUNNING when detectFn eventually resolves', async () => {

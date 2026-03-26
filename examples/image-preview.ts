@@ -44,7 +44,7 @@ export function selectAndPreviewImageAspera() {
     return readAsArrayBuffer(filePath);
   }).then(response => {
     if (!response) {
-      return; // User canceled or no file selected
+      return; // User cancelled or no file selected
     }
 
     /**
@@ -57,7 +57,7 @@ export function selectAndPreviewImageAspera() {
   }).catch(error => {
     // Handle errors from either file selection or reading
     if (error.debugData?.code === -32002) {
-      alert('User canceled file selection');
+      alert('User cancelled file selection');
     } else {
       console.error('Failed to select or read file', error);
       alert(`Failed to select or read file\n\n${JSON.stringify(error, undefined, 2)}`);

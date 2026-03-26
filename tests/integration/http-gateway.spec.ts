@@ -231,7 +231,7 @@ describe('HTTP Gateway', () => {
   // ============================================================================
 
   describe('stopTransfer', () => {
-    it('should abort XHR and set status to canceled for an in-progress upload', async () => {
+    it('should abort XHR and set status to cancelled for an in-progress upload', async () => {
       const mockFile = new File(['upload content'], 'file.txt', {type: 'text/plain'});
       asperaSdk.httpGatewaySelectedFiles.set('file.txt', mockFile);
 
@@ -246,11 +246,11 @@ describe('HTTP Gateway', () => {
 
       expect(abortSpy).toHaveBeenCalled();
       expect(asperaSdk.httpGatewayTransferStore.has(transferId)).toBe(true);
-      expect(asperaSdk.httpGatewayTransferStore.get(transferId).status).toBe('canceled');
+      expect(asperaSdk.httpGatewayTransferStore.get(transferId).status).toBe('cancelled');
       expect(asperaSdk.httpGatewayRequestStore.has(transferId)).toBe(false);
     });
 
-    it('should emit a canceled status update via activity callback', async () => {
+    it('should emit a cancelled status update via activity callback', async () => {
       const mockFile = new File(['upload content'], 'file.txt', {type: 'text/plain'});
       asperaSdk.httpGatewaySelectedFiles.set('file.txt', mockFile);
 
@@ -262,7 +262,7 @@ describe('HTTP Gateway', () => {
       await stopTransfer(result.uuid);
 
       const lastUpdate = updates[updates.length - 1];
-      expect(lastUpdate.transfers[0].status).toBe('canceled');
+      expect(lastUpdate.transfers[0].status).toBe('cancelled');
     });
 
     it('should reject when transfer not found', async () => {

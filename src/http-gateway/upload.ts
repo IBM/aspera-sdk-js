@@ -62,7 +62,7 @@ export const httpUpload = (transferSpec: TransferSpec, asperaSdkSpec?: AsperaSdk
   };
 
   const triggerFailed = (): void => {
-    if (transferObject.status === 'canceled') {
+    if (transferObject.status === 'cancelled') {
       return;
     }
 

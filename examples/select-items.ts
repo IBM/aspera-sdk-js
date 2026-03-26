@@ -29,9 +29,9 @@ export function selectItemsAspera(selectFolders: boolean) {
     alert(`Selected items:\n\n${JSON.stringify(response, undefined, 2)}`);
     response.dataTransfer.files.forEach(item => window.selectedFiles.push(item));
   }).catch(error => {
-    // If code -32002 then user canceled selecting. Otherwise another failure.
+    // If code -32002 then user cancelled selecting. Otherwise another failure.
     if (error.debugData?.code === -32002) {
-      alert('User canceled selecting items');
+      alert('User cancelled selecting items');
     } else {
       console.error('Selecting items failed', error);
       alert(`Selecting items failed\n\n${JSON.stringify(error, undefined, 2)}`);
@@ -46,7 +46,7 @@ export function showSaveFileDialogAspera() {
     alert(`Save file dialog response:\n\n${JSON.stringify(response, undefined, 2)}`);
   }).catch(error => {
     if (error.debugData?.code === -32002) {
-      alert('User canceled save file dialog');
+      alert('User cancelled save file dialog');
     } else {
       console.error('Save file dialog failed', error);
       alert(`Save file dialog failed\n\n${JSON.stringify(error, undefined, 2)}`);

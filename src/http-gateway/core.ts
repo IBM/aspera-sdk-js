@@ -51,7 +51,12 @@ export const initHttpGateway = (response: HttpGatewayInfo): Promise<void> => {
     // Watch for old HTTP Gateway transfers in case used.
     oldHttpRegisterActivityCallback(oldHttpTransfers => {
       oldHttpTransfers.transfers.forEach(oldHttpTransfer => {
-        sendTransferUpdate(oldHttpTransfer as unknown as AsperaSdkTransfer);
+        const transfer = oldHttpTransfer as unknown as AsperaSdkTransfer;
+        // The HTTP Gateway v2 SDK uses "canceled" but we standardize on "cancelled"
+        if ((transfer.status as string) === 'canceled') {
+          transfer.status = 'cancelled';
+        }
+        sendTransferUpdate(transfer);
       });
     });
 
@@ -103,7 +108,7 @@ export const setupHttpGateway = (url: string): Promise<void> => {
 
 /**
  * Stop an in-progress HTTP Gateway transfer.
- * Aborts the underlying HTTP request and sets the transfer status to 'canceled'.
+ * Aborts the underlying HTTP request and sets the transfer status to 'cancelled'.
  *
  * Note: If the download is being directly handled by the browser's download manager, this will return
  * an error. The user must cancel the download themselves in the browser's download manger.
@@ -127,7 +132,7 @@ export const httpStopTransfer = (id: string): Promise<void> => {
     return Promise.reject(generateErrorBody(messages.stopTransferFailedExternal, {reason: 'External handle'}));
   }
 
-  transfer.status = 'canceled';
+  transfer.status = 'cancelled';
 
   const request = asperaSdk.httpGatewayRequestStore.get(id);
   if (request) {

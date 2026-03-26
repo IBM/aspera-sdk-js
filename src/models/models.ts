@@ -424,6 +424,15 @@ export interface TransferSpec {
   /** Directon of transfer, whether send (upload) or receive (download) */
   direction?: 'send'|'receive';
   /**
+   * The name of the ZIP file created when downloading more than one file.
+   * For example, `download_name: 'project_files'` results in `project_files.zip`.
+   *
+   * Only applicable when `zip_required` is `true` or downloading multiple files.
+   *
+   * This field is only used by HTTP Gateway and is ignored by other transfer clients.
+   */
+  download_name?: string;
+  /**
    * Exclude files (but not directories) that are newer than a specific time from the transfer, based on when the file was last modified.
    * Express in ISO 8601 format (for exanple, 2006-01-02T15:04:05Z) or as number of seconds elapsed since 00:00:00 UTC on 1 January 1970.
    */
@@ -610,6 +619,16 @@ export interface TransferSpec {
   token?: string;
   /** Use ascp4 as the transfer engine. */
   use_ascp4?: boolean;
+  /**
+   * **Required when downloading a folder via HTTP Gateway.** Set to `true` to have
+   * HTTP Gateway stream the folder contents back as a ZIP archive. Without this flag,
+   * HTTP Gateway cannot serve folder downloads.
+   *
+   * Use `download_name` to control the filename of the resulting ZIP (defaults to `download.zip`).
+   *
+   * This field is only used by HTTP Gateway and is ignored by other transfer clients.
+   */
+  zip_required?: boolean;
 }
 
 export type TransferStatus = 'failed'|'completed'|'running'|'queued'|'removed'|'canceled'|'orphaned'|'paused';

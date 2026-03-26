@@ -739,6 +739,7 @@ export type SdkStatus =
   | 'INITIALIZING'
   | 'RETRYING'
   | 'RUNNING'
+  | 'DEGRADED'
   | 'FAILED'
   | 'OUTDATED'
   | 'EXTENSION_INSTALL'

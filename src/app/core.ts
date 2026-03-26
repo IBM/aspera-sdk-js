@@ -17,8 +17,7 @@ import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
  * @returns a promise that resolves if server can connect or rejects if not
  */
 export const testConnection = (): Promise<any> => {
-  // FIXME: If force HTTP gateway is false this ends up preventing SDK from verifying IBM Aspera for desktop is running.
-  if (asperaSdk.useHttpGateway || asperaSdk.useConnect) {
+  if (asperaSdk.isReady || asperaSdk.useConnect) {
     return Promise.resolve(asperaSdk.globals.sdkResponseData);
   }
 
@@ -215,9 +214,10 @@ export const init = (options?: InitOptions): Promise<any> => {
  * Use {@link registerStatusCallback} to receive status updates. Use {@link getStatus} to
  * read the current status synchronously at any time.
  *
- * **Desktop path**: `INITIALIZING` → `RUNNING` (app detected) or `FAILED` (timeout).
- * Detection continues in the background after `FAILED`. If the user launches the app
- * later, the status transitions to `RUNNING`.
+ * **Desktop path**: `INITIALIZING` → `RUNNING` (app detected), `DEGRADED` (timeout but
+ * HTTP Gateway is available as a supplementary transport), or `FAILED` (timeout, no
+ * fallback). Detection continues in the background after `DEGRADED` or `FAILED` — if the
+ * user launches the app later, the status transitions to `RUNNING`.
  *
  * **Connect path**: `INITIALIZING` → `RUNNING`, `FAILED`, `OUTDATED`, or
  * `EXTENSION_INSTALL` depending on the state of the Connect browser extension
@@ -467,15 +467,43 @@ export const deregisterActivityCallback = (id: string): void => {
 };
 
 /**
- * Register a callback for getting updates about the connection status of IBM Aspera SDK.
+ * Register a callback for SDK lifecycle status changes. The callback fires immediately
+ * with the current status (if one exists) and again whenever the status changes.
  *
- * For example, to be notified of when the SDK loses connection with the application or connection
- * is re-established. This can be useful if you want to handle the case where the user quits IBM Aspera
- * after `init` has already been called, and want to prompt the user to relaunch the application.
+ * Status values:
+ *
+ * - `INITIALIZING` — The SDK is detecting a transfer client.
+ * - `RUNNING` — A transfer client is ready. Full functionality is available.
+ * - `DEGRADED` — The primary transfer client (IBM Aspera for desktop) was not detected, but HTTP
+ *   Gateway is available as a fallback. This is only available if XXX...
+ * - `FAILED` — No transfer client could be reached. This could be because the user does
+ *    not have a transfer client installed, it is not running, or in the case of HTTP Gateway,
+ *    it was not reachable.
+ * - `DISCONNECTED` — The transfer client was previously running but lost connection. This is specific
+ *    to IBM Aspera for desktop. For example, if the user quits the app this status will trigger.
+ * - `OUTDATED` — (Connect only) The Connect installation needs updating.
+ * - `EXTENSION_INSTALL` — (Connect only) The browser extension needs to be installed.
+ *
+ * For IBM Aspera for desktop, detection continues in the background after `FAILED` or `DEGRADED`.
+ * If the user launches the application later, the status transitions to `RUNNING`.
  *
  * @param callback callback function to receive status events
  *
  * @returns ID representing the callback for deregistration purposes
+ *
+ * @example
+ * const id = registerStatusCallback(status => {
+ *   if (status === 'RUNNING') {
+ *     // Full functionality — enable all UI
+ *   } else if (status === 'DEGRADED') {
+ *     // Transfers work via HTTP Gateway
+ *   } else if (status === 'FAILED') {
+ *     // Nothing available — prompt user to install
+ *   }
+ * });
+ *
+ * // Later, to stop listening:
+ * deregisterStatusCallback(id);
  */
 export const registerStatusCallback = (callback: (status: SdkStatus) => void): string => {
   return statusService.registerCallback(callback);

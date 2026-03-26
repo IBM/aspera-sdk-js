@@ -631,7 +631,7 @@ export interface TransferSpec {
   zip_required?: boolean;
 }
 
-export type TransferStatus = 'failed'|'completed'|'running'|'queued'|'removed'|'canceled'|'orphaned'|'paused';
+export type TransferStatus = 'failed'|'completed'|'running'|'queued'|'removed'|'cancelled'|'orphaned'|'paused';
 
 /** Pagination options for paginated API requests. */
 export interface Pagination {

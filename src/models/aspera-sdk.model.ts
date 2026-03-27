@@ -141,6 +141,15 @@ export class ActivityTracking {
       ? message.data
       : {transfers: [message.data]};
 
+    const transfers = (data as any).transfers;
+    if (Array.isArray(transfers)) {
+      transfers.forEach((t: any) => {
+        if (!t.transferClient) {
+          t.transferClient = 'desktop';
+        }
+      });
+    }
+
     if (message.type === 'transferUpdated' || message.type === 'transferRemoved') {
       this.activity_callbacks.forEach(callback => {
         if (typeof callback === 'function') {

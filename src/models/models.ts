@@ -724,7 +724,12 @@ export interface AsperaSdkTransfer {
   remaining_usec: number;
   /** The title of the transfer */
   title: string;
-  /** Indicate if HTTP Gateway transfer */
+  /** The transfer client that handled this transfer */
+  transferClient?: TransferClient;
+  /**
+   * Indicate if HTTP Gateway transfer
+   * @deprecated Use `transferClient === 'http-gateway'` instead.
+   */
   httpGatewayTransfer?: boolean;
   /** Indicate the request id of the HTTP Gateway transfer */
   httpRequestId?: string;
@@ -753,6 +758,9 @@ export interface InstallerInfoResponse {
 export type WebsocketTopics = 'subscribe_transfer_activity' | 'transfer_activity';
 export type WebsocketEvent = 'CLOSED' | 'RECONNECT';
 export type SafariExtensionEvent = 'ENABLED' | 'DISABLED';
+
+/** The transfer client that handled the transfer */
+export type TransferClient = 'desktop' | 'http-gateway' | 'connect';
 
 export type SdkStatus =
   | 'INITIALIZING'

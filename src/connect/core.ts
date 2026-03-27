@@ -15,9 +15,10 @@ let installerFlowActivated = false;
  */
 
 export const handleTransfers = (transfers: ConnectTypes.TransferInfo[]): void => {
+  const stamped = transfers.map(t => ({...t, transferClient: 'connect' as const}));
   asperaSdk.activityTracking.handleTransferActivity({
     type: 'transferUpdated',
-    data: {transfers},
+    data: {transfers: stamped},
   });
 };
 

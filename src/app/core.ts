@@ -1486,6 +1486,11 @@ export const readDirectory = (options: ReadDirectoryOptions): Promise<ReadDirect
 };
 
 const supportsMethod = (method: string): boolean => {
+  // HTTP Gateway v2 specific overrides
+  if (asperaSdk.useOldHttpGateway && (method === 'read_as_array_buffer' || method === 'read_chunk_as_array_buffer')) {
+    return false;
+  }
+
   // We currently do not support calculating file checksums when using HTTP Gateway. In theory it should be possible
   // to calculate this directly in the browser similar to how `readAsArrayBuffer()` is implemented.
   // HTTP Gateway also does not support showing native transfer client UI (about, preferences, etc.).

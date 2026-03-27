@@ -1515,11 +1515,12 @@ const supportsMethod = (method: string): boolean => {
  * Returns an object describing the high-level capabilities supported by the user's
  * transfer client (e.g. IBM Aspera for desktop, Connect, or HTTP Gateway).
  *
- * Use this for feature detection at a semantic level rather than checking individual RPC methods.
- * Capabitilies may depend on multiple underlying RPC methods and also may vary by transfer client.
+ * Use this for feature detection at a semantic level as capabilities may change depending on the
+ * transfer client.
  *
- * Some capabitilies may depend on newer versions of the transfer client. This function may be useful
- * if you want to conditionally perform certain actions rather than potentially getting an error.
+ * Rather than caching the return value of this function, it's recommended to call it on the fly as
+ * capabilities may change if your application supports multiple transfer clients. As a result, it's
+ * recommend to use the slightly more ergonomic {@link hasCapability}.
  *
  * @returns an object with boolean flags for each capability.
  *
@@ -1547,10 +1548,18 @@ export const getCapabilities = (): SdkCapabilities => {
 };
 
 /**
- * Check if the SDK and underlying transfer client supports a specific capability.
+ * Check if the SDK and underlying transfer client supports a specific capability or feature.
  *
  * Capabilities depend on the transfer client being used (HTTP Gateway, Connect, or IBM Aspera for desktop).
- * Use this function to conditionally enable/disable features in your application.
+ *
+ * This function may be useful if you want to conditionally perform certain actions rather than
+ * potentially getting an error.
+ *
+ * For example, only IBM Aspera for desktop supports traversing a folder's contents. An application can
+ * check `hasCapability('readDirectory')` to optionally show a folder browser only when the feature is available.
+ * For example, when a user does not have IBM Aspera for desktop installed and is using HTTP Gateway, your
+ * application can disable this feature. Later, if that same user installs IBM Aspera for desktop, your application
+ * will show the feature as enabled without any additional changes.
  *
  * @param capability the capability to check.
  *
@@ -1560,7 +1569,7 @@ export const getCapabilities = (): SdkCapabilities => {
  * ```typescript
  * // Determine if your web application can render image previews for user selected files
  * if (asperaSdk.hasCapability('imagePreview')) {
- *   asperaSdk.readAsArrayBuffer(path);
+ *   const response = await asperaSdk.readAsArrayBuffer(path);
  * }
  * ```
  */

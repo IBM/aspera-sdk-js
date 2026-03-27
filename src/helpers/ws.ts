@@ -129,6 +129,8 @@ export class WebsocketService {
   }
 
   private connect() {
+    this.detachSocket();
+
     this.getWebSocketConnection(asperaSdk.globals.rpcPort)
       .then((webSocket) => {
         this.globalSocket = webSocket;
@@ -143,7 +145,21 @@ export class WebsocketService {
       });
   }
 
+  /**
+   * Detach event handlers from the current socket so it cannot fire
+   * stale CLOSED/RECONNECT events after being replaced.
+   */
+  private detachSocket(): void {
+    if (this.globalSocket) {
+      this.globalSocket.onopen = null;
+      this.globalSocket.onclose = null;
+      this.globalSocket.onerror = null;
+      this.globalSocket.onmessage = null;
+    }
+  }
+
   private reconnect() {
+    this.detachSocket();
     if (this.globalSocket) {
       this.globalSocket.close();
     }

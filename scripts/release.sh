@@ -2,10 +2,6 @@
 
 set -euo pipefail
 
-# Get the version from package.json
-VERSION=$(node -p "require('./package.json').version")
-TAG="v$VERSION"
-
 # Check if we're on main branch
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 if [ "$BRANCH" != "main" ]; then
@@ -23,7 +19,11 @@ fi
 echo "Pulling latest changes from main..."
 git pull origin main
 
-# Re-read version after pull (in case version.yml updated it)
+# Bump version (scans commits since last tag)
+echo "Determining version bump..."
+npm run version:update
+
+# Read the new version
 VERSION=$(node -p "require('./package.json').version")
 TAG="v$VERSION"
 
@@ -35,9 +35,9 @@ fi
 
 echo "Creating release for version $VERSION..."
 
-# Create and push the tag
+# Create and push the tag, push the version commit
 git tag "$TAG"
-git push origin "$TAG"
+git push origin main "$TAG"
 
 echo ""
 echo "Release $TAG triggered successfully!"

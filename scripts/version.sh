@@ -2,23 +2,32 @@
 
 set -euo pipefail
 
-MESSAGE=$(git log -1 --pretty=%B | tr '[:upper:]' '[:lower:]')
+# Get all commit messages since the last version tag
+LAST_TAG=$(git describe --tags --abbrev=0 --match "v*" 2>/dev/null || echo "")
 
-NEWVERSION=""
-if [[ "$MESSAGE" == *"chore(release)"* ]]; then
-  echo "Not bumping chore release"
-elif [[ "$MESSAGE" == *"breaking change"* ]]; then
-  echo "Bumping major version"
-  NEWVERSION=`npm version major --no-git-tag-version --no-verify`
-elif [[ "$MESSAGE" == *"feat"* ]]; then
-  echo "Bumping minor version"
-  NEWVERSION=`npm version minor --no-git-tag-version --no-verify`
+if [ -z "$LAST_TAG" ]; then
+  MESSAGES=$(git log --pretty=%B | tr '[:upper:]' '[:lower:]')
 else
-  echo "Bumping patch version"
-  NEWVERSION=`npm version patch --no-git-tag-version --no-verify`
+  MESSAGES=$(git log "$LAST_TAG"..HEAD --pretty=%B | tr '[:upper:]' '[:lower:]')
 fi
 
-if [ "$NEWVERSION" != "" ]; then
-    git add package.json package-lock.json
-    git commit -m "chore(release): $NEWVERSION [ci-ignore]" --no-verify
+if [ -z "$MESSAGES" ]; then
+  echo "No new commits since $LAST_TAG. Nothing to bump."
+  exit 0
 fi
+
+# Determine bump type: highest wins (major > minor > patch)
+BUMP="patch"
+if echo "$MESSAGES" | grep -q "feat"; then
+  BUMP="minor"
+fi
+if echo "$MESSAGES" | grep -q "breaking change"; then
+  BUMP="major"
+fi
+
+echo "Bumping $BUMP version"
+NEWVERSION=$(npm version "$BUMP" --no-git-tag-version --no-verify)
+echo "New version: $NEWVERSION"
+
+git add package.json package-lock.json
+git commit -m "chore(release): $NEWVERSION" --no-verify

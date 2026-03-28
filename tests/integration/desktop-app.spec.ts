@@ -38,7 +38,7 @@ describe('Desktop App', () => {
 
   beforeEach(() => {
     setupSdk({mode: 'desktop-app', appId: APP_ID});
-    mockFetch((url, body) => rpcOk({}, body?.id || 0));
+    mockFetch((url, body) => rpcOk([], body?.id || 0));
   });
 
   afterEach(() => {

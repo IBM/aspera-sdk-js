@@ -418,11 +418,12 @@ export const startTransfer = (transferSpec: TransferSpec, asperaSdkSpec?: Aspera
     'Set `allow_dialogs: false` explicitly to suppress this warning. ' +
     'More info: https://github.com/IBM/aspera-sdk-js/issues/196'
       );
-      asperaSdkSpec = { ...asperaSdkSpec, allow_dialogs: false };
+      asperaSdkSpec.allow_dialogs = false;
     }
 
     return asperaSdk.globals.connect.startTransferPromise(transferSpec as unknown as ConnectTypes.TransferSpec, asperaSdkSpec).then(response => {
-      return {...response.transfer_specs[0], transferClient: 'connect'} as unknown as AsperaSdkTransfer;
+      (response.transfer_specs[0] as any).transferClient = 'connect';
+      return response.transfer_specs[0] as unknown as AsperaSdkTransfer;
     });
   } else if (!asperaSdk.isReady) {
     return throwError(messages.serverNotVerified);
@@ -602,7 +603,8 @@ export const stopTransfer = (id: string): Promise<any> => {
 export const resumeTransfer = (id: string, options?: ResumeTransferOptions): Promise<AsperaSdkTransfer> => {
   if (asperaSdk.useConnect) {
     return asperaSdk.globals.connect.resumeTransfer(id, options).then(response => {
-      return {...response.transfer_spec, transferClient: 'connect'} as unknown as AsperaSdkTransfer;
+      (response.transfer_spec as any).transferClient = 'connect';
+      return response.transfer_spec as unknown as AsperaSdkTransfer;
     });
   }
 
@@ -931,8 +933,10 @@ export const getAllTransfers = (): Promise<AsperaSdkTransfer[]> => {
   } else if (asperaSdk.useConnect) {
     asperaSdk.globals.connect.getAllTransfers({
       success: data => {
-        const transfers = data.transfers.map((t: any) => ({...t, transferClient: 'connect'}));
-        promiseInfo.resolver(transfers);
+        data.transfers.forEach(t => {
+          (t as any).transferClient = 'connect';
+        });
+        promiseInfo.resolver(data.transfers);
       }, error: error => {
         promiseInfo.rejecter(error);
       },
@@ -951,11 +955,9 @@ export const getAllTransfers = (): Promise<AsperaSdkTransfer[]> => {
 
   client.request('get_all_transfers', payload)
     .then((data: AsperaSdkTransfer[]) => {
-      if (Array.isArray(data)) {
-        data.forEach(t => {
-          t.transferClient = 'desktop';
-        });
-      }
+      data.forEach(t => {
+        t.transferClient = 'desktop';
+      });
       promiseInfo.resolver(data);
     })
     .catch(error => {
@@ -984,7 +986,8 @@ export const getTransfer = (id: string): Promise<AsperaSdkTransfer> => {
     }
   } else if (asperaSdk.useConnect) {
     return asperaSdk.globals.connect.getTransfer(id).then(response => {
-      return {...response.transfer_info, transferClient: 'connect'} as unknown as AsperaSdkTransfer;
+      (response.transfer_info as any).transferClient = 'connect';
+      return response.transfer_info as unknown as AsperaSdkTransfer;
     });
   }
 

@@ -418,10 +418,11 @@ export const startTransfer = (transferSpec: TransferSpec, asperaSdkSpec?: Aspera
     'Set `allow_dialogs: false` explicitly to suppress this warning. ' +
     'More info: https://github.com/IBM/aspera-sdk-js/issues/196'
       );
-      asperaSdkSpec = { ...asperaSdkSpec, allow_dialogs: false };
+      asperaSdkSpec.allow_dialogs = false;
     }
 
     return asperaSdk.globals.connect.startTransferPromise(transferSpec as unknown as ConnectTypes.TransferSpec, asperaSdkSpec).then(response => {
+      (response.transfer_specs[0] as any).transfer_client = 'connect';
       return response.transfer_specs[0] as unknown as AsperaSdkTransfer;
     });
   } else if (!asperaSdk.isReady) {
@@ -437,7 +438,10 @@ export const startTransfer = (transferSpec: TransferSpec, asperaSdkSpec?: Aspera
   };
 
   client.request('start_transfer', payload)
-    .then((data: any) => promiseInfo.resolver(data))
+    .then((data: any) => {
+      data.transfer_client = 'desktop';
+      promiseInfo.resolver(data);
+    })
     .catch(error => {
       errorLog(messages.transferFailed, error);
       promiseInfo.rejecter(generateErrorBody(messages.transferFailed, error));
@@ -599,6 +603,7 @@ export const stopTransfer = (id: string): Promise<any> => {
 export const resumeTransfer = (id: string, options?: ResumeTransferOptions): Promise<AsperaSdkTransfer> => {
   if (asperaSdk.useConnect) {
     return asperaSdk.globals.connect.resumeTransfer(id, options).then(response => {
+      (response.transfer_spec as any).transfer_client = 'connect';
       return response.transfer_spec as unknown as AsperaSdkTransfer;
     });
   }
@@ -615,7 +620,10 @@ export const resumeTransfer = (id: string, options?: ResumeTransferOptions): Pro
   };
 
   client.request('resume_transfer', payload)
-    .then((data: AsperaSdkTransfer) => promiseInfo.resolver(data))
+    .then((data: AsperaSdkTransfer) => {
+      data.transfer_client = 'desktop';
+      promiseInfo.resolver(data);
+    })
     .catch(error => {
       errorLog(messages.resumeTransferFailed, error);
       promiseInfo.rejecter(generateErrorBody(messages.resumeTransferFailed, error));
@@ -925,6 +933,9 @@ export const getAllTransfers = (): Promise<AsperaSdkTransfer[]> => {
   } else if (asperaSdk.useConnect) {
     asperaSdk.globals.connect.getAllTransfers({
       success: data => {
+        data.transfers.forEach(t => {
+          (t as any).transfer_client = 'connect';
+        });
         promiseInfo.resolver(data.transfers);
       }, error: error => {
         promiseInfo.rejecter(error);
@@ -943,7 +954,12 @@ export const getAllTransfers = (): Promise<AsperaSdkTransfer[]> => {
   };
 
   client.request('get_all_transfers', payload)
-    .then((data: AsperaSdkTransfer[]) => promiseInfo.resolver(data))
+    .then((data: AsperaSdkTransfer[]) => {
+      data.forEach(t => {
+        t.transfer_client = 'desktop';
+      });
+      promiseInfo.resolver(data);
+    })
     .catch(error => {
       errorLog(messages.getAllTransfersFailed, error);
       promiseInfo.rejecter(generateErrorBody(messages.getAllTransfersFailed, error));
@@ -970,6 +986,7 @@ export const getTransfer = (id: string): Promise<AsperaSdkTransfer> => {
     }
   } else if (asperaSdk.useConnect) {
     return asperaSdk.globals.connect.getTransfer(id).then(response => {
+      (response.transfer_info as any).transfer_client = 'connect';
       return response.transfer_info as unknown as AsperaSdkTransfer;
     });
   }
@@ -985,7 +1002,10 @@ export const getTransfer = (id: string): Promise<AsperaSdkTransfer> => {
   };
 
   client.request('get_transfer', payload)
-    .then((data: AsperaSdkTransfer) => promiseInfo.resolver(data))
+    .then((data: AsperaSdkTransfer) => {
+      data.transfer_client = 'desktop';
+      promiseInfo.resolver(data);
+    })
     .catch(error => {
       errorLog(messages.getTransferFailed, error);
       promiseInfo.rejecter(generateErrorBody(messages.getTransferFailed, error));

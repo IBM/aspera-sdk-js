@@ -56,6 +56,7 @@ export const initHttpGateway = (response: HttpGatewayInfo): Promise<void> => {
         if ((transfer.status as string) === 'canceled') {
           transfer.status = 'cancelled';
         }
+        transfer.transfer_client = 'http-gateway';
         sendTransferUpdate(transfer);
       });
     });
@@ -353,6 +354,7 @@ export const getSdkTransfer = (transferSpec: TransferSpec): AsperaSdkTransfer =>
     percentage: 0,
     title: '',
     remaining_usec: 0,
+    transfer_client: 'http-gateway',
     httpGatewayTransfer: true,
     httpDownloadExternalHandle: false,
   };

@@ -1,6 +1,6 @@
 import {messages} from '../constants/messages';
 import {client} from '../helpers/client/client';
-import {errorLog, generateErrorBody, generatePromiseObjects, isSafari, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
+import {errorLog, generateErrorBody, generatePromiseObjects, isSafari, isValidTransferSpec, randomUUID, throwError, withTimeout} from '../helpers/helpers';
 import {httpDownload, httpUpload, setupHttpGateway} from '../http-gateway';
 import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChunkAsArrayBuffer, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, httpStopTransfer, sendTransferUpdate} from '../http-gateway/core';
 import {asperaSdk} from '../index';
@@ -155,6 +155,13 @@ export const init = (options?: InitOptions): Promise<any> => {
   };
 
   const getDesktopStartCalls = (): Promise<unknown> => {
+    if (options?.connectSettings?.fallback && !options?.connectSettings?.useConnect) {
+      const timeout = options?.retryTimeout ?? 5000;
+      return withTimeout(connectDesktop(), timeout)
+        .then(() => asperaSdk.globals.sdkResponseData)
+        .catch(() => initConnect(options.connectSettings));
+    }
+
     return connectDesktop()
       .then(() => asperaSdk.globals.sdkResponseData)
       .catch(handleErrors);
@@ -278,8 +285,14 @@ export const initSession = (options?: InitOptions): void => {
   const retryInterval = options?.retryInterval ?? 2000;
   const retryTimeout = options?.retryTimeout ?? 5000;
 
+  const onFallback = options?.connectSettings?.fallback && !options?.connectSettings?.useConnect
+    ? (): void => {
+      initConnect(options.connectSettings);
+    }
+    : undefined;
+
   const startDesktopDetection = (): void => {
-    statusService.startPolling(connectDesktop, retryInterval, retryTimeout);
+    statusService.startPolling(connectDesktop, retryInterval, retryTimeout, onFallback);
   };
 
   const startTransferClient = (): void => {

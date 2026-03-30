@@ -988,6 +988,8 @@ export interface InitOptions {
   connectSettings?: {
     /** Use connect. Indicate if Connect should be used instead of Desktop. */
     useConnect: boolean;
+    /** Try Desktop first, fall back to Connect if Desktop is unavailable within the retry timeout. Ignored when `useConnect` is true. */
+    fallback?: boolean;
     /** Minimum version of Connect to allow */
     minVersion?: string;
     /** Indicate if Drag and Drop is enabled */

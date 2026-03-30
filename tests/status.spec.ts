@@ -60,6 +60,23 @@ describe('StatusService', () => {
       expect(statusService.getStatus()).toBe('DEGRADED');
     });
 
+    test('remaps FAILED to DEGRADED when HTTP Gateway is ready', () => {
+      asperaSdk.globals.httpGatewayVerified = true;
+      statusService.setStatus('INITIALIZING');
+
+      statusService.setStatus('FAILED');
+
+      expect(statusService.getStatus()).toBe('DEGRADED');
+    });
+
+    test('keeps FAILED when HTTP Gateway is not ready', () => {
+      statusService.setStatus('INITIALIZING');
+
+      statusService.setStatus('FAILED');
+
+      expect(statusService.getStatus()).toBe('FAILED');
+    });
+
     test('keeps DISCONNECTED when HTTP Gateway is not ready', () => {
       statusService.setStatus('RUNNING');
 
@@ -285,6 +302,49 @@ describe('StatusService', () => {
       expect(statuses).toContain('INITIALIZING');
       expect(statuses).toContain('DEGRADED');
       expect(statuses).toContain('RUNNING');
+    });
+
+    test('calls onFallback and stops polling when timeout fires with fallback', async () => {
+      jest.useFakeTimers();
+
+      const detectFn = jest.fn().mockRejectedValue(new Error('not found'));
+      const onFallback = jest.fn();
+      statusService.startPolling(detectFn, 2000, 5000, onFallback);
+      await Promise.resolve();
+
+      // Before timeout: still INITIALIZING, no fallback
+      jest.advanceTimersByTime(4999);
+      await Promise.resolve();
+      expect(onFallback).not.toHaveBeenCalled();
+      expect(statusService.getStatus()).toBe('INITIALIZING');
+
+      // At timeout: onFallback called
+      jest.advanceTimersByTime(1);
+      expect(onFallback).toHaveBeenCalledTimes(1);
+
+      // Polling stopped — no more detectFn calls after timeout
+      const callsBefore = detectFn.mock.calls.length;
+      jest.advanceTimersByTime(4000);
+      await Promise.resolve();
+      expect(detectFn.mock.calls.length).toBe(callsBefore);
+    });
+
+    test('does not call onFallback if Desktop found before timeout', async () => {
+      jest.useFakeTimers();
+
+      const detectFn = jest.fn().mockResolvedValue(undefined);
+      const onFallback = jest.fn();
+      statusService.startPolling(detectFn, 2000, 5000, onFallback);
+
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(statusService.getStatus()).toBe('RUNNING');
+      expect(onFallback).not.toHaveBeenCalled();
+
+      // Advance past timeout to make sure onFallback is not called
+      jest.advanceTimersByTime(6000);
+      expect(onFallback).not.toHaveBeenCalled();
     });
 
     test('transitions from FAILED to RUNNING when detectFn eventually resolves', async () => {

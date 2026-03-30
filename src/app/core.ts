@@ -422,7 +422,7 @@ export const startTransfer = (transferSpec: TransferSpec, asperaSdkSpec?: Aspera
     }
 
     return asperaSdk.globals.connect.startTransferPromise(transferSpec as unknown as ConnectTypes.TransferSpec, asperaSdkSpec).then(response => {
-      (response.transfer_specs[0] as any).transferClient = 'connect';
+      (response.transfer_specs[0] as any).transfer_client = 'connect';
       return response.transfer_specs[0] as unknown as AsperaSdkTransfer;
     });
   } else if (!asperaSdk.isReady) {
@@ -439,7 +439,7 @@ export const startTransfer = (transferSpec: TransferSpec, asperaSdkSpec?: Aspera
 
   client.request('start_transfer', payload)
     .then((data: any) => {
-      data.transferClient = 'desktop';
+      data.transfer_client = 'desktop';
       promiseInfo.resolver(data);
     })
     .catch(error => {
@@ -603,7 +603,7 @@ export const stopTransfer = (id: string): Promise<any> => {
 export const resumeTransfer = (id: string, options?: ResumeTransferOptions): Promise<AsperaSdkTransfer> => {
   if (asperaSdk.useConnect) {
     return asperaSdk.globals.connect.resumeTransfer(id, options).then(response => {
-      (response.transfer_spec as any).transferClient = 'connect';
+      (response.transfer_spec as any).transfer_client = 'connect';
       return response.transfer_spec as unknown as AsperaSdkTransfer;
     });
   }
@@ -621,7 +621,7 @@ export const resumeTransfer = (id: string, options?: ResumeTransferOptions): Pro
 
   client.request('resume_transfer', payload)
     .then((data: AsperaSdkTransfer) => {
-      data.transferClient = 'desktop';
+      data.transfer_client = 'desktop';
       promiseInfo.resolver(data);
     })
     .catch(error => {
@@ -934,7 +934,7 @@ export const getAllTransfers = (): Promise<AsperaSdkTransfer[]> => {
     asperaSdk.globals.connect.getAllTransfers({
       success: data => {
         data.transfers.forEach(t => {
-          (t as any).transferClient = 'connect';
+          (t as any).transfer_client = 'connect';
         });
         promiseInfo.resolver(data.transfers);
       }, error: error => {
@@ -956,7 +956,7 @@ export const getAllTransfers = (): Promise<AsperaSdkTransfer[]> => {
   client.request('get_all_transfers', payload)
     .then((data: AsperaSdkTransfer[]) => {
       data.forEach(t => {
-        t.transferClient = 'desktop';
+        t.transfer_client = 'desktop';
       });
       promiseInfo.resolver(data);
     })
@@ -986,7 +986,7 @@ export const getTransfer = (id: string): Promise<AsperaSdkTransfer> => {
     }
   } else if (asperaSdk.useConnect) {
     return asperaSdk.globals.connect.getTransfer(id).then(response => {
-      (response.transfer_info as any).transferClient = 'connect';
+      (response.transfer_info as any).transfer_client = 'connect';
       return response.transfer_info as unknown as AsperaSdkTransfer;
     });
   }
@@ -1003,7 +1003,7 @@ export const getTransfer = (id: string): Promise<AsperaSdkTransfer> => {
 
   client.request('get_transfer', payload)
     .then((data: AsperaSdkTransfer) => {
-      data.transferClient = 'desktop';
+      data.transfer_client = 'desktop';
       promiseInfo.resolver(data);
     })
     .catch(error => {

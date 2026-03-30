@@ -59,10 +59,10 @@ describe('Desktop App', () => {
       });
     });
 
-    it('should stamp transferClient as desktop', async () => {
+    it('should stamp transfer_client as desktop', async () => {
       const result = await startTransfer(downloadSpec(), {});
 
-      expect(result.transferClient).toBe('desktop');
+      expect(result.transfer_client).toBe('desktop');
     });
   });
 
@@ -98,10 +98,10 @@ describe('Desktop App', () => {
       });
     });
 
-    it('should stamp transferClient as desktop', async () => {
+    it('should stamp transfer_client as desktop', async () => {
       const result = await resumeTransfer('transfer-uuid-789');
 
-      expect(result.transferClient).toBe('desktop');
+      expect(result.transfer_client).toBe('desktop');
     });
   });
 
@@ -219,12 +219,12 @@ describe('Desktop App', () => {
       expect(call.body.params).toEqual({app_id: APP_ID});
     });
 
-    it('should stamp transferClient as desktop on each transfer', async () => {
+    it('should stamp transfer_client as desktop on each transfer', async () => {
       mockFetch((url, body) => rpcOk([{uuid: 't1'}, {uuid: 't2'}], body?.id || 0));
 
       const result = await getAllTransfers();
 
-      result.forEach(t => expect(t.transferClient).toBe('desktop'));
+      result.forEach(t => expect(t.transfer_client).toBe('desktop'));
     });
   });
 
@@ -237,10 +237,10 @@ describe('Desktop App', () => {
       expect(call.body.params).toEqual({transfer_id: 'transfer-uuid-abc'});
     });
 
-    it('should stamp transferClient as desktop', async () => {
+    it('should stamp transfer_client as desktop', async () => {
       const result = await getTransfer('transfer-uuid-abc');
 
-      expect(result.transferClient).toBe('desktop');
+      expect(result.transfer_client).toBe('desktop');
     });
   });
 

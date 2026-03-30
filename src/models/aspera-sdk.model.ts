@@ -144,8 +144,8 @@ export class ActivityTracking {
     const transfers = (data as any).transfers;
     if (Array.isArray(transfers)) {
       transfers.forEach((t: any) => {
-        if (!t.transferClient) {
-          t.transferClient = 'desktop';
+        if (!t.transfer_client) {
+          t.transfer_client = 'desktop';
         }
       });
     }

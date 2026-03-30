@@ -725,10 +725,10 @@ export interface AsperaSdkTransfer {
   /** The title of the transfer */
   title: string;
   /** The transfer client that handled this transfer */
-  transferClient: TransferClient;
+  transfer_client: TransferClient;
   /**
    * Indicate if HTTP Gateway transfer
-   * @deprecated Use `transferClient === 'http-gateway'` instead.
+   * @deprecated Use `transfer_client === 'http-gateway'` instead.
    */
   httpGatewayTransfer?: boolean;
   /** Indicate the request id of the HTTP Gateway transfer */

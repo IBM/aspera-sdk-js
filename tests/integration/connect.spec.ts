@@ -57,10 +57,10 @@ describe('Connect SDK', () => {
       expect(call.args[1]).toEqual({allow_dialogs: false, use_absolute_destination_path: false});
     });
 
-    it('should stamp transferClient as connect', async () => {
+    it('should stamp transfer_client as connect', async () => {
       const result = await startTransfer(downloadSpec(), {});
 
-      expect(result.transferClient).toBe('connect');
+      expect(result.transfer_client).toBe('connect');
     });
   });
 
@@ -90,10 +90,10 @@ describe('Connect SDK', () => {
       expect(mock.resumeTransfer).toHaveBeenCalledWith('transfer-uuid-789', {token: 'new-token'});
     });
 
-    it('should stamp transferClient as connect', async () => {
+    it('should stamp transfer_client as connect', async () => {
       const result = await resumeTransfer('transfer-uuid-789');
 
-      expect(result.transferClient).toBe('connect');
+      expect(result.transfer_client).toBe('connect');
     });
   });
 
@@ -153,7 +153,7 @@ describe('Connect SDK', () => {
       expect(mock.getAllTransfers).toHaveBeenCalled();
     });
 
-    it('should stamp transferClient as connect on each transfer', async () => {
+    it('should stamp transfer_client as connect on each transfer', async () => {
       const mock = getConnectMock();
       mock.getAllTransfers.mockImplementation((callbacks: any) => {
         callbacks.success({transfers: [{uuid: 't1'}, {uuid: 't2'}]});
@@ -161,7 +161,7 @@ describe('Connect SDK', () => {
 
       const result = await getAllTransfers();
 
-      result.forEach(t => expect(t.transferClient).toBe('connect'));
+      result.forEach(t => expect(t.transfer_client).toBe('connect'));
     });
   });
 
@@ -173,10 +173,10 @@ describe('Connect SDK', () => {
       expect(mock.getTransfer).toHaveBeenCalledWith('transfer-uuid-abc');
     });
 
-    it('should stamp transferClient as connect', async () => {
+    it('should stamp transfer_client as connect', async () => {
       const result = await getTransfer('transfer-uuid-abc');
 
-      expect(result.transferClient).toBe('connect');
+      expect(result.transfer_client).toBe('connect');
     });
   });
 

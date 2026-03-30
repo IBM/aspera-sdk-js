@@ -94,7 +94,7 @@ describe('HTTP Gateway', () => {
       const result = await startTransfer(downloadSpec(), {});
 
       expect(result.status).toBe('running');
-      expect(result.transferClient).toBe('http-gateway');
+      expect(result.transfer_client).toBe('http-gateway');
       expect(result.httpGatewayTransfer).toBe(true);
       expect(result.httpRequestId).toBe('test-request-id');
     });

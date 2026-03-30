@@ -7,6 +7,7 @@ import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
 import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, SaveFileDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, SdkStatus, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, ShowPreferencesPageOptions, PreferencesPage, TestSshPortsOptions} from '../models/models';
 import {statusService} from './status';
+import {websocketService} from '../helpers/ws';
 import {initConnect} from '../connect/core';
 import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
 
@@ -159,7 +160,10 @@ export const init = (options?: InitOptions): Promise<any> => {
       const timeout = options?.retryTimeout ?? 5000;
       return withTimeout(connectDesktop(), timeout)
         .then(() => asperaSdk.globals.sdkResponseData)
-        .catch(() => initConnect(options.connectSettings));
+        .catch(() => {
+          websocketService.disconnect();
+          return initConnect(options.connectSettings);
+        });
     }
 
     return connectDesktop()
@@ -287,6 +291,7 @@ export const initSession = (options?: InitOptions): void => {
 
   const onFallback = options?.connectSettings?.fallback && !options?.connectSettings?.useConnect
     ? (): void => {
+      websocketService.disconnect();
       initConnect(options.connectSettings);
     }
     : undefined;

@@ -10,6 +10,7 @@ import {asperaSdk} from '../index';
 import {HttpGatewayInfo} from '../http-gateway/models';
 import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
 import {Connect, ConnectInstaller} from '@ibm-aspera/connect-sdk-js';
+import { TransferClient } from '../../dist/commonjs';
 
 export class AsperaSdkGlobals {
   /** The URL of the IBM Aspera HTTP server to use with the SDK */
@@ -395,6 +396,7 @@ export class AsperaSdk {
   getChecksum: (options: GetChecksumOptions) => Promise<ChecksumFileResponse>;
   /** Function to read directory contents and return entries as a flat list */
   readDirectory: (options: ReadDirectoryOptions) => Promise<ReadDirectoryResponse>;
+  currentTransferClient: () => TransferClient | undefined;
   /** Indicate if Safari Extension is enabled. If the extension is disabled during the lifecycle this will not update to disabled. */
   SAFARI_EXTENSION_STATUS: SafariExtensionEvent = 'DISABLED';
   /** Aspera HTTP Gateway calls. This normally is not needed by clients but expose just in case. */

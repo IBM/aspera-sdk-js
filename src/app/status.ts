@@ -88,6 +88,34 @@ class StatusService {
     this.pollTimerId = setInterval(attempt, interval);
   }
 
+  /**
+   * Resume Desktop detection polling without resetting status or setting a fail timeout.
+   * Used after a fallback decision (e.g. FAILED/DEGRADED) to continue detecting Desktop
+   * in the background so a late launch can still transition to RUNNING.
+   *
+   * @param detectFn async function that resolves if Desktop is found, rejects if not
+   * @param interval ms between attempts
+   */
+  resumePolling(detectFn: () => Promise<void>, interval: number): void {
+    if (this.pollTimerId) {
+      return;
+    }
+
+    const attempt = (): void => {
+      detectFn()
+        .then(() => {
+          this.stopPolling();
+          this.setStatus('RUNNING');
+        })
+        .catch(() => {
+          // Stay in current status, poll continues
+        });
+    };
+
+    attempt();
+    this.pollTimerId = setInterval(attempt, interval);
+  }
+
   stopPolling(): void {
     if (this.pollTimerId) {
       clearInterval(this.pollTimerId);

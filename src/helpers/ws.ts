@@ -15,6 +15,8 @@ export class WebsocketService {
   private isConnected = false;
   /** When true, the reconnect loop is suppressed */
   private stopped = false;
+  /** When true, the connection/reconnect loop is already running */
+  private active = false;
   /** ID of the pending reconnect timer (so it can be cancelled) */
   private reconnectTimerId: ReturnType<typeof setTimeout> | null = null;
   /** Global promise object that resolves when init completes */
@@ -128,7 +130,11 @@ export class WebsocketService {
    */
   init(): Promise<unknown> {
     this.stopped = false;
-    this.connect();
+
+    if (!this.active) {
+      this.active = true;
+      this.connect();
+    }
 
     return this.initPromise.promise;
   }
@@ -139,6 +145,7 @@ export class WebsocketService {
    */
   disconnect(): void {
     this.stopped = true;
+    this.active = false;
 
     if (this.reconnectTimerId) {
       clearTimeout(this.reconnectTimerId);
@@ -152,6 +159,7 @@ export class WebsocketService {
     }
 
     this.isConnected = false;
+    this.initPromise = generatePromiseObjects();
   }
 
   private connect() {

@@ -1,6 +1,6 @@
 import {messages} from '../constants/messages';
 import {client} from '../helpers/client/client';
-import {errorLog, generateErrorBody, generatePromiseObjects, isSafari, isValidTransferSpec, randomUUID, throwError, withTimeout} from '../helpers/helpers';
+import {errorLog, generateErrorBody, generatePromiseObjects, isValidTransferSpec, randomUUID, throwError, withTimeout} from '../helpers/helpers';
 import {httpDownload, httpUpload, setupHttpGateway} from '../http-gateway';
 import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChunkAsArrayBuffer, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, httpStopTransfer, sendTransferUpdate} from '../http-gateway/core';
 import {asperaSdk} from '../index';
@@ -9,6 +9,7 @@ import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, Dropzone
 import {statusService} from './status';
 import {websocketService} from '../helpers/ws';
 import {initConnect} from '../connect/core';
+import {detectConnectExtension} from '../helpers/connect-extension';
 import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
 
 /**
@@ -162,7 +163,14 @@ export const init = (options?: InitOptions): Promise<any> => {
         .then(() => asperaSdk.globals.sdkResponseData)
         .catch(() => {
           websocketService.disconnect();
-          return initConnect(options.connectSettings);
+          return detectConnectExtension(timeout).then(found => {
+            if (found) {
+              return initConnect(options.connectSettings);
+            } else if (asperaSdk.httpGatewayIsReady) {
+              return asperaSdk.globals.sdkResponseData;
+            }
+            throw generateErrorBody(messages.serverError);
+          });
         });
     }
 
@@ -289,14 +297,27 @@ export const initSession = (options?: InitOptions): void => {
   const retryInterval = options?.retryInterval ?? 2000;
   const retryTimeout = options?.retryTimeout ?? 5000;
 
-  const onFallback = options?.connectSettings?.fallback && !options?.connectSettings?.useConnect
-    ? (): void => {
-      websocketService.disconnect();
-      initConnect(options.connectSettings);
-    }
-    : undefined;
+  const hasFallback = options?.connectSettings?.fallback && !options?.connectSettings?.useConnect;
 
   const startDesktopDetection = (): void => {
+    const onFallback = hasFallback
+      ? (): void => {
+        websocketService.disconnect();
+        detectConnectExtension(retryTimeout).then(found => {
+          if (found) {
+            initConnect(options.connectSettings);
+          } else {
+            if (asperaSdk.httpGatewayIsReady) {
+              statusService.setStatus('DEGRADED');
+            } else {
+              statusService.setStatus('FAILED');
+            }
+            statusService.resumePolling(connectDesktop, retryInterval);
+          }
+        });
+      }
+      : undefined;
+
     statusService.startPolling(connectDesktop, retryInterval, retryTimeout, onFallback);
   };
 

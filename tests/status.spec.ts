@@ -385,6 +385,77 @@ describe('StatusService', () => {
     });
   });
 
+  describe('resumePolling', () => {
+    test('does not reset status', () => {
+      jest.useFakeTimers();
+
+      statusService.setStatus('FAILED');
+      const detectFn = jest.fn().mockRejectedValue(new Error('not found'));
+
+      statusService.resumePolling(detectFn, 2000);
+
+      expect(statusService.getStatus()).toBe('FAILED');
+    });
+
+    test('calls detectFn immediately and on interval', async () => {
+      jest.useFakeTimers();
+
+      const detectFn = jest.fn().mockRejectedValue(new Error('not found'));
+      statusService.resumePolling(detectFn, 2000);
+
+      expect(detectFn).toHaveBeenCalledTimes(1);
+
+      jest.advanceTimersByTime(4000);
+      await Promise.resolve();
+
+      expect(detectFn).toHaveBeenCalledTimes(3);
+    });
+
+    test('transitions to RUNNING when detectFn resolves', async () => {
+      jest.useFakeTimers();
+
+      statusService.setStatus('FAILED');
+      const detectFn = jest.fn().mockResolvedValue(undefined);
+
+      statusService.resumePolling(detectFn, 2000);
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(statusService.getStatus()).toBe('RUNNING');
+    });
+
+    test('stops polling when detectFn resolves', async () => {
+      jest.useFakeTimers();
+
+      statusService.setStatus('FAILED');
+      const detectFn = jest.fn().mockResolvedValue(undefined);
+
+      statusService.resumePolling(detectFn, 2000);
+      await Promise.resolve();
+      await Promise.resolve();
+
+      const callsBefore = detectFn.mock.calls.length;
+      jest.advanceTimersByTime(4000);
+      await Promise.resolve();
+      expect(detectFn.mock.calls.length).toBe(callsBefore);
+    });
+
+    test('does not start if already polling', async () => {
+      jest.useFakeTimers();
+
+      const detectFn1 = jest.fn().mockRejectedValue(new Error('not found'));
+      const detectFn2 = jest.fn().mockRejectedValue(new Error('not found'));
+
+      statusService.startPolling(detectFn1, 2000, 10000);
+      statusService.resumePolling(detectFn2, 2000);
+
+      jest.advanceTimersByTime(4000);
+      await Promise.resolve();
+
+      expect(detectFn2).not.toHaveBeenCalled();
+    });
+  });
+
   describe('reset', () => {
     test('clears status, callbacks, and timers', () => {
       jest.useFakeTimers();

@@ -305,7 +305,18 @@ export const initSession = (options?: InitOptions): void => {
         websocketService.disconnect();
         detectConnectExtension(retryTimeout).then(found => {
           if (found) {
-            initConnect(options.connectSettings);
+            initConnect({...options.connectSettings, hideIncludedInstaller: true});
+            const callbackId = statusService.registerCallback((status) => {
+              if (status === 'INITIALIZING') {
+                return;
+              }
+              statusService.deregisterCallback(callbackId);
+              if (status !== 'RUNNING') {
+                asperaSdk.globals.connect.removeEventListener();
+                asperaSdk.globals.connect.stop();
+                statusService.resumePolling(connectDesktop, retryInterval);
+              }
+            });
           } else {
             if (asperaSdk.httpGatewayIsReady) {
               statusService.setStatus('DEGRADED');

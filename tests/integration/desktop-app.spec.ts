@@ -198,7 +198,7 @@ describe('Desktop App', () => {
 
       const call = lastFetchCall();
       expect(call.body.method).toBe('test_ssh_ports');
-      expect(call.body.params).toEqual({remote_host: 'files.example.com', ssh_port: 22, timeout_sec: 5});
+      expect(call.body.params).toEqual({request: {remote_host: 'files.example.com', ssh_port: 22, timeout_sec: 5}});
     });
 
     it('should use default ssh_port and timeout_sec when not provided', async () => {
@@ -206,7 +206,7 @@ describe('Desktop App', () => {
 
       const call = lastFetchCall();
       expect(call.body.method).toBe('test_ssh_ports');
-      expect(call.body.params).toEqual({remote_host: 'files.example.com', ssh_port: 33001, timeout_sec: 3});
+      expect(call.body.params).toEqual({request: {remote_host: 'files.example.com', ssh_port: 33001, timeout_sec: 3}});
     });
   });
 

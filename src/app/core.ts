@@ -342,9 +342,11 @@ export const testSshPorts = (options: TestSshPortsOptions): Promise<any> => {
   const promiseInfo = generatePromiseObjects();
 
   const payload = {
-    remote_host: options.remote_host,
-    ssh_port: options.ssh_port ?? 33001,
-    timeout_sec: options.timeout_sec ?? 3,
+    request: {
+      remote_host: options.remote_host,
+      ssh_port: options.ssh_port ?? 33001,
+      timeout_sec: options.timeout_sec ?? 3,
+    }
   };
 
   client.request('test_ssh_ports', payload)

@@ -247,11 +247,7 @@ export const init = (options?: InitOptions): Promise<any> => {
  * @param options - Initialization options. See {@link InitOptions}.
  *
  * @example
- * // Detect IBM Aspera for desktop (default)
- * initSession({ appId: 'my-app' });
- *
- * @example
- * // Detect IBM Aspera for desktop with status handling
+ * // Use IBM Aspera for desktop (default)
  * registerStatusCallback(status => {
  *   if (status === 'RUNNING') {
  *     // Transfer client is ready — enable UI
@@ -271,8 +267,8 @@ export const init = (options?: InitOptions): Promise<any> => {
  *   },
  * });
  *
- * @example
- * // Use HTTP Gateway as the sole transport (no desktop app needed)
+ * * @example
+ * // Use HTTP Gateway only
  * initSession({
  *   appId: 'my-app',
  *   httpGatewaySettings: {
@@ -281,13 +277,33 @@ export const init = (options?: InitOptions): Promise<any> => {
  *   },
  * });
  *
+ * * @example
+ * // Use IBM Aspera for desktop with automatic fallback to IBM Aspera Connect
+ * initSession({
+ *   appId: 'my-app',
+ *   connectSettings: {
+ *     fallback: true,
+ *   },
+ * });
+ *
  * @example
- * // HTTP Gateway as supplementary transport with Desktop as primary
+ * // Use IBM Aspera for desktop with automatic fallback to HTTP Gateway
  * initSession({
  *   appId: 'my-app',
  *   httpGatewaySettings: {
  *     url: 'https://example.com/aspera/http-gwy',
- *     forceGateway: false,
+ *   },
+ * });
+ *
+ * * @example
+ * // Use IBM Aspera for desktop or IBM Aspera Connect with automatic fallback to HTTP Gateway
+ * initSession({
+ *   appId: 'my-app',
+ *   connectSettings: {
+ *     fallback: true,
+ *   },
+ *   httpGatewaySettings: {
+ *     url: 'https://example.com/aspera/http-gwy',
  *   },
  * });
  */

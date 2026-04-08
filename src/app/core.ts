@@ -165,7 +165,7 @@ export const init = (options?: InitOptions): Promise<any> => {
           websocketService.disconnect();
           return detectConnectExtension(timeout).then(found => {
             if (found) {
-              return initConnect(options.connectSettings);
+              return initConnect({...options.connectSettings, hideIncludedInstaller: true});
             } else if (asperaSdk.httpGatewayIsReady) {
               return asperaSdk.globals.sdkResponseData;
             }
@@ -330,6 +330,8 @@ export const initSession = (options?: InitOptions): void => {
               if (status !== 'RUNNING') {
                 asperaSdk.globals.connect.removeEventListener();
                 asperaSdk.globals.connect.stop();
+                // Explicitly set status to FAILED since we go back to desktop mode
+                statusService.setStatus('FAILED');
                 statusService.resumePolling(connectDesktop, retryInterval);
               }
             });

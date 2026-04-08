@@ -1673,4 +1673,4 @@ export const currentTransferClient = (): TransferClient | undefined => {
   } else if (asperaSdk.isReady) {
     return 'desktop';
   }
-}
+};

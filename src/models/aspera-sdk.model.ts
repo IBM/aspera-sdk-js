@@ -1,4 +1,4 @@
-import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, SaveFileDialogOptions, InitOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, SafariExtensionEvent, SdkStatus, TransferSpec, WebsocketEvent, InstallerUrlInfo, RpcMethod, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, ShowPreferencesPageOptions, TestSshPortsOptions} from './models';
+import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, SaveFileDialogOptions, InitOptions, InstallerInfoResponse, InstallerOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, SafariExtensionEvent, SdkStatus, TransferSpec, WebsocketEvent, InstallerUrlInfo, RpcMethod, SdkCapabilities, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, ShowPreferencesPageOptions, TestSshPortsOptions, TransferClient} from './models';
 import {statusService} from '../app/status';
 import {hiddenStyleList, installerUrl, protocol} from '../constants/constants';
 import {messages} from '../constants/messages';
@@ -10,7 +10,6 @@ import {asperaSdk} from '../index';
 import {HttpGatewayInfo} from '../http-gateway/models';
 import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
 import {Connect, ConnectInstaller} from '@ibm-aspera/connect-sdk-js';
-import { TransferClient } from '../../dist/commonjs';
 
 export class AsperaSdkGlobals {
   /** The URL of the IBM Aspera HTTP server to use with the SDK */

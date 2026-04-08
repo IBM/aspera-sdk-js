@@ -1,13 +1,15 @@
 import {messages} from '../constants/messages';
 import {client} from '../helpers/client/client';
-import {errorLog, generateErrorBody, generatePromiseObjects, isSafari, isValidTransferSpec, randomUUID, throwError} from '../helpers/helpers';
+import {errorLog, generateErrorBody, generatePromiseObjects, isValidTransferSpec, randomUUID, throwError, withTimeout} from '../helpers/helpers';
 import {httpDownload, httpUpload, setupHttpGateway} from '../http-gateway';
 import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChunkAsArrayBuffer, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, httpStopTransfer, sendTransferUpdate} from '../http-gateway/core';
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
-import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, SaveFileDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, SdkStatus, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, ShowPreferencesPageOptions, PreferencesPage, TestSshPortsOptions} from '../models/models';
+import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, SaveFileDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, SdkStatus, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, ShowPreferencesPageOptions, PreferencesPage, TestSshPortsOptions, TransferClient} from '../models/models';
 import {statusService} from './status';
+import {websocketService} from '../helpers/ws';
 import {initConnect} from '../connect/core';
+import {detectConnectExtension} from '../helpers/connect-extension';
 import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
 
 /**
@@ -155,6 +157,23 @@ export const init = (options?: InitOptions): Promise<any> => {
   };
 
   const getDesktopStartCalls = (): Promise<unknown> => {
+    if (options?.connectSettings?.fallback && !options?.connectSettings?.useConnect) {
+      const timeout = options?.retryTimeout ?? 5000;
+      return withTimeout(connectDesktop(), timeout)
+        .then(() => asperaSdk.globals.sdkResponseData)
+        .catch(() => {
+          websocketService.disconnect();
+          return detectConnectExtension(timeout).then(found => {
+            if (found) {
+              return initConnect({...options.connectSettings, hideIncludedInstaller: true});
+            } else if (asperaSdk.httpGatewayIsReady) {
+              return asperaSdk.globals.sdkResponseData;
+            }
+            throw generateErrorBody(messages.serverError);
+          });
+        });
+    }
+
     return connectDesktop()
       .then(() => asperaSdk.globals.sdkResponseData)
       .catch(handleErrors);
@@ -228,11 +247,7 @@ export const init = (options?: InitOptions): Promise<any> => {
  * @param options - Initialization options. See {@link InitOptions}.
  *
  * @example
- * // Detect IBM Aspera for desktop (default)
- * initSession({ appId: 'my-app' });
- *
- * @example
- * // Detect IBM Aspera for desktop with status handling
+ * // Use IBM Aspera for desktop (default)
  * registerStatusCallback(status => {
  *   if (status === 'RUNNING') {
  *     // Transfer client is ready — enable UI
@@ -252,8 +267,8 @@ export const init = (options?: InitOptions): Promise<any> => {
  *   },
  * });
  *
- * @example
- * // Use HTTP Gateway as the sole transport (no desktop app needed)
+ * * @example
+ * // Use HTTP Gateway only
  * initSession({
  *   appId: 'my-app',
  *   httpGatewaySettings: {
@@ -262,13 +277,33 @@ export const init = (options?: InitOptions): Promise<any> => {
  *   },
  * });
  *
+ * * @example
+ * // Use IBM Aspera for desktop with automatic fallback to IBM Aspera Connect
+ * initSession({
+ *   appId: 'my-app',
+ *   connectSettings: {
+ *     fallback: true,
+ *   },
+ * });
+ *
  * @example
- * // HTTP Gateway as supplementary transport with Desktop as primary
+ * // Use IBM Aspera for desktop with automatic fallback to HTTP Gateway
  * initSession({
  *   appId: 'my-app',
  *   httpGatewaySettings: {
  *     url: 'https://example.com/aspera/http-gwy',
- *     forceGateway: false,
+ *   },
+ * });
+ *
+ * * @example
+ * // Use IBM Aspera for desktop or IBM Aspera Connect with automatic fallback to HTTP Gateway
+ * initSession({
+ *   appId: 'my-app',
+ *   connectSettings: {
+ *     fallback: true,
+ *   },
+ *   httpGatewaySettings: {
+ *     url: 'https://example.com/aspera/http-gwy',
  *   },
  * });
  */
@@ -278,8 +313,41 @@ export const initSession = (options?: InitOptions): void => {
   const retryInterval = options?.retryInterval ?? 2000;
   const retryTimeout = options?.retryTimeout ?? 5000;
 
+  const hasFallback = options?.connectSettings?.fallback && !options?.connectSettings?.useConnect;
+
   const startDesktopDetection = (): void => {
-    statusService.startPolling(connectDesktop, retryInterval, retryTimeout);
+    const onFallback = hasFallback
+      ? (): void => {
+        websocketService.disconnect();
+        detectConnectExtension(retryTimeout).then(found => {
+          if (found) {
+            initConnect({...options.connectSettings, hideIncludedInstaller: true});
+            const callbackId = statusService.registerCallback((status) => {
+              if (status === 'INITIALIZING') {
+                return;
+              }
+              statusService.deregisterCallback(callbackId);
+              if (status !== 'RUNNING') {
+                asperaSdk.globals.connect.removeEventListener();
+                asperaSdk.globals.connect.stop();
+                // Explicitly set status to FAILED since we go back to desktop mode
+                statusService.setStatus('FAILED');
+                statusService.resumePolling(connectDesktop, retryInterval);
+              }
+            });
+          } else {
+            if (asperaSdk.httpGatewayIsReady) {
+              statusService.setStatus('DEGRADED');
+            } else {
+              statusService.setStatus('FAILED');
+            }
+            statusService.resumePolling(connectDesktop, retryInterval);
+          }
+        });
+      }
+      : undefined;
+
+    statusService.startPolling(connectDesktop, retryInterval, retryTimeout, onFallback);
   };
 
   const startTransferClient = (): void => {
@@ -1597,4 +1665,14 @@ export const getCapabilities = (): SdkCapabilities => {
  */
 export const hasCapability = (capability: keyof SdkCapabilities): boolean => {
   return !!getCapabilities()[capability];
+};
+
+export const currentTransferClient = (): TransferClient | undefined => {
+  if (asperaSdk.useHttpGateway) {
+    return 'http-gateway';
+  } else if (asperaSdk.useConnect) {
+    return 'connect';
+  } else if (asperaSdk.isReady) {
+    return 'desktop';
+  }
 };

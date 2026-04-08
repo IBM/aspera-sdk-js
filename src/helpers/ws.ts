@@ -13,6 +13,12 @@ export class WebsocketService {
   private eventListener: Function;
   /** Indicator if the websocket is already connected */
   private isConnected = false;
+  /** When true, the reconnect loop is suppressed */
+  private stopped = false;
+  /** When true, the connection/reconnect loop is already running */
+  private active = false;
+  /** ID of the pending reconnect timer (so it can be cancelled) */
+  private reconnectTimerId: ReturnType<typeof setTimeout> | null = null;
   /** Global promise object that resolves when init completes */
   private initPromise = generatePromiseObjects();
 
@@ -123,9 +129,37 @@ export class WebsocketService {
    * @returns a promise that resolves when the websocket connection is established
    */
   init(): Promise<unknown> {
-    this.connect();
+    this.stopped = false;
+
+    if (!this.active) {
+      this.active = true;
+      this.connect();
+    }
 
     return this.initPromise.promise;
+  }
+
+  /**
+   * Stop the WebSocket connection and suppress the automatic reconnect loop.
+   * Used when falling back to a different transfer client (e.g. Connect).
+   */
+  disconnect(): void {
+    this.stopped = true;
+    this.active = false;
+
+    if (this.reconnectTimerId) {
+      clearTimeout(this.reconnectTimerId);
+      this.reconnectTimerId = null;
+    }
+
+    this.detachSocket();
+    if (this.globalSocket) {
+      this.globalSocket.close();
+      this.globalSocket = null;
+    }
+
+    this.isConnected = false;
+    this.initPromise = generatePromiseObjects();
   }
 
   private connect() {
@@ -159,12 +193,17 @@ export class WebsocketService {
   }
 
   private reconnect() {
+    if (this.stopped) {
+      return;
+    }
+
     this.detachSocket();
     if (this.globalSocket) {
       this.globalSocket.close();
     }
 
-    setTimeout(() => {
+    this.reconnectTimerId = setTimeout(() => {
+      this.reconnectTimerId = null;
       this.connect();
     }, 1000);
   }

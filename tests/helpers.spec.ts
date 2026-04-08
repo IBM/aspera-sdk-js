@@ -4,7 +4,8 @@ import {
   generateErrorBody,
   generatePromiseObjects,
   isValidTransferSpec,
-  isValidURL
+  isValidURL,
+  withTimeout
 } from '../src/helpers/helpers';
 import {TransferSpec} from '../src/models/models';
 
@@ -95,6 +96,38 @@ describe('isValidTransferSpec', () => {
     invalidTransferSpecs.forEach(element => {
       expect(isValidTransferSpec(element)).toBe(false);
     });
+  });
+});
+
+describe('withTimeout', () => {
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
+  test('resolves when promise resolves before timeout', async () => {
+    const result = withTimeout(Promise.resolve('ok'), 1000);
+    await expect(result).resolves.toBe('ok');
+  });
+
+  test('rejects when promise rejects before timeout', async () => {
+    const result = withTimeout(Promise.reject(new Error('fail')), 1000);
+    await expect(result).rejects.toThrow('fail');
+  });
+
+  test('rejects with timeout error when promise does not settle in time', async () => {
+    const neverResolves = new Promise(() => {});
+    const result = withTimeout(neverResolves, 500);
+
+    jest.advanceTimersByTime(500);
+
+    await expect(result).rejects.toThrow('timeout');
+  });
+
+  test('clears timer when promise resolves before timeout', async () => {
+    const clearSpy = jest.spyOn(global, 'clearTimeout');
+    const result = withTimeout(Promise.resolve('ok'), 1000);
+    await result;
+    expect(clearSpy).toHaveBeenCalled();
+    clearSpy.mockRestore();
   });
 });
 

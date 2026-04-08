@@ -236,6 +236,26 @@ export const safeJsonParse = (json: string): any|undefined => {
   }
 };
 
+/**
+ * Race a promise against a timeout. Rejects with an Error('timeout') if the
+ * given milliseconds elapse before the promise settles.
+ */
+export const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('timeout')), ms);
+    promise.then(
+      val => {
+        clearTimeout(timer);
+        resolve(val);
+      },
+      err => {
+        clearTimeout(timer);
+        reject(err);
+      }
+    );
+  });
+};
+
 export default {
   errorLog,
   generateErrorBody,
@@ -250,4 +270,5 @@ export default {
   getInstallerUrls,
   safeJsonString,
   safeJsonParse,
+  withTimeout,
 };

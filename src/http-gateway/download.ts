@@ -3,7 +3,7 @@ import {asperaSdk} from '../index';
 import {safeJsonString, throwError} from '../helpers/helpers';
 import {messages} from '../constants/messages';
 import { base64Encoding, getMessageFromError, getSdkTransfer, sendTransferUpdate } from './core';
-import {download as oldHttpDownload} from '@ibm-aspera/http-gateway-sdk-js';
+import {download as oldHttpDownload} from './v2';
 import { HttpGatewayPresign } from './models';
 
 /**

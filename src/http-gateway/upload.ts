@@ -3,7 +3,7 @@ import {asperaSdk} from '../index';
 import {generatePromiseObjects, safeJsonString, throwError} from '../helpers/helpers';
 import {messages} from '../constants/messages';
 import {getMessageFromError, getSdkTransfer, sendTransferUpdate} from './core';
-import {upload as oldHttpUpload} from '@ibm-aspera/http-gateway-sdk-js';
+import {upload as oldHttpUpload} from './v2';
 
 /**
  * HTTP Gateway Upload Logic

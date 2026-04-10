@@ -1,7 +1,7 @@
 import {messages} from '../constants/messages';
 import {generateErrorBody, generatePromiseObjects, randomUUID, safeJsonParse, throwError} from '../helpers/helpers';
 import {asperaSdk} from '../index';
-import {removeTransfer as oldHttpRemoveTransfer, getAllTransfers as oldHttpGetAllTransfers, getTransferById as oldHttpGetTransfer, getFilesForUploadPromise as oldHttpGetFilesForUploadPromise, getFoldersForUploadPromise as oldHttpGetFoldersForUploadPromise, initHttpGateway as oldInitHttpGateway, registerActivityCallback as oldHttpRegisterActivityCallback, cancelTransfer as oldHttpCancelTransfer} from '@ibm-aspera/http-gateway-sdk-js';
+import {removeTransfer as oldHttpRemoveTransfer, getAllTransfers as oldHttpGetAllTransfers, getTransferById as oldHttpGetTransfer, getFilesForUploadPromise as oldHttpGetFilesForUploadPromise, getFoldersForUploadPromise as oldHttpGetFoldersForUploadPromise, initHttpGateway as oldInitHttpGateway, registerActivityCallback as oldHttpRegisterActivityCallback, cancelTransfer as oldHttpCancelTransfer} from './v2';
 import {FileDialogOptions, DataTransferResponse, DropzoneEventData, TransferSpec, AsperaSdkTransfer, ReadAsArrayBufferResponse, ReadChunkAsArrayBufferResponse} from '../models/models';
 import {HttpGatewayInfo} from './models';
 

@@ -101,4 +101,4 @@ module.exports = defineConfig([{
       'markers': ['/'],
     }],
   },
-}, globalIgnores(['**/examples'])]);
+}, globalIgnores(['**/examples', '**/v2'])]);

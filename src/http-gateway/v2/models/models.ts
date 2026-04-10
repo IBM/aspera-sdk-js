@@ -4,7 +4,7 @@ export interface PromiseObject {
   rejecter: (response?: any) => void;
 }
 
-export type TransferStatus = 'failed'|'completed'|'running'|'initiating'|'queued'|'canceled';
+export type TransferStatus = 'failed'|'completed'|'running'|'initiating'|'queued'|'cancelled';
 
 export type FeatureFlags = 'noBase64Encoding';
 

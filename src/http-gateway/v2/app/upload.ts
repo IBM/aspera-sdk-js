@@ -34,7 +34,7 @@ export const updateTransferActivity = (
   currentFile?: File
 ): void => {
   const transfer = asperaHttpGateway.activityTracking.getTransferById(id);
-  if (!transfer || transfer.status === 'canceled' || transfer.status === 'completed') {
+  if (!transfer || transfer.status === 'cancelled' || transfer.status === 'completed') {
     return;
   }
   transfer.status = status;
@@ -156,7 +156,7 @@ export const startSendingData = (
             return;
           }
 
-          if (transfer && transfer.status === 'canceled') {
+          if (transfer && transfer.status === 'cancelled') {
             socket.close();
             return;
           }

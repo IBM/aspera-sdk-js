@@ -26,7 +26,7 @@ export const messages = {
   yes: 'Yes',
   no: 'No',
   close: 'Close',
-  leavingWhileUploading: 'An upload is in progress. If you leave the upload will be canceled.',
+  leavingWhileUploading: 'An upload is in progress. If you leave the upload will be cancelled.',
   unableToReadFolder: 'The dropped item could not be parsed. Please try selecting via the select file/folder option',
   streamingTooManyFiles: 'Too many files requested for a stream. Only one video file is allowed in the transferSpec',
   loadingDownload: 'The download will now open in this window.',

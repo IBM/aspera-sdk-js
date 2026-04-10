@@ -161,7 +161,7 @@ export const removeTransfer = (id: string): void => {
 export const cancelTransfer = (id: string): void => {
   const transfer = asperaHttpGateway.activityTracking.getTransferById(id);
   if (transfer) {
-    transfer.status = 'canceled';
+    transfer.status = 'cancelled';
   }
 };
 

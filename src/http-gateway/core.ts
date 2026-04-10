@@ -52,10 +52,6 @@ export const initHttpGateway = (response: HttpGatewayInfo): Promise<void> => {
     oldHttpRegisterActivityCallback(oldHttpTransfers => {
       oldHttpTransfers.transfers.forEach(oldHttpTransfer => {
         const transfer = oldHttpTransfer as unknown as AsperaSdkTransfer;
-        // The HTTP Gateway v2 SDK uses "canceled" but we standardize on "cancelled"
-        if ((transfer.status as string) === 'canceled') {
-          transfer.status = 'cancelled';
-        }
         transfer.transfer_client = 'http-gateway';
         sendTransferUpdate(transfer);
       });

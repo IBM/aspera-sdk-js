@@ -706,6 +706,8 @@ export interface AsperaSdkTransfer {
   explorer_path: string;
   /** The status of the transfer */
   status: TransferStatus;
+  /** The previous status of the transfer */
+  previous_status: TransferStatus;
   /** The transfer error description if the status is error */
   error_desc?: string;
   /** The transfer error code (SSH or HTTP) if the status is error */

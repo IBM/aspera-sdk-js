@@ -168,9 +168,28 @@ export class ActivityTracking {
    * @param webSocketEvent the event type.
    */
   handleWebSocketEvents(webSocketEvent: WebsocketEvent): void {
+    const current_status = statusService.getStatus();
+
     if (webSocketEvent === 'CLOSED') {
       statusService.setStatus('DISCONNECTED');
-    } else if (webSocketEvent === 'RECONNECT') {
+      return;
+    }
+
+    if (webSocketEvent !== 'RECONNECT') {
+      return;
+    }
+
+    // Only treat RECONNECT as a transition to RUNNING when we have prior verification of
+    // IBM Aspera for desktop. For example, if IBM Aspera for desktop was RUNNING and verified,
+    // and then the user quits and restarts the application.
+    //
+    // TODO: This potentially leads to a data race if the application was quit/restarted because it was being
+    // upgraded. The new application may have newer RPC methods, but transitioning to RUNNING here could
+    // potentially lead to an application seeing stale RPC methods if they call `hasCapability()`, for example,
+    // in the status event listener.
+    const wasPreviouslyVerified = asperaSdk.globals.rpcMethods.length > 0;
+
+    if (current_status === 'DISCONNECTED' || (current_status === 'DEGRADED' && wasPreviouslyVerified)) {
       statusService.setStatus('RUNNING');
     }
   }

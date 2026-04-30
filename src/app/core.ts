@@ -1637,6 +1637,7 @@ export const getCapabilities = (): SdkCapabilities => {
     getFilesList: supportsMethod('get_files_list'),
     setBranding: supportsMethod('update_branding'),
     showDirectory: supportsMethod('show_directory'),
+    folderUpload: !asperaSdk.useOldHttpGateway,
   };
 };
 

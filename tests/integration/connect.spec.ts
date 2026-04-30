@@ -359,6 +359,7 @@ describe('Connect SDK', () => {
       expect(hasCapability('imagePreview')).toBe(true);
       expect(hasCapability('fileChecksum')).toBe(true);
       expect(hasCapability('showDirectory')).toBe(true);
+      expect(hasCapability('folderUpload')).toBe(true);
     });
 
     it('should return false for Desktop App only capabilities', () => {

@@ -1116,4 +1116,11 @@ export interface SdkCapabilities {
    * This is only supported when using Connect or IBM Aspera for desktop, but not HTTP Gateway.
    */
   showDirectory: boolean,
+  /**
+   * Whether the transfer client supports uploading folders.
+   *
+   * This is supported by Connect, IBM Aspera for desktop, and HTTP Gateway v3+. HTTP Gateway v2 and older
+   * do not support uploading folders.
+   */
+  folderUpload: boolean,
 }

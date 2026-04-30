@@ -409,6 +409,7 @@ describe('HTTP Gateway', () => {
 
     it('should return true for capabilities supported by HTTP Gateway', () => {
       expect(hasCapability('imagePreview')).toBe(true);
+      expect(hasCapability('folderUpload')).toBe(true);
     });
   });
 });

@@ -441,6 +441,7 @@ describe('Desktop App', () => {
       expect(hasCapability('getFilesList')).toBe(true);
       expect(hasCapability('setBranding')).toBe(true);
       expect(hasCapability('showDirectory')).toBe(true);
+      expect(hasCapability('folderUpload')).toBe(true);
     });
 
     it('should return false for capabilities whose RPC methods are not discovered', () => {

@@ -168,9 +168,13 @@ export class ActivityTracking {
    * @param webSocketEvent the event type.
    */
   handleWebSocketEvents(webSocketEvent: WebsocketEvent): void {
+    let current_status = statusService.getStatus();
+
     if (webSocketEvent === 'CLOSED') {
       statusService.setStatus('DISCONNECTED');
-    } else if (webSocketEvent === 'RECONNECT') {
+    } else if (webSocketEvent === 'RECONNECT' && (current_status === 'DISCONNECTED' || current_status === 'DEGRADED')) {
+      // We make sure we only emit RUNNING if we were previously DISCONNECTED|DEGRADED. The authoritative RUNNING
+      // status on initialization is handled by the status service.
       statusService.setStatus('RUNNING');
     }
   }

@@ -360,6 +360,8 @@ describe('Connect SDK', () => {
       expect(hasCapability('fileChecksum')).toBe(true);
       expect(hasCapability('showDirectory')).toBe(true);
       expect(hasCapability('folderUpload')).toBe(true);
+      expect(hasCapability('modifyTransfer')).toBe(true);
+      expect(hasCapability('resumeTransfer')).toBe(true);
     });
 
     it('should return false for Desktop App only capabilities', () => {

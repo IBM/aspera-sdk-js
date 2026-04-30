@@ -426,7 +426,7 @@ describe('Desktop App', () => {
 
   describe('hasCapability', () => {
     it('should return true for capabilities whose RPC methods are discovered', () => {
-      asperaSdk.globals.rpcMethods = ['show_about', 'open_preferences', 'show_transfer_manager', 'show_transfer_monitor', 'authenticate', 'test_ssh_ports', 'show_save_file_dialog', 'read_as_array_buffer', 'read_chunk_as_array_buffer', 'get_checksum', 'read_directory', 'get_files_list', 'update_branding', 'show_directory'];
+      asperaSdk.globals.rpcMethods = ['show_about', 'open_preferences', 'show_transfer_manager', 'show_transfer_monitor', 'authenticate', 'test_ssh_ports', 'show_save_file_dialog', 'read_as_array_buffer', 'read_chunk_as_array_buffer', 'get_checksum', 'read_directory', 'get_files_list', 'update_branding', 'show_directory', 'modify_transfer', 'resume_transfer'];
 
       expect(hasCapability('showAbout')).toBe(true);
       expect(hasCapability('showPreferences')).toBe(true);
@@ -442,6 +442,8 @@ describe('Desktop App', () => {
       expect(hasCapability('setBranding')).toBe(true);
       expect(hasCapability('showDirectory')).toBe(true);
       expect(hasCapability('folderUpload')).toBe(true);
+      expect(hasCapability('modifyTransfer')).toBe(true);
+      expect(hasCapability('resumeTransfer')).toBe(true);
     });
 
     it('should return false for capabilities whose RPC methods are not discovered', () => {
@@ -460,6 +462,8 @@ describe('Desktop App', () => {
       expect(hasCapability('getFilesList')).toBe(false);
       expect(hasCapability('setBranding')).toBe(false);
       expect(hasCapability('showDirectory')).toBe(false);
+      expect(hasCapability('modifyTransfer')).toBe(false);
+      expect(hasCapability('resumeTransfer')).toBe(false);
     });
 
     it('should handle partial RPC method availability', () => {

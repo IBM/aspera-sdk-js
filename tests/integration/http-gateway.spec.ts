@@ -405,6 +405,8 @@ describe('HTTP Gateway', () => {
       expect(hasCapability('getFilesList')).toBe(false);
       expect(hasCapability('setBranding')).toBe(false);
       expect(hasCapability('showDirectory')).toBe(false);
+      expect(hasCapability('modifyTransfer')).toBe(false);
+      expect(hasCapability('resumeTransfer')).toBe(false);
     });
 
     it('should return true for capabilities supported by HTTP Gateway', () => {

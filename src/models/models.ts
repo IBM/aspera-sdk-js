@@ -1031,96 +1031,99 @@ export interface RpcMethod {
  */
 export interface SdkCapabilities {
   /**
-   * Whether the SDK can read file contents for generating image previews.
+   * Whether the transfer client can read file contents for generating image previews.
    *
-   * Image preview is supported if the SDK is using HTTP Gateway, Connect, or IBM Aspera for desktop
-   * with the required RPC methods.
+   * This is supported when using HTTP Gateway, Connect, or IBM Aspera for desktop.
   */
   imagePreview: boolean,
   /**
-   * Whether the SDK can calculate checksums of a file chunk.
+   * Whether the transfer client can calculate checksums of a file chunk.
    */
   fileChecksum: boolean,
   /**
    * Whether the transfer client supports showing the about page.
    *
-   * This is supported when using Connect or IBM Aspera for desktop with the required RPC methods,
-   * but not HTTP Gateway.
+   * This is supported when using Connect or IBM Aspera for desktop.
    */
   showAbout: boolean,
   /**
    * Whether the transfer client supports showing the preferences page.
    *
-   * This is supported when using Connect or IBM Aspera for desktop with the required RPC methods,
-   * but not HTTP Gateway.
+   * This is supported when using Connect or IBM Aspera for desktop.
    */
   showPreferences: boolean,
   /**
    * Whether the transfer client supports showing the transfer manager.
    *
-   * This is supported when using Connect or IBM Aspera for desktop with the required RPC methods,
-   * but not HTTP Gateway.
+   * This is supported when using Connect or IBM Aspera for desktop.
    */
   showTransferManager: boolean,
   /**
    * Whether the transfer client supports showing the transfer rate monitor.
    *
-   * This is supported when using Connect or IBM Aspera for desktop with the required RPC methods,
-   * but not HTTP Gateway.
+   * This is supported when using Connect or IBM Aspera for desktop.
    */
   showTransferMonitor: boolean,
   /**
    * Whether the transfer client supports authenticating a transfer specification.
    *
-   * This is supported when using Connect or IBM Aspera for desktop with the required RPC methods,
-   * but not HTTP Gateway.
+   * This is supported when using Connect or IBM Aspera for desktop.
    */
   authenticate: boolean,
   /**
    * Whether the transfer client supports testing SSH port connectivity.
    *
-   * This is supported when using Connect or IBM Aspera for desktop with the required RPC methods,
-   * but not HTTP Gateway.
+   * This is supported when using Connect or IBM Aspera for desktop.
    */
   testSshPorts: boolean,
   /**
    * Whether the transfer client supports showing the save file dialog.
    *
-   * This is supported when using Connect or IBM Aspera for desktop with the required RPC methods,
-   * but not HTTP Gateway.
+   * This is supported when using Connect or IBM Aspera for desktop.
    */
   showSaveFileDialog: boolean,
   /**
-   * Whether the SDK can read directory contents.
+   * Whether the transfer client can read directory contents.
    *
-   * This is supported when using IBM Aspera for desktop with the required RPC methods,
-   * but not Connect or HTTP Gateway.
+   * This is only supported when using IBM Aspera for desktop.
    */
   readDirectory: boolean,
   /**
    * Whether the transfer client supports getting file-level progress for a given transfer.
    *
-   * This is only supported when using IBM Aspera for desktop.
+   * This is supported when using IBM Aspera for desktop.
    */
   getFilesList: boolean,
   /**
    * Whether the transfer client supports customized branding settings.
    *
-   * This is only supported when using IBM Aspera for desktop.
+   * This is supported when using IBM Aspera for desktop.
    */
   setBranding: boolean,
   /**
    * Whether the transfer client supports highlighting the destination directory of the transfer
    * using the system's file browser (ex: Finder or Windows Explorer).
    *
-   * This is only supported when using Connect or IBM Aspera for desktop, but not HTTP Gateway.
+   * This is supported when using Connect or IBM Aspera for desktop.
    */
   showDirectory: boolean,
   /**
    * Whether the transfer client supports uploading folders.
    *
-   * This is supported by Connect, IBM Aspera for desktop, and HTTP Gateway v3+. HTTP Gateway v2 and older
+   * This is supported when using Connect, IBM Aspera for desktop, and HTTP Gateway v3 or newer. HTTP Gateway v2 and older
    * do not support uploading folders.
    */
   folderUpload: boolean,
+  /**
+   * Whether the transfer client can modify a running transfer.
+   *
+   * This is supported when using Connect or IBM Aspera for desktop.
+   */
+  modifyTransfer: boolean,
+  /**
+   * Whether the transfer client resume a stopped transfer.
+   *
+   * This is supported when using Connect or IBM Aspera for desktop.
+   */
+  resumeTransfer: boolean,
 }

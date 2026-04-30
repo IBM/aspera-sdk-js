@@ -1584,7 +1584,7 @@ const supportsMethod = (method: string): boolean => {
   // We currently do not support calculating file checksums when using HTTP Gateway. In theory it should be possible
   // to calculate this directly in the browser similar to how `readAsArrayBuffer()` is implemented.
   // HTTP Gateway also does not support showing native transfer client UI (about, preferences, etc.).
-  if (asperaSdk.useHttpGateway && (method === 'get_checksum' || method === 'show_about' || method === 'open_preferences' || method === 'show_transfer_manager' || method === 'show_transfer_monitor' || method === 'authenticate' || method === 'test_ssh_ports' || method === 'show_save_file_dialog' || method === 'read_directory' || method === 'get_files_list' || method === 'update_branding')) {
+  if (asperaSdk.useHttpGateway && (method === 'get_checksum' || method === 'show_about' || method === 'open_preferences' || method === 'show_transfer_manager' || method === 'show_transfer_monitor' || method === 'authenticate' || method === 'test_ssh_ports' || method === 'show_save_file_dialog' || method === 'read_directory' || method === 'get_files_list' || method === 'update_branding' || method === 'show_directory')) {
     return false;
   }
 
@@ -1636,6 +1636,7 @@ export const getCapabilities = (): SdkCapabilities => {
     readDirectory: supportsMethod('read_directory'),
     getFilesList: supportsMethod('get_files_list'),
     setBranding: supportsMethod('update_branding'),
+    showDirectory: supportsMethod('show_directory'),
   };
 };
 

@@ -1109,4 +1109,11 @@ export interface SdkCapabilities {
    * This is only supported when using IBM Aspera for desktop.
    */
   setBranding: boolean,
+  /**
+   * Whether the transfer client supports highlighting the destination directory of the transfer
+   * using the system's file browser (ex: Finder or Windows Explorer).
+   *
+   * This is only supported when using Connect or IBM Aspera for desktop, but not HTTP Gateway.
+   */
+  showDirectory: boolean,
 }

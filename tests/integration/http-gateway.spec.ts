@@ -404,6 +404,7 @@ describe('HTTP Gateway', () => {
       expect(hasCapability('readDirectory')).toBe(false);
       expect(hasCapability('getFilesList')).toBe(false);
       expect(hasCapability('setBranding')).toBe(false);
+      expect(hasCapability('showDirectory')).toBe(false);
     });
 
     it('should return true for capabilities supported by HTTP Gateway', () => {

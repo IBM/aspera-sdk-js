@@ -403,6 +403,7 @@ describe('HTTP Gateway', () => {
       expect(hasCapability('fileChecksum')).toBe(false);
       expect(hasCapability('readDirectory')).toBe(false);
       expect(hasCapability('getFilesList')).toBe(false);
+      expect(hasCapability('setBranding')).toBe(false);
     });
 
     it('should return true for capabilities supported by HTTP Gateway', () => {

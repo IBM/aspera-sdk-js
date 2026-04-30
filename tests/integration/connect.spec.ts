@@ -363,6 +363,7 @@ describe('Connect SDK', () => {
     it('should return false for Desktop App only capabilities', () => {
       expect(hasCapability('readDirectory')).toBe(false);
       expect(hasCapability('getFilesList')).toBe(false);
+      expect(hasCapability('setBranding')).toBe(false);
     });
   });
 });

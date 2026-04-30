@@ -402,6 +402,7 @@ describe('HTTP Gateway', () => {
       expect(hasCapability('showSaveFileDialog')).toBe(false);
       expect(hasCapability('fileChecksum')).toBe(false);
       expect(hasCapability('readDirectory')).toBe(false);
+      expect(hasCapability('getFilesList')).toBe(false);
     });
 
     it('should return true for capabilities supported by HTTP Gateway', () => {

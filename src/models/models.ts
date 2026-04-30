@@ -1097,4 +1097,10 @@ export interface SdkCapabilities {
    * but not Connect or HTTP Gateway.
    */
   readDirectory: boolean,
+  /**
+   * Whether the transfer client supports getting file-level progress for a given transfer.
+   *
+   * This is only supoprted when using IBM Aspera for desktop.
+   */
+  getFilesList: boolean,
 }

@@ -358,10 +358,16 @@ describe('Connect SDK', () => {
       expect(hasCapability('showSaveFileDialog')).toBe(true);
       expect(hasCapability('imagePreview')).toBe(true);
       expect(hasCapability('fileChecksum')).toBe(true);
+      expect(hasCapability('showDirectory')).toBe(true);
+      expect(hasCapability('folderUpload')).toBe(true);
+      expect(hasCapability('modifyTransfer')).toBe(true);
+      expect(hasCapability('resumeTransfer')).toBe(true);
     });
 
     it('should return false for Desktop App only capabilities', () => {
       expect(hasCapability('readDirectory')).toBe(false);
+      expect(hasCapability('getFilesList')).toBe(false);
+      expect(hasCapability('setBranding')).toBe(false);
     });
   });
 });

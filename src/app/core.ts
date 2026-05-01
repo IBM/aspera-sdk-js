@@ -1395,6 +1395,24 @@ export const removeDropzone = (elementSelector: string): void => {
  * @returns a promise that returns information about the user's IBM Aspera installation.
  */
 export const getInfo = (): Promise<AsperaSdkInfo> => {
+  // Fetch the Connect application version on demand the first time it's requested.
+  // Cached on `asperaSdk.globals.connectVersion` so subsequent calls return immediately.
+  if (asperaSdk.useConnect && !asperaSdk.globals.connectVersion) {
+    const promiseInfo = generatePromiseObjects();
+
+    asperaSdk.globals.connect.version()
+      .then(info => {
+        asperaSdk.globals.connectVersion = info?.version;
+        promiseInfo.resolver(asperaSdk.globals.sdkResponseData);
+      })
+      .catch(() => {
+        // Best-effort — leave connectVersion undefined if Connect's version() rejects.
+        promiseInfo.resolver(asperaSdk.globals.sdkResponseData);
+      });
+
+    return promiseInfo.promise;
+  }
+
   if (asperaSdk.useHttpGateway || asperaSdk.useConnect) {
     return Promise.resolve(asperaSdk.globals.sdkResponseData);
   }
@@ -1403,9 +1421,7 @@ export const getInfo = (): Promise<AsperaSdkInfo> => {
     return throwError(messages.serverNotVerified);
   }
 
-  return new Promise((resolve, _) => {
-    resolve(asperaSdk.globals.sdkResponseData);
-  });
+  return Promise.resolve(asperaSdk.globals.sdkResponseData);
 };
 
 /**

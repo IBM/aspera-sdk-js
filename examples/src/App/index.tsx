@@ -1,6 +1,6 @@
 import './App.scss';
 import { init, launch, testConnection } from '@ibm-aspera/sdk';
-import { Header, HeaderGlobalAction, HeaderGlobalBar, HeaderName, Theme, Tab, TabList, Tabs, Button } from '@carbon/react';
+import { Header, HeaderGlobalAction, HeaderGlobalBar, HeaderMenuItem, HeaderName, HeaderNavigation, Theme, Tab, TabList, Tabs, Button } from '@carbon/react';
 import { LogoGithub, Notification, NotificationOff, Sdk, Reset } from '@carbon/icons-react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router';
 import { useEffect, useState } from 'react';
@@ -19,6 +19,7 @@ import AllTogether from '../Views/AllTogether';
 import ImagePreview from '../Views/ImagePreview';
 import FileChecksum from '../Views/FileChecksum';
 import UI from '../Views/UI';
+import Demo from '../Demo/Demo';
 
 export const tabItems = [
   {route: '/', name: 'Home', component: <Home />},
@@ -112,9 +113,15 @@ export default function App() {
     navigate(path);
   };
 
+  const onDemo = location.pathname === '/demo';
+
   const header = (
     <Header aria-label="Carbon Tutorial">
-      <HeaderName prefix="IBM Aspera">JavaScript SDK Test Application</HeaderName>
+      <HeaderName prefix="IBM Aspera">JavaScript SDK</HeaderName>
+      <HeaderNavigation aria-label="App selector">
+        <HeaderMenuItem isActive={!onDemo} onClick={() => navigate('/')}>API test app</HeaderMenuItem>
+        <HeaderMenuItem isActive={onDemo} onClick={() => navigate('/demo')}>Demo</HeaderMenuItem>
+      </HeaderNavigation>
       <HeaderGlobalBar>
         <HeaderGlobalAction aria-label="Reset test app" tooltipAlignment="end" className="action-icons" onClick={resetTestApp}>
           <Reset size={20} />
@@ -168,17 +175,20 @@ export default function App() {
     <Theme theme="g100" className="aspera-root">
       {header}
       <div className="content-root">
-        <div className="content-header">
-          <div className="content-header-title">
-            <h1>{tabItems[currentTabIndex]?.name || '404'}</h1>
-            <div className="content-header-title--actions">
-              <Button kind="ghost" type="button" onClick={startApp}>Launch and start</Button>
+        {!onDemo && (
+          <div className="content-header">
+            <div className="content-header-title">
+              <h1>{tabItems[currentTabIndex]?.name || '404'}</h1>
+              <div className="content-header-title--actions">
+                <Button kind="ghost" type="button" onClick={startApp}>Launch and start</Button>
+              </div>
             </div>
+            {tabs}
           </div>
-          {tabs}
-        </div>
-        <div className="route-root">
+        )}
+        <div className={`route-root${onDemo ? ' route-root--demo' : ''}`}>
           <Routes>
+            <Route path="/demo" element={<Demo />} />
             {tabItems.map(item => <Route index={item.route === '/'} key={item.route} path={item.route === '/' ? undefined : item.route} element={item.component} />)}
           </Routes>
         </div>

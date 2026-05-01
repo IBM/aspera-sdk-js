@@ -53,6 +53,8 @@ export class AsperaSdkGlobals {
   connectInstaller?: ConnectTypes.ConnectInstallerClientType;
   /** Connect status */
   connectStatus: ConnectTypes.ConnectStatusStrings = 'WAITING';
+  /** Connect application version, populated when Connect transitions to RUNNING. */
+  connectVersion?: string;
 
   backupLaunchMethod(url: string): void {
     window.alert(messages.loadingProtocol);
@@ -91,6 +93,7 @@ export class AsperaSdkGlobals {
       connect: {
         active: this.connectStatus === 'RUNNING',
         status: this.connectStatus,
+        version: this.connectVersion,
       },
     };
   }
@@ -113,6 +116,8 @@ export type AsperaSdkInfo = AsperaSdkClientInfo&{
   connect: {
     active: boolean;
     status: ConnectTypes.ConnectStatusStrings;
+    /** Connect application version, available once Connect has reached the RUNNING status. */
+    version?: string;
   }
 }
 

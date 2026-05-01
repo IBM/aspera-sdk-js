@@ -14,6 +14,7 @@ import {
   showTransferManager,
   createDropzone,
   getCapabilities,
+  getInfo,
   getInstallerInfo,
   getTransfer,
   hasCapability,
@@ -21,7 +22,7 @@ import {
   removeTransfer,
   currentTransferClient,
 } from '@ibm-aspera/sdk';
-import type { AsperaSdkTransfer, BrowserStyleFile, InstallerInfo, SdkCapabilities, SdkStatus, TransferClient, TransferSpec } from '@ibm-aspera/sdk';
+import type { AsperaSdkInfo, AsperaSdkTransfer, BrowserStyleFile, InstallerInfo, SdkCapabilities, SdkStatus, TransferClient, TransferSpec } from '@ibm-aspera/sdk';
 import {
   Button,
   Dropdown,
@@ -122,6 +123,7 @@ export default function Demo() {
   const [transfers, setTransfers] = useState<Map<string, AsperaSdkTransfer>>(new Map());
   const [transferSpec, setTransferSpec] = useState(() => localStorage.getItem('ASPERA-DEMO-TRANSFER-SPEC') || DEFAULT_TRANSFER_SPEC);
   const [installerEntries, setInstallerEntries] = useState<InstallerInfo[]>([]);
+  const [sdkInfo, setSdkInfo] = useState<AsperaSdkInfo | null>(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [infoTransfer, setInfoTransfer] = useState<AsperaSdkTransfer | null>(null);
   const dropzoneRegistered = useRef(false);
@@ -152,6 +154,13 @@ export default function Demo() {
       console.error('Failed to fetch installer info', err);
     });
   }, [needsInstaller, installerEntries.length]);
+
+  useEffect(() => {
+    if (!showCapabilities || !activeClient) return;
+    getInfo().then((info) => setSdkInfo(info)).catch((err) => {
+      console.error('Failed to fetch SDK info', err);
+    });
+  }, [showCapabilities, activeClient]);
 
   const appendDroppedPaths = (files: BrowserStyleFile[]): void => {
     if (!files.length) return;
@@ -317,6 +326,14 @@ export default function Demo() {
     };
   }, [capabilities]);
 
+  const activeClientVersion = useMemo(() => {
+    if (!sdkInfo || !activeClient) return null;
+    if (activeClient === 'desktop') return sdkInfo.version;
+    if (activeClient === 'http-gateway') return sdkInfo.httpGateway?.info?.version;
+    if (activeClient === 'connect') return sdkInfo.connect?.version;
+    return null;
+  }, [sdkInfo, activeClient]);
+
   return (
     <div className="demo-page">
       <div className="demo-col demo-col--a">
@@ -380,7 +397,12 @@ export default function Demo() {
         <Tile className="demo-section demo-caps">
           <div className="demo-caps__header">
             <h3>Active client</h3>
-            <Tag type="blue" size="md">{transferClientLabel(activeClient)}</Tag>
+            <div className="demo-caps__client">
+              <Tag type="blue" size="md">{transferClientLabel(activeClient)}</Tag>
+              {activeClientVersion && (
+                <span className="demo-caps__version">v{activeClientVersion}</span>
+              )}
+            </div>
           </div>
           <div className="demo-caps__grid">
             {enabledCaps.enabled.map((c) => (

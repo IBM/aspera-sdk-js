@@ -116,6 +116,18 @@
     }
   }
 
+  &__client {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  &__version {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--cds-text-secondary);
+  }
+
   &__grid {
     display: flex;
     flex-wrap: wrap;

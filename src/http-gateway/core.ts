@@ -322,6 +322,39 @@ export const httpGatewaySelectFileFolderDialog = (options?: FileDialogOptions, f
 };
 
 /**
+ * Generate a human-readable title for an HTTP Gateway transfer. The desktop and Connect
+ * transfer clients populate `title` themselves; HTTP Gateway transfers are constructed
+ * client-side and need a synthesized title for consumer UIs.
+ *
+ * If the caller already supplied a `title` on the spec, that wins. Otherwise we use the
+ * basename of the first source path, suffixed with `(+N)` when there are additional paths.
+ */
+const getTitle = (transferSpec: TransferSpec): string => {
+  if (transferSpec.title) {
+    return transferSpec.title;
+  }
+
+  const paths = transferSpec.paths;
+  if (!paths || paths.length === 0) {
+    return '';
+  }
+
+  const path = paths[0]?.source;
+
+  if (!path) {
+    return '';
+  }
+
+  const first = path.split('/').filter(Boolean).pop() ?? '';
+
+  if (paths.length === 1) {
+    return first;
+  }
+
+  return `${first} (+${paths.length - 1})`;
+};
+
+/**
  * Get a generic transfer object for HTTP Gateway transfers.
  *
  * @param transferSpec - TransferSpec being provided for the HTTP Gateway transfer
@@ -329,6 +362,8 @@ export const httpGatewaySelectFileFolderDialog = (options?: FileDialogOptions, f
  * @returns a transfer object to track status and send to consumers
  */
 export const getSdkTransfer = (transferSpec: TransferSpec): AsperaSdkTransfer => {
+  const title = getTitle(transferSpec);
+
   return {
     uuid: randomUUID(),
     transfer_spec: transferSpec,
@@ -349,7 +384,7 @@ export const getSdkTransfer = (transferSpec: TransferSpec): AsperaSdkTransfer =>
     calculated_rate_kbps: 0,
     elapsed_usec: 0,
     percentage: 0,
-    title: '',
+    title,
     remaining_usec: 0,
     transfer_client: 'http-gateway',
     httpGatewayTransfer: true,

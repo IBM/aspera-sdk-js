@@ -110,6 +110,89 @@ describe('HTTP Gateway', () => {
     });
   });
 
+  describe('transfer title', () => {
+    it('should use the basename of a single source path', async () => {
+      const result = await startTransfer(
+        downloadSpec({paths: [{source: '/remote/folder/document.pdf'}]}),
+        {},
+      );
+
+      expect(result.title).toBe('document.pdf');
+    });
+
+    it('should suffix with `(+N)` when there are multiple paths', async () => {
+      const result = await startTransfer(
+        downloadSpec({
+          paths: [
+            {source: '/remote/folder/document.pdf'},
+            {source: '/remote/folder/image.png'},
+            {source: '/remote/folder/data.csv'},
+          ],
+        }),
+        {},
+      );
+
+      expect(result.title).toBe('document.pdf (+2)');
+    });
+
+    it('should respect an explicit title from the transfer spec', async () => {
+      const result = await startTransfer(
+        downloadSpec({
+          title: 'Quarterly report bundle',
+          paths: [{source: '/remote/folder/document.pdf'}],
+        }),
+        {},
+      );
+
+      expect(result.title).toBe('Quarterly report bundle');
+    });
+
+    it('should respect an explicit title even with multiple paths', async () => {
+      const result = await startTransfer(
+        downloadSpec({
+          title: 'My selection',
+          paths: [
+            {source: '/remote/a.txt'},
+            {source: '/remote/b.txt'},
+          ],
+        }),
+        {},
+      );
+
+      expect(result.title).toBe('My selection');
+    });
+
+    it('should strip a trailing slash on a folder path', async () => {
+      const result = await startTransfer(
+        downloadSpec({paths: [{source: '/remote/folder/sub/'}]}),
+        {},
+      );
+
+      expect(result.title).toBe('sub');
+    });
+
+    it('should handle a path with no separators', async () => {
+      const result = await startTransfer(
+        downloadSpec({paths: [{source: 'document.pdf'}]}),
+        {},
+      );
+
+      expect(result.title).toBe('document.pdf');
+    });
+
+    it('should return an empty string when paths is empty', async () => {
+      // The startTransfer flow validates the spec, so use the v3 download path which still
+      // creates the SDK transfer object even if the gateway later rejects. The title should
+      // still be computed from the (empty) paths array.
+      const result = await startTransfer(
+        downloadSpec({paths: []}),
+        {},
+      );
+
+      expect(result.title).toBe('');
+    });
+  });
+
   describe('startTransfer (upload)', () => {
     it('should reject when files not selected by user', async () => {
       await expect(startTransfer(uploadSpec({token: 'upload-token'}), {})).rejects.toEqual({

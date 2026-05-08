@@ -420,6 +420,26 @@ export const getMessageFromError = (error: any): {message: string, code: number}
   };
 };
 
+/**
+ * Encodes a JSON string as a base64 string.
+ *
+ * The returned value uses the standard base64 alphabet and must not be assumed to be
+ * URL safe. It may contain `+`, `/`, or `=` padding characters.
+ *
+ * This function first converts the input string to UTF-8 bytes using {@link TextEncoder}, then
+ * converts those bytes into a binary string before passing it to {@link Window.btoa}.
+ *
+ * This extra conversion is necessary because `btoa()` only works for strings in which each
+ * character occupies only one byte. So if you were to pass a string into `btoa()` containing
+ * characters that occupy more than one byte, you will get an error. This is problematic because
+ * a transfer spec could potentially have any number of Unicode characters.
+ *
+ * See the MDN `window.btoa()` documentation for more details:
+ * https://developer.mozilla.org/en-US/docs/Web/API/Window/btoa#unicode_strings
+ *
+ * @param jsonString - The JSON string to encode. May contain arbitrary Unicode characters.
+ * @returns A Base64-encoded representation of the UTF-8 bytes of `jsonString`.
+ */
 export const base64Encoding = (jsonString: string): string => {
   const bytes = new TextEncoder().encode(jsonString);
   const binString = Array.from(bytes, (byte) =>

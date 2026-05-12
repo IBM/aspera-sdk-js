@@ -303,6 +303,17 @@
     margin-bottom: 0.5rem;
   }
 
+  &__item-tags {
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+  }
+
+  &__client-tag {
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
   &__name {
     font-weight: 500;
     overflow: hidden;

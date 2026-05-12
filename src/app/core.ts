@@ -13,6 +13,15 @@ import {detectConnectExtension} from '../helpers/connect-extension';
 import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
 
 /**
+ * Timeout for the lightweight Connect-extension probe in fallback flows. An installed +
+ * enabled extension responds to the dispatched event within tens of milliseconds; capping
+ * at 1.5s matches the Connect SDK's own internal probe (`detectExtension(1000)`) while
+ * leaving a small buffer for slow systems. Decoupled from `retryTimeout` so the fallback
+ * doesn't pay the full desktop-detection budget twice when the extension isn't present.
+ */
+const CONNECT_EXTENSION_DETECT_TIMEOUT = 1500;
+
+/**
  * Check if IBM Aspera for Desktop connection works. This function is called by init
  * when initializing the SDK. This function can be used at any point for checking.
  *
@@ -163,7 +172,7 @@ export const init = (options?: InitOptions): Promise<any> => {
         .then(() => asperaSdk.globals.sdkResponseData)
         .catch(() => {
           websocketService.disconnect();
-          return detectConnectExtension(timeout).then(found => {
+          return detectConnectExtension(CONNECT_EXTENSION_DETECT_TIMEOUT).then(found => {
             if (found) {
               return initConnect({...options.connectSettings, hideIncludedInstaller: true});
             } else if (asperaSdk.httpGatewayIsReady) {
@@ -319,7 +328,7 @@ export const initSession = (options?: InitOptions): void => {
     const onFallback = hasFallback
       ? (): void => {
         websocketService.disconnect();
-        detectConnectExtension(retryTimeout).then(found => {
+        detectConnectExtension(CONNECT_EXTENSION_DETECT_TIMEOUT).then(found => {
           if (found) {
             initConnect({...options.connectSettings, hideIncludedInstaller: true});
             const callbackId = statusService.registerCallback((status) => {

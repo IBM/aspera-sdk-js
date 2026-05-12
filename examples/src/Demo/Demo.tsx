@@ -39,8 +39,10 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 type ModeId =
   | 'gateway-only'
   | 'desktop-only'
+  | 'connect-only'
   | 'desktop+gateway'
   | 'connect+gateway'
+  | 'desktop->connect-fallback'
   | 'desktop->connect-fallback+gateway';
 
 interface ModeOption {
@@ -52,10 +54,12 @@ interface ModeOption {
 
 const MODES: ModeOption[] = [
   { id: 'desktop-only', label: 'Desktop only', description: 'Native IBM Aspera for desktop. Fastest transfers; requires the desktop app to be installed.', requiresGateway: false },
+  { id: 'connect-only', label: 'Connect only', description: 'IBM Aspera Connect (browser plugin) only; no HTTP Gateway fallback.', requiresGateway: false },
+  { id: 'gateway-only', label: 'HTTP Gateway only', description: 'Force HTTP Gateway; no native client detection. Works in any browser.', requiresGateway: true },
   { id: 'desktop+gateway', label: 'Desktop + HTTP Gateway', description: 'Try desktop first; fall back to HTTP Gateway if desktop is unavailable.', requiresGateway: true },
   { id: 'connect+gateway', label: 'Connect + HTTP Gateway', description: 'Use IBM Aspera Connect (browser plugin); HTTP Gateway available as a fallback.', requiresGateway: true },
+  { id: 'desktop->connect-fallback', label: 'Desktop → Connect fallback', description: 'Try desktop first; fall back to IBM Aspera Connect if desktop is unavailable. No HTTP Gateway.', requiresGateway: false },
   { id: 'desktop->connect-fallback+gateway', label: 'Desktop → Connect fallback + HTTP Gateway', description: 'Try desktop, fall back to Connect, with HTTP Gateway as an additional fallback.', requiresGateway: true },
-  { id: 'gateway-only', label: 'HTTP Gateway only', description: 'Force HTTP Gateway; no native client detection. Works in any browser.', requiresGateway: true },
 ];
 
 const DEFAULT_TRANSFER_SPEC = JSON.stringify(
@@ -240,8 +244,8 @@ export default function Demo() {
         ? { url: gatewayUrl, forceGateway: mode.id === 'gateway-only' }
         : undefined,
       connectSettings: {
-        useConnect: mode.id === 'connect+gateway',
-        fallback: mode.id === 'desktop->connect-fallback+gateway',
+        useConnect: mode.id === 'connect+gateway' || mode.id === 'connect-only',
+        fallback: mode.id === 'desktop->connect-fallback+gateway' || mode.id === 'desktop->connect-fallback',
         dragDropEnabled: true,
       },
     };
@@ -587,7 +591,10 @@ export default function Demo() {
               <li key={t.uuid} className="demo-monitor__item">
                 <div className="demo-monitor__item-head">
                   <span className="demo-monitor__name">{t.title || t.current_file || t.uuid.slice(0, 8)}</span>
-                  <Tag type={transferTagType(t.status)} size="sm">{t.status}</Tag>
+                  <div className="demo-monitor__item-tags">
+                    <Tag type="outline" size="sm" className="demo-monitor__client-tag">{transferClientLabel(t.transfer_client)}</Tag>
+                    <Tag type={transferTagType(t.status)} size="sm">{t.status}</Tag>
+                  </div>
                 </div>
                 {t.status === 'failed' && t.error_desc && (
                   <div className="demo-monitor__error">

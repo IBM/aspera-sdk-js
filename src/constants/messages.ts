@@ -7,6 +7,7 @@ export const messages = {
   getInstallerError: 'Unable to get latest installers',
   getAllTransfersFailed: 'Unable to get all transfers',
   getTransferFailed: 'Unable to get transfer',
+  failedToGetDownloadUrl: 'Unable to retrieve HTTP download URL',
   invalidEndpoint: 'The specified endpoint is not a valid URL',
   loadingProtocol: 'Launching IBM Aspera for Desktop',
   modifyTransferFailed: 'Unable to modify transfer',

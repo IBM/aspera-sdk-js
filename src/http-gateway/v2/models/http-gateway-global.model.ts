@@ -8,8 +8,8 @@ class HttpGatewayGlobals {
   serverUrl: string;
   /** Server information */
   serverInfo: ServerInfo;
-  /** Chunk size to use for uploads in bytes */
-  chunkSize = 64000;
+  /** Chunk size to use for uploads in bytes. Default: 2 MiB. */
+  chunkSize = 2097152;
   /** Indication that the server has been verified as working */
   serverVerified: boolean;
   /** The ID to use for HTTP Gateway needed DOM items */

@@ -1,7 +1,7 @@
 import {messages} from '../constants/messages';
 import {generateErrorBody, generatePromiseObjects, randomUUID, safeJsonParse, throwError} from '../helpers/helpers';
 import {asperaSdk} from '../index';
-import {asperaHttpGateway, removeTransfer as oldHttpRemoveTransfer, getAllTransfers as oldHttpGetAllTransfers, getTransferById as oldHttpGetTransfer, getFilesForUploadPromise as oldHttpGetFilesForUploadPromise, getFoldersForUploadPromise as oldHttpGetFoldersForUploadPromise, initHttpGateway as oldInitHttpGateway, registerActivityCallback as oldHttpRegisterActivityCallback, cancelTransfer as oldHttpCancelTransfer} from './v2';
+import {removeTransfer as oldHttpRemoveTransfer, getAllTransfers as oldHttpGetAllTransfers, getTransferById as oldHttpGetTransfer, getFilesForUploadPromise as oldHttpGetFilesForUploadPromise, getFoldersForUploadPromise as oldHttpGetFoldersForUploadPromise, initHttpGateway as oldInitHttpGateway, registerActivityCallback as oldHttpRegisterActivityCallback, cancelTransfer as oldHttpCancelTransfer} from './v2';
 import {FileDialogOptions, DataTransferResponse, DropzoneEventData, TransferSpec, AsperaSdkTransfer, ReadAsArrayBufferResponse, ReadChunkAsArrayBufferResponse} from '../models/models';
 import {HttpGatewayInfo} from './models';
 
@@ -56,8 +56,6 @@ export const initHttpGateway = (response: HttpGatewayInfo): Promise<void> => {
         sendTransferUpdate(transfer);
       });
     });
-
-    applyHttpGatewayRuntimeSettings();
 
     return oldInitHttpGateway(asperaSdk.globals.httpGatewayUrl).then(() => {});
   }
@@ -169,23 +167,6 @@ export const httpRemoveTransfer = (id: string): Promise<any> => {
       asperaSdk.httpGatewayTransferStore.delete(id);
       return {removed: true};
     });
-};
-
-/**
- * Push the SDK's current HTTP Gateway runtime settings to v2's internal state.
- *
- * Called automatically from `initHttpGateway` once a v2 gateway is detected, and from
- * `updateHttpGatewaySettings` so runtime changes apply immediately to an already-active
- * v2 gateway. No-ops when the active gateway is v3+ (no chunking or queueing there).
- */
-export const applyHttpGatewayRuntimeSettings = (): void => {
-  if (!asperaSdk.useOldHttpGateway) {
-    return;
-  }
-
-  const {chunkSize, concurrentUploads} = asperaSdk.globals.httpGatewayRuntimeSettings;
-  asperaHttpGateway.overwriteDefaultChunkSize(chunkSize);
-  asperaHttpGateway.overwriteDefaultConcurrentUploads(concurrentUploads);
 };
 
 /**

@@ -2,7 +2,8 @@ import {messages} from '../constants/messages';
 import {client} from '../helpers/client/client';
 import {errorLog, generateErrorBody, generatePromiseObjects, isValidTransferSpec, randomUUID, throwError, withTimeout} from '../helpers/helpers';
 import {httpDownload, httpUpload, setupHttpGateway} from '../http-gateway';
-import {applyHttpGatewayRuntimeSettings, handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChunkAsArrayBuffer, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, httpStopTransfer, sendTransferUpdate} from '../http-gateway/core';
+import {handleHttpGatewayDrop, httpGatewayReadAsArrayBuffer, httpGatewayReadChunkAsArrayBuffer, httpGatewaySelectFileFolderDialog, httpGetAllTransfers, httpGetTransfer, httpRemoveTransfer, httpStopTransfer, sendTransferUpdate} from '../http-gateway/core';
+import {asperaHttpGateway} from '../http-gateway/v2';
 import {asperaSdk} from '../index';
 import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/aspera-sdk.model';
 import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, SaveFileDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, SdkStatus, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, ShowPreferencesPageOptions, PreferencesPage, TestSshPortsOptions, TransferClient} from '../models/models';
@@ -125,6 +126,32 @@ const connectDesktop = (): Promise<void> => {
     .then(() => rpcDiscover())
     .then(() => initDragDrop(true))
     .then((): void => undefined);
+};
+
+/**
+ * Update HTTP Gateway settings.
+ *
+ * Partial updates are supported — fields left undefined keep their current value.
+ *
+ * @param settings the settings to update
+ *
+ * @example
+ * // Before init:
+ * updateHttpGatewaySettings({chunkSize: 5_000_000, concurrentUploads: 4});
+ * initSession({appId: 'my-app', httpGatewaySettings: {url: '...', forceGateway: true}});
+ *
+ * @example
+ * // At runtime:
+ * updateHttpGatewaySettings({chunkSize: 5_000_000});
+ */
+export const updateHttpGatewaySettings = (settings: {chunkSize?: number; concurrentUploads?: number}): void => {
+  if (typeof settings?.chunkSize === 'number') {
+    asperaHttpGateway.overwriteDefaultChunkSize(settings.chunkSize);
+  }
+
+  if (typeof settings?.concurrentUploads === 'number') {
+    asperaHttpGateway.overwriteDefaultConcurrentUploads(settings.concurrentUploads);
+  }
 };
 
 /**
@@ -1704,41 +1731,6 @@ export const getCapabilities = (): SdkCapabilities => {
  */
 export const hasCapability = (capability: keyof SdkCapabilities): boolean => {
   return !!getCapabilities()[capability];
-};
-
-/**
- * Update HTTP Gateway runtime settings. These settings only affect HTTP Gateway v2
- * transfers — v3+ does not chunk uploads or queue them internally, so values set here
- * are stored but have no effect when the active gateway is v3+.
- *
- * Can be called before {@link initSession}; values are applied to v2's internal state
- * as soon as a v2 gateway is detected during init. Can also be called at any point
- * after init to update an already-running v2 gateway.
- *
- * Partial updates are supported — fields left undefined keep their current value.
- * Invalid values (non-positive numbers) are silently ignored.
- *
- * @param settings the settings to update
- *
- * @example
- * // Before init:
- * updateHttpGatewaySettings({chunkSize: 5_000_000, concurrentUploads: 4});
- * initSession({appId: 'my-app', httpGatewaySettings: {url: '...', forceGateway: true}});
- *
- * @example
- * // At runtime:
- * updateHttpGatewaySettings({chunkSize: 5_000_000});
- */
-export const updateHttpGatewaySettings = (settings: {chunkSize?: number; concurrentUploads?: number}): void => {
-  if (typeof settings?.chunkSize === 'number' && settings.chunkSize > 0) {
-    asperaSdk.globals.httpGatewayRuntimeSettings.chunkSize = settings.chunkSize;
-  }
-
-  if (typeof settings?.concurrentUploads === 'number' && settings.concurrentUploads > 0) {
-    asperaSdk.globals.httpGatewayRuntimeSettings.concurrentUploads = settings.concurrentUploads;
-  }
-
-  applyHttpGatewayRuntimeSettings();
 };
 
 export const currentTransferClient = (): TransferClient | undefined => {

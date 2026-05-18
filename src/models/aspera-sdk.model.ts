@@ -53,16 +53,6 @@ export class AsperaSdkGlobals {
   connectInstaller?: ConnectTypes.ConnectInstallerClientType;
   /** Connect status */
   connectStatus: ConnectTypes.ConnectStatusStrings = 'WAITING';
-  /**
-   * Runtime HTTP Gateway settings. Only applied to HTTP Gateway v2 transfers — v3+ has no
-   * chunking or queueing, so these are stored but have no effect when a v3+ gateway is active.
-   * Mutated by {@link updateHttpGatewaySettings} and by `initSession` when `httpGatewaySettings`
-   * passes overrides.
-   */
-  httpGatewayRuntimeSettings: { chunkSize: number; concurrentUploads: number } = {
-    chunkSize: 2097152,
-    concurrentUploads: 3,
-  };
   /** Connect application version, populated when Connect transitions to RUNNING. */
   connectVersion?: string;
 

@@ -985,6 +985,18 @@ export interface InitOptions {
     url: string;
     /** Indicate if HTTP Gateway should be forced. This will not start desktop if httpGatewayUrl is valid. */
     forceGateway: boolean;
+    /**
+     * Chunk size, in bytes, used when uploading via HTTP Gateway v2. v3+ does not chunk
+     * (the browser streams the request), so this value has no effect on v3+ gateways.
+     * Default: 2097152 (2 MiB).
+     */
+    chunkSize?: number;
+    /**
+     * Maximum number of concurrent uploads when using HTTP Gateway v2. v3+ does not queue
+     * uploads internally, so this value has no effect on v3+ gateways.
+     * Default: 3.
+     */
+    concurrentUploads?: number;
   };
   /** Connect Settings */
   connectSettings?: {

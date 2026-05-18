@@ -1,5 +1,5 @@
 import {AsperaSdk} from './models/aspera-sdk.model';
-import {authenticate, createDropzone, deregisterActivityCallback, deregisterStatusCallback, getAllTransfers, getCapabilities, getChecksum, getFilesList, getInfo, getStatus, getTransfer, hasCapability, init, initDragDrop, initSession, modifyTransfer, showPreferencesPage, readAsArrayBuffer, readChunkAsArrayBuffer, readDirectory, registerActivityCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showAbout, showDirectory, showPreferences, showSaveFileDialog, showSelectFileDialog, showSelectFolderDialog, showTransferManager, showTransferMonitor, startTransfer, stopTransfer, testConnection, testSshPorts, currentTransferClient} from './app/core';
+import {authenticate, createDropzone, deregisterActivityCallback, deregisterStatusCallback, getAllTransfers, getCapabilities, getChecksum, getFilesList, getInfo, getStatus, getTransfer, hasCapability, init, initDragDrop, initSession, modifyTransfer, showPreferencesPage, readAsArrayBuffer, readChunkAsArrayBuffer, readDirectory, registerActivityCallback, registerStatusCallback, removeDropzone, removeTransfer, resumeTransfer, setBranding, showAbout, showDirectory, showPreferences, showSaveFileDialog, showSelectFileDialog, showSelectFolderDialog, showTransferManager, showTransferMonitor, startTransfer, stopTransfer, testConnection, testSshPorts, updateHttpGatewaySettings, currentTransferClient} from './app/core';
 import {getInstallerInfo} from './app/installer';
 import {getInstallerUrls, isSafari} from './helpers/helpers';
 import * as httpGatewayCalls from './http-gateway';
@@ -48,6 +48,7 @@ asperaSdk.hasCapability = hasCapability;
 asperaSdk.getChecksum = getChecksum;
 asperaSdk.readDirectory = readDirectory;
 asperaSdk.currentTransferClient = currentTransferClient;
+asperaSdk.updateHttpGatewaySettings = updateHttpGatewaySettings;
 asperaSdk.httpGatewayCalls = httpGatewayCalls;
 
 const launch = asperaSdk.globals.launch;
@@ -101,6 +102,7 @@ export {
   getChecksum,
   readDirectory,
   currentTransferClient,
+  updateHttpGatewaySettings,
 };
 
 export type {

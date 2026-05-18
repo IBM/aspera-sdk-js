@@ -53,6 +53,16 @@ export class AsperaSdkGlobals {
   connectInstaller?: ConnectTypes.ConnectInstallerClientType;
   /** Connect status */
   connectStatus: ConnectTypes.ConnectStatusStrings = 'WAITING';
+  /**
+   * Runtime HTTP Gateway settings. Only applied to HTTP Gateway v2 transfers — v3+ has no
+   * chunking or queueing, so these are stored but have no effect when a v3+ gateway is active.
+   * Mutated by {@link updateHttpGatewaySettings} and by `initSession` when `httpGatewaySettings`
+   * passes overrides.
+   */
+  httpGatewayRuntimeSettings: { chunkSize: number; concurrentUploads: number } = {
+    chunkSize: 2097152,
+    concurrentUploads: 3,
+  };
   /** Connect application version, populated when Connect transitions to RUNNING. */
   connectVersion?: string;
 
@@ -420,6 +430,8 @@ export class AsperaSdk {
   /** Function to read directory contents and return entries as a flat list */
   readDirectory: (options: ReadDirectoryOptions) => Promise<ReadDirectoryResponse>;
   currentTransferClient: () => TransferClient | undefined;
+  /** Function to update HTTP Gateway runtime settings. Only affects HTTP Gateway v2; v3+ ignores these values. */
+  updateHttpGatewaySettings: (settings: {chunkSize?: number; concurrentUploads?: number}) => void;
   /** Indicate if Safari Extension is enabled. If the extension is disabled during the lifecycle this will not update to disabled. */
   SAFARI_EXTENSION_STATUS: SafariExtensionEvent = 'DISABLED';
   /** Aspera HTTP Gateway calls. This normally is not needed by clients but expose just in case. */

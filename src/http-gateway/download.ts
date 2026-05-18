@@ -227,13 +227,6 @@ export const httpDownload = (transferSpec: TransferSpec, asperaSdkSpec?: AsperaS
           transferObject.httpDownloadUrl = response?.url;
           transferObject.status = 'running';
           return transferObject;
-        })
-        .catch((error: any) => {
-          const errorData = getMessageFromError(error.response || error);
-          transferObject.status = 'failed';
-          transferObject.error_code = errorData.code;
-          transferObject.error_desc = errorData.message;
-          return transferObject;
         });
     }
 

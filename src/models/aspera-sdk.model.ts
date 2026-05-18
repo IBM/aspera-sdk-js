@@ -420,7 +420,7 @@ export class AsperaSdk {
   /** Function to read directory contents and return entries as a flat list */
   readDirectory: (options: ReadDirectoryOptions) => Promise<ReadDirectoryResponse>;
   currentTransferClient: () => TransferClient | undefined;
-  /** Function to update HTTP Gateway runtime settings. Only affects HTTP Gateway v2; v3+ ignores these values. */
+  /** Function to update HTTP Gateway settings. */
   updateHttpGatewaySettings: (settings: {chunkSize?: number; concurrentUploads?: number}) => void;
   /** Indicate if Safari Extension is enabled. If the extension is disabled during the lifecycle this will not update to disabled. */
   SAFARI_EXTENSION_STATUS: SafariExtensionEvent = 'DISABLED';

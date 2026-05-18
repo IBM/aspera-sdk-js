@@ -79,6 +79,17 @@ const httpDownloadPresigned = (transferSpec: TransferSpec, asperaSdkSpec?: Asper
 
     transferObject.httpRequestId = response.headers.get('X-Request-Id');
     transferObject.status = 'running';
+
+    if (asperaSdkSpec?.disableAutoDownload) {
+      // Caller asked for the URL only — surface it on the transfer and skip the iframe.
+      // The transfer entry stays in the store flagged as externally handled; consumer is
+      // responsible for invoking the URL (e.g., window.open) and calling removeTransfer when
+      // they're done with the entry.
+      transferObject.httpDownloadUrl = response.body.signed_url;
+      sendTransferUpdate(transferObject);
+      return transferObject;
+    }
+
     sendTransferUpdate(transferObject);
 
     const iframe = document.createElement('iframe');
@@ -203,6 +214,12 @@ export const httpDownload = (transferSpec: TransferSpec, asperaSdkSpec?: AsperaS
 
   if (asperaSdk.useOldHttpGateway) {
     return oldHttpDownload(transferSpec);
+  }
+
+  // `disableAutoDownload` requires a presigned URL to surface to the caller, so always take
+  // the presigned path regardless of the in-browser-download size threshold.
+  if (asperaSdkSpec?.disableAutoDownload) {
+    return httpDownloadPresigned(transferSpec, asperaSdkSpec);
   }
 
   if (

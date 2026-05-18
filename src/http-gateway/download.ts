@@ -22,7 +22,13 @@ const httpDownloadPresigned = (transferSpec: TransferSpec, asperaSdkSpec?: Asper
   // create a transfer sdk object
   const transferObject = getSdkTransfer(transferSpec);
   transferObject.httpDownloadExternalHandle = true;
-  sendTransferUpdate(transferObject);
+
+  // When `disableAutoDownload` is set, skip updates and activity callbacks
+  const disableAutoDownload = !!asperaSdkSpec?.disableAutoDownload;
+
+  if (!disableAutoDownload) {
+    sendTransferUpdate(transferObject);
+  }
 
   const triggerFailed = (error: any): void => {
     const errorData = getMessageFromError(error.response || error);
@@ -30,7 +36,10 @@ const httpDownloadPresigned = (transferSpec: TransferSpec, asperaSdkSpec?: Asper
     transferObject.status = 'failed';
     transferObject.error_code = errorData.code;
     transferObject.error_desc = errorData.message;
-    sendTransferUpdate(transferObject);
+
+    if (!disableAutoDownload) {
+      sendTransferUpdate(transferObject);
+    }
   };
 
   const url = new URL(asperaSdkSpec?.http_gateway_override_server_url || asperaSdk.globals.httpGatewayUrl);
@@ -80,13 +89,8 @@ const httpDownloadPresigned = (transferSpec: TransferSpec, asperaSdkSpec?: Asper
     transferObject.httpRequestId = response.headers.get('X-Request-Id');
     transferObject.status = 'running';
 
-    if (asperaSdkSpec?.disableAutoDownload) {
-      // Caller asked for the URL only — surface it on the transfer and skip the iframe.
-      // The transfer entry stays in the store flagged as externally handled; consumer is
-      // responsible for invoking the URL (e.g., window.open) and calling removeTransfer when
-      // they're done with the entry.
+    if (disableAutoDownload) {
       transferObject.httpDownloadUrl = response.body.signed_url;
-      sendTransferUpdate(transferObject);
       return transferObject;
     }
 
@@ -213,6 +217,26 @@ export const httpDownload = (transferSpec: TransferSpec, asperaSdkSpec?: AsperaS
   }
 
   if (asperaSdk.useOldHttpGateway) {
+    if (asperaSdkSpec?.disableAutoDownload) {
+      const transferObject = getSdkTransfer(transferSpec);
+      transferObject.httpDownloadExternalHandle = true;
+
+      // TODO: Pass through all options
+      return oldHttpDownload(transferSpec, {disableAutoDownload: true})
+        .then((response: any) => {
+          transferObject.httpDownloadUrl = response?.url;
+          transferObject.status = 'running';
+          return transferObject;
+        })
+        .catch((error: any) => {
+          const errorData = getMessageFromError(error.response || error);
+          transferObject.status = 'failed';
+          transferObject.error_code = errorData.code;
+          transferObject.error_desc = errorData.message;
+          return transferObject;
+        });
+    }
+
     return oldHttpDownload(transferSpec);
   }
 

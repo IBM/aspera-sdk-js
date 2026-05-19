@@ -1,6 +1,6 @@
 import {AsperaSdkSpec, AsperaSdkTransfer, TransferSpec} from '../models/models';
 import {asperaSdk} from '../index';
-import {safeJsonString, throwError} from '../helpers/helpers';
+import {generateErrorBody, safeJsonString, throwError} from '../helpers/helpers';
 import {messages} from '../constants/messages';
 import { base64Encoding, getMessageFromError, getSdkTransfer, sendTransferUpdate } from './core';
 import {download as oldHttpDownload} from './v2';
@@ -22,15 +22,28 @@ const httpDownloadPresigned = (transferSpec: TransferSpec, asperaSdkSpec?: Asper
   // create a transfer sdk object
   const transferObject = getSdkTransfer(transferSpec);
   transferObject.httpDownloadExternalHandle = true;
-  sendTransferUpdate(transferObject);
 
-  const triggerFailed = (error: any): void => {
+  // When `disableAutoDownload` is set, skip updates and activity callbacks
+  const disableAutoDownload = !!asperaSdkSpec?.disableAutoDownload;
+
+  if (!disableAutoDownload) {
+    sendTransferUpdate(transferObject);
+  }
+
+  // For disableAutoDownload there's no transfer to track, so failures reject once.
+  // For the regular flow, failures resolve with the transfer in a 'failed' state.
+  const handleError = (error: any): Promise<AsperaSdkTransfer> => {
     const errorData = getMessageFromError(error.response || error);
+
+    if (disableAutoDownload) {
+      return Promise.reject(generateErrorBody(messages.failedToGetDownloadUrl, error));
+    }
 
     transferObject.status = 'failed';
     transferObject.error_code = errorData.code;
     transferObject.error_desc = errorData.message;
     sendTransferUpdate(transferObject);
+    return Promise.resolve(transferObject);
   };
 
   const url = new URL(asperaSdkSpec?.http_gateway_override_server_url || asperaSdk.globals.httpGatewayUrl);
@@ -72,13 +85,18 @@ const httpDownloadPresigned = (transferSpec: TransferSpec, asperaSdkSpec?: Asper
     });
   }).then(response => {
     if (response.status >= 400) {
-      triggerFailed(response.body);
-
-      return transferObject;
+      // Defer to the single error handler in .catch (avoids double-handling).
+      throw response.body;
     }
 
     transferObject.httpRequestId = response.headers.get('X-Request-Id');
     transferObject.status = 'running';
+
+    if (disableAutoDownload) {
+      transferObject.httpDownloadUrl = response.body.signed_url;
+      return transferObject;
+    }
+
     sendTransferUpdate(transferObject);
 
     const iframe = document.createElement('iframe');
@@ -90,9 +108,7 @@ const httpDownloadPresigned = (transferSpec: TransferSpec, asperaSdkSpec?: Asper
 
     return transferObject;
   }).catch(error => {
-    triggerFailed(error);
-
-    return transferObject;
+    return handleError(error);
   });
 };
 
@@ -202,7 +218,26 @@ export const httpDownload = (transferSpec: TransferSpec, asperaSdkSpec?: AsperaS
   }
 
   if (asperaSdk.useOldHttpGateway) {
+    if (asperaSdkSpec?.disableAutoDownload) {
+      const transferObject = getSdkTransfer(transferSpec);
+      transferObject.httpDownloadExternalHandle = true;
+
+      // TODO: Pass through all options
+      return oldHttpDownload(transferSpec, {disableAutoDownload: true})
+        .then((response: any) => {
+          transferObject.httpDownloadUrl = response?.url;
+          transferObject.status = 'running';
+          return transferObject;
+        });
+    }
+
     return oldHttpDownload(transferSpec);
+  }
+
+  // `disableAutoDownload` requires a presigned URL to surface to the caller, so always take
+  // the presigned path regardless of the in-browser-download size threshold.
+  if (asperaSdkSpec?.disableAutoDownload) {
+    return httpDownloadPresigned(transferSpec, asperaSdkSpec);
   }
 
   if (

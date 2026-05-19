@@ -350,6 +350,16 @@ export interface AsperaSdkSpec {
    * This is for backwards compatibility with the old SDK.
    */
   http_gateway_v2_transfer_id?: string;
+  /**
+   * For HTTP Gateway downloads only. When `true`, the SDK obtains the presigned download URL
+   * but does not automatically initiate the browser download. Instead, the URL is returned on
+   * the resulting transfer as `httpDownloadUrl` so the caller can decide what to do with it.
+   *
+   * When set, the SDK always takes the presigned path regardless of the file size threshold.
+   * The returned transfer is not added to the SDK's transfer store and does not fire activity
+   * callbacks — the SDK has no ongoing role after returning the URL.
+   */
+  disableAutoDownload?: boolean;
 }
 
 export interface Path {
@@ -737,6 +747,13 @@ export interface AsperaSdkTransfer {
   httpRequestId?: string;
   /** Indicate if the HTTP Gateway transfer is being done via browser download manager. (No progress updates) */
   httpDownloadExternalHandle?: boolean;
+  /**
+   * For HTTP Gateway downloads started with `AsperaSdkSpec.disableAutoDownload: true`, this
+   * is the presigned download URL returned by the gateway. The SDK does not auto-trigger the
+   * download in this mode — the caller is expected to use this URL (e.g., open it in a new
+   * tab).
+   */
+  httpDownloadUrl?: string;
 }
 
 export interface InstallerInfo {

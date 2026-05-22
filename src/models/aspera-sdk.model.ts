@@ -142,6 +142,10 @@ export class ActivityTracking {
    * @param message the message received
    */
   handleTransferActivity(message: ActivityMessage): void {
+    if (!message) {
+      return;
+    }
+
     const data = message.data && typeof message.data === 'object' && 'transfers' in message.data
       ? message.data
       : {transfers: [message.data]};

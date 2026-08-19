@@ -357,9 +357,9 @@ export class HttpGateway {
   /** Request folder picker to get folder for uploading using Promises */
   getFoldersForUploadPromise: (id: string) => Promise<DataTransferResponse>;
   /** Create dropzone for drop events of files */
-  createDropzone: (callback: (data: {event: any; files: {dataTransfer: {files: ConnectStyleFile[]}}}) => void, elementSelector: string, formId: string) => void;
+  createDropzone: (callback: (data: {event: any; files: {dataTransfer: {files: ConnectStyleFile[]}}}) => void, elementSelector: string) => void;
   /** Remove dropzone for drop events of files */
-  removeDropzone: (elementSelector: string, formId: string) => void;
+  removeDropzone: (elementSelector: string) => void;
   /** Register callback for the transfer activity monitor */
   registerActivityCallback: (callback: (transfers: TransferResponse) => void) => string;
   /** Deregister callback to remove it from the callbacks getting transfer data */

@@ -1288,7 +1288,9 @@ export const createDropzone = (
     allowDefaultBehavior: options?.allowDefaultBehavior ?? false,
   };
 
-  if (asperaSdk.useConnect) {
+  if (asperaSdk.useOldHttpGateway) {
+    return asperaHttpGateway.createDropzone(callback, elementSelector);
+  } else if (asperaSdk.useConnect) {
     const connectOptions = {
       dragenter: resolvedOptions.dragEnter,
       dragover: resolvedOptions.dragOver,
@@ -1416,6 +1418,10 @@ export const createDropzone = (
  * @param elementSelector the selector of the element on the page that should remove
  */
 export const removeDropzone = (elementSelector: string): void => {
+  if (asperaSdk.useOldHttpGateway) {
+    return asperaHttpGateway.removeDropzone(elementSelector);
+  }
+
   const foundDropzone = asperaSdk.globals.dropZonesCreated.get(elementSelector);
 
   if (foundDropzone) {

@@ -37,7 +37,7 @@ export const httpUpload = (transferSpec: TransferSpec, asperaSdkSpec?: AsperaSdk
 
     if (foundFile) {
       body.append('Content-Length', String(foundFile.size));
-      body.append('file', foundFile);
+      body.append('file', foundFile, path.source);
     } else {
       hasBadFile.push(path.source);
     }

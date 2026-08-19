@@ -206,23 +206,30 @@ export const createHtmlInputElement = (): HTMLInputElement => {
   return element;
 };
 
+interface DroppedFile {
+  /** Handle to the raw File object provided by the browser */
+  file: File;
+  /** Full absolute path to the file from the filesystem root (i.e. foo/file1.txt) */
+  path: string;
+}
+
 /**
  * Handle drop events and store files for HTTP Gateway
  * This works on top of desktop.
  */
 export const handleHttpGatewayDrop = (items: DataTransferItemList, callback: (data: DropzoneEventData) => void, event: DragEvent): void => {
-  const files: File[] = [];
+  const files: DroppedFile[] = [];
   let callbackCount = 0;
   let callbackFinishCount = 0;
 
   const finalCallback = (): void => {
     if (callbackFinishCount >= callbackCount) {
-      const finalFiles = files.map(file => {
-        asperaSdk.httpGatewaySelectedFiles.set(file.name, file);
+      const finalFiles = files.map(({file, path}) => {
+        asperaSdk.httpGatewaySelectedFiles.set(path, file);
 
         return {
           lastModified: file.lastModified,
-          name: file.name,
+          name: path,
           size: file.size,
           type: file.type
         };
@@ -234,7 +241,11 @@ export const handleHttpGatewayDrop = (items: DataTransferItemList, callback: (da
   const traverse = (item: FileSystemEntry) => {
     if (item.isFile) {
       (item as FileSystemFileEntry).file(file => {
-        files.push(file);
+        files.push({
+          file,
+          // FileSystemEntry.fullPath normally begins with "/".
+          path: item.fullPath.replace(/^\/+/, '') || file.name,
+        });
         callbackFinishCount++;
         finalCallback();
       });

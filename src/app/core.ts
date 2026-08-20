@@ -1418,9 +1418,8 @@ export const createDropzone = (
  * @param elementSelector the selector of the element on the page that should remove
  */
 export const removeDropzone = (elementSelector: string): void => {
-  if (asperaSdk.useOldHttpGateway) {
-    return asperaHttpGateway.removeDropzone(elementSelector);
-  }
+  // Make sure to also remove from legacy SDK. This is a no-op if nothing is registered.
+  asperaHttpGateway.removeDropzone(elementSelector);
 
   const foundDropzone = asperaSdk.globals.dropZonesCreated.get(elementSelector);
 

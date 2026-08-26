@@ -35,6 +35,7 @@ import {
   downloadSpec,
   uploadSpec,
 } from '../test-helpers';
+import {TextEncoder as NodeTextEncoder} from 'util';
 
 describe('HTTP Gateway', () => {
   const GATEWAY_URL = 'https://gateway.example.com/aspera/http-gwy';
@@ -228,6 +229,42 @@ describe('HTTP Gateway', () => {
       await removeTransfer(transferId);
 
       expect(abortSpy).toHaveBeenCalled();
+      expect(asperaSdk.httpGatewayTransferStore.has(transferId)).toBe(false);
+      expect(asperaSdk.httpGatewayRequestStore.has(transferId)).toBe(false);
+    });
+
+    it('should abort fetch and remove transfer from both stores for a blob download', async () => {
+      Object.defineProperty(global, 'TextEncoder', {value: NodeTextEncoder, configurable: true});
+      let requestSignal: AbortSignal | undefined;
+      global.fetch = jest.fn().mockImplementation(async (_url: string, options?: RequestInit) => {
+        requestSignal = options?.signal as AbortSignal;
+
+        return {
+          status: 200,
+          headers: {
+            get: (name: string) => name === 'Content-Length' ? '100' : null,
+          },
+          body: {
+            getReader: () => ({
+              read: () => new Promise((_resolve, reject) => {
+                requestSignal?.addEventListener('abort', () => reject(new DOMException('Aborted', 'AbortError')));
+              }),
+            }),
+          },
+        };
+      });
+
+      const result = await startTransfer(downloadSpec({
+        tags: {aspera: {'http-gateway': {expected_size: 100}}},
+      }), {});
+      const transferId = result.uuid;
+
+      expect(asperaSdk.httpGatewayRequestStore.has(transferId)).toBe(true);
+
+      await removeTransfer(transferId);
+      await Promise.resolve();
+
+      expect(requestSignal?.aborted).toBe(true);
       expect(asperaSdk.httpGatewayTransferStore.has(transferId)).toBe(false);
       expect(asperaSdk.httpGatewayRequestStore.has(transferId)).toBe(false);
     });

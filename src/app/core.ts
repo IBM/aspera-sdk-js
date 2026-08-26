@@ -678,7 +678,7 @@ export const removeTransfer = (id: string): Promise<any> => {
  * @returns a promise that resolves if transfer is stopped and rejects if transfer cannot be stopped
  */
 export const stopTransfer = (id: string): Promise<any> => {
-  if (asperaSdk.useHttpGateway) {
+  if (asperaSdk.useHttpGateway || asperaSdk.httpGatewayTransferStore.has(id)) {
     return httpStopTransfer(id);
   }
 

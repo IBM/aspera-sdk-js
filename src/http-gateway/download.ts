@@ -127,8 +127,24 @@ const httpDownloadPresigned = (transferSpec: TransferSpec, asperaSdkSpec?: Asper
 const httpDownloadInBrowser = (transferSpec: TransferSpec, asperaSdkSpec?: AsperaSdkSpec): Promise<AsperaSdkTransfer> => {
   // create a transfer sdk object
   const transferObject = getSdkTransfer(transferSpec);
+  const request = new AbortController();
+  asperaSdk.httpGatewayRequestStore.set(transferObject.uuid, request);
+
+  const clearRequest = (): void => {
+    if (asperaSdk.httpGatewayRequestStore.get(transferObject.uuid) === request) {
+      asperaSdk.httpGatewayRequestStore.delete(transferObject.uuid);
+    }
+  };
 
   const triggerFailed = (error: any): void => {
+    clearRequest();
+
+    // Aborting the fetch rejects the pending read. Preserve the cancelled state
+    // set by stopTransfer/removeTransfer instead of reporting a failure.
+    if (transferObject.status === 'cancelled') {
+      return;
+    }
+
     const errorData = getMessageFromError(error.response || error);
 
     transferObject.status = 'failed';
@@ -148,7 +164,7 @@ const httpDownloadInBrowser = (transferSpec: TransferSpec, asperaSdkSpec?: Asper
     headers['X-Aspera-AccessKey'] = asperaSdkSpec.http_gateway_authentication.access_key;
   }
 
-  fetch(`${asperaSdkSpec?.http_gateway_override_server_url || asperaSdk.globals.httpGatewayUrl}${asperaSdk.globals.httpGatewayRoutePrefix}/download`, {method: 'GET', headers}).then(data => {
+  fetch(`${asperaSdkSpec?.http_gateway_override_server_url || asperaSdk.globals.httpGatewayUrl}${asperaSdk.globals.httpGatewayRoutePrefix}/download`, {method: 'GET', headers, signal: request.signal}).then(data => {
     const responseHeaders = data.headers;
     transferObject.httpRequestId = responseHeaders.get('X-Request-Id');
     const chunks: Uint8Array<ArrayBuffer>[] = [];
@@ -168,6 +184,7 @@ const httpDownloadInBrowser = (transferSpec: TransferSpec, asperaSdkSpec?: Asper
           }
 
           transferObject.status = 'completed';
+          clearRequest();
           sendTransferUpdate(transferObject);
           const blobData = new Blob(chunks, {type: responseHeaders.get('Content-Type')});
           const objectURL = URL.createObjectURL(blobData);
@@ -202,6 +219,24 @@ const httpDownloadInBrowser = (transferSpec: TransferSpec, asperaSdkSpec?: Asper
 
 /**
  * HTTP Gateway Download Logic
+ *
+ * For HTTP Gateway v3, downloads can either be blob-based or browser managed:
+ *
+ *  - `In-browser blob based download`: The SDK downloads the file as a Blob before saving it. Because the SDK manages the
+ *  transfer, the application can receive and display download progress.
+ *  - `Browser-managed download`: The SDK uses a presigned URL and delegates the download to the browser's download manager. The
+ *  application has limited (i.e. none) control over these transfers and the user should manage the download directly.
+ *
+ * By default, the download method is selected using the expected behavior size:
+ *  - 1 GB or less: in-browser blob download
+ *  - Greater than 1 GB: browser-managed download
+ *
+ * The default threshold is 1 GB and can be configured by the application. The expected size of the download must be explicitly set
+ * by the application in the transfer spec tags via `tags.aspera["http-gateway"].expected_size`. If the application does not
+ * provide the expected size, the SDK will default to using a browser-managed download.
+ *
+ * Blob downloads provide application-level progress reporting, but require the browser to hold the downloaded data in memory. Therefore,
+ * browser-managed downloads are usually preferred, especially for larger files.
  *
  * @param transferSpec - TransferSpec for the download
  * @param asperaSdkSpec IBM Aspera settings when starting a transfer.

@@ -644,7 +644,7 @@ export const deregisterStatusCallback = (id: string): void => {
  * @returns a promise that resolves if transfer is removed and rejects if transfer cannot be removed
  */
 export const removeTransfer = (id: string): Promise<any> => {
-  if (asperaSdk.useHttpGateway) {
+  if (asperaSdk.useHttpGateway || asperaSdk.httpGatewayTransferStore.has(id)) {
     return httpRemoveTransfer(id);
   } else if (asperaSdk.useConnect) {
     return asperaSdk.globals.connect.removeTransfer(id);
@@ -678,7 +678,7 @@ export const removeTransfer = (id: string): Promise<any> => {
  * @returns a promise that resolves if transfer is stopped and rejects if transfer cannot be stopped
  */
 export const stopTransfer = (id: string): Promise<any> => {
-  if (asperaSdk.useHttpGateway) {
+  if (asperaSdk.useHttpGateway || asperaSdk.httpGatewayTransferStore.has(id)) {
     return httpStopTransfer(id);
   }
 

@@ -39,7 +39,7 @@
     "typedoc": "^0.28.14",
     "typescript": "^5.9.3",
     "webpack": "^5.111.1",
-    "webpack-cli": "^6.0.1",
+    "webpack-cli": "^7.2.3",
     "webpack-dev-server": "^6.0.0"
   },
   "dependencies": {

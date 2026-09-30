@@ -93,14 +93,30 @@ export const httpUpload = (transferSpec: TransferSpec, asperaSdkSpec?: AsperaSdk
 
   request.addEventListener('load', () => {
     transferObject.httpRequestId = request.getResponseHeader('X-Request-Id');
+
+    if (transferObject.status === 'failed' || transferObject.status === 'cancelled') {
+      return;
+    }
+
+    if (request.status >= 400) {
+      triggerFailed();
+      return;
+    }
+
+    transferObject.status = 'completed';
+    transferObject.elapsed_usec = (new Date().getTime() - new Date(transferObject.add_time).getTime()) * 1000;
+    asperaSdk.httpGatewayRequestStore.delete(transferObject.uuid);
+    triggerUpdate();
   });
 
+  // This event seems to fire when the browser has finished uploading data to the server but BEFORE the server responds with
+  // the HTTP status code. On the server side, the transfer (via ascp) could still be running so the HTTP status code may not
+  // arrive for some time.
   request.upload.addEventListener('load', event => {
     if (transferObject.status === 'failed') {
       return;
     }
 
-    transferObject.status = 'completed';
     transferObject.elapsed_usec = (new Date().getTime() - new Date(transferObject.add_time).getTime()) * 1000;
 
     if (event.lengthComputable) {
@@ -109,7 +125,6 @@ export const httpUpload = (transferSpec: TransferSpec, asperaSdkSpec?: AsperaSdk
       transferObject.percentage = (event.loaded / event.total);
     }
 
-    asperaSdk.httpGatewayRequestStore.delete(transferObject.uuid);
     triggerUpdate();
   });
 
@@ -121,12 +136,6 @@ export const httpUpload = (transferSpec: TransferSpec, asperaSdkSpec?: AsperaSdk
     transferObject.status = 'running';
     promiseInfo.resolver(transferObject);
     triggerUpdate();
-  });
-
-  request.addEventListener('readystatechange', () => {
-    if (request.status >= 400) {
-      triggerFailed();
-    }
   });
 
   request.upload.addEventListener('error', event => {

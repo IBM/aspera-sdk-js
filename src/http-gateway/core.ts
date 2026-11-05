@@ -2,7 +2,7 @@ import {messages} from '../constants/messages';
 import {generateErrorBody, generatePromiseObjects, randomUUID, safeJsonParse, throwError} from '../helpers/helpers';
 import {asperaSdk} from '../index';
 import {removeTransfer as oldHttpRemoveTransfer, getAllTransfers as oldHttpGetAllTransfers, getTransferById as oldHttpGetTransfer, getFilesForUploadPromise as oldHttpGetFilesForUploadPromise, getFoldersForUploadPromise as oldHttpGetFoldersForUploadPromise, initHttpGateway as oldInitHttpGateway, registerActivityCallback as oldHttpRegisterActivityCallback, cancelTransfer as oldHttpCancelTransfer} from './v2';
-import {FileDialogOptions, DataTransferResponse, DropzoneEventData, TransferSpec, AsperaSdkTransfer, ReadAsArrayBufferResponse, ReadChunkAsArrayBufferResponse} from '../models/models';
+import {FileDialogOptions, DataTransferResponse, DropzoneEventData, TransferSpec, AsperaSdkTransfer, TransferStatus, ReadAsArrayBufferResponse, ReadChunkAsArrayBufferResponse} from '../models/models';
 import {HttpGatewayInfo} from './models';
 
 // Maximum file size for generating image previews for files. 50MiB matches the limits in both Connect and IBM Aspera for desktop.
@@ -374,6 +374,7 @@ const getTitle = (transferSpec: TransferSpec): string => {
  */
 export const getSdkTransfer = (transferSpec: TransferSpec): AsperaSdkTransfer => {
   const title = getTitle(transferSpec);
+  let currentStatus: TransferStatus = 'initiating';
 
   return {
     uuid: randomUUID(),
@@ -389,7 +390,16 @@ export const getSdkTransfer = (transferSpec: TransferSpec): AsperaSdkTransfer =>
     end_time: '',
     explorer_path: '',
     previous_status: 'initiating',
-    status: 'initiating',
+    get status(): TransferStatus {
+      return currentStatus;
+    },
+    // Keep track of the status the transfer was in before the latest change
+    set status(status: TransferStatus) {
+      if (status !== currentStatus) {
+        this.previous_status = currentStatus;
+        currentStatus = status;
+      }
+    },
     bytes_written: 0,
     bytes_expected: 0,
     calculated_rate_kbps: 0,

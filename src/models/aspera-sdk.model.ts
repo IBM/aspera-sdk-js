@@ -177,6 +177,12 @@ export class ActivityTracking {
    * @param webSocketEvent the event type.
    */
   handleWebSocketEvents(webSocketEvent: WebsocketEvent): void {
+    // While Connect is the active client, the Desktop websocket only exists for background
+    // detection (fallback flow). Its lifecycle must not leak into the SDK status.
+    if (asperaSdk.useConnect) {
+      return;
+    }
+
     const current_status = statusService.getStatus();
 
     if (webSocketEvent === 'CLOSED') {
@@ -218,6 +224,11 @@ export class ActivityTracking {
    * @param running whether the client is running or not.
    */
   handleClientEvents(running: boolean): void {
+    // See handleWebSocketEvents: Desktop events are ignored while Connect is the active client
+    if (asperaSdk.useConnect) {
+      return;
+    }
+
     if (!running) {
       statusService.setStatus('DISCONNECTED');
     }

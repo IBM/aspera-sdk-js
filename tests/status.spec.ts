@@ -51,6 +51,57 @@ describe('StatusService', () => {
       expect(cb).toHaveBeenCalledWith('DISCONNECTED');
     });
 
+    describe('transfer client changes', () => {
+      afterEach(() => {
+        asperaSdk.globals.connectStatus = 'WAITING';
+        asperaSdk.globals.appId = '';
+      });
+
+      test('re-emits RUNNING when the active transfer client changes', () => {
+        const cb = jest.fn();
+        asperaSdk.globals.appId = 'app';
+        asperaSdk.globals.connectStatus = 'RUNNING';
+        statusService.setStatus('RUNNING');
+        statusService.registerCallback(cb);
+        cb.mockClear();
+
+        // Connect -> Desktop
+        asperaSdk.globals.connectStatus = 'STOPPED';
+        asperaSdk.globals.asperaAppVerified = true;
+        statusService.setStatus('RUNNING');
+
+        expect(cb).toHaveBeenCalledTimes(1);
+        expect(cb).toHaveBeenCalledWith('RUNNING');
+        expect(asperaSdk.currentTransferClient()).toBe('desktop');
+      });
+
+      test('still deduplicates RUNNING when the transfer client is unchanged', () => {
+        const cb = jest.fn();
+        asperaSdk.globals.appId = 'app';
+        asperaSdk.globals.asperaAppVerified = true;
+        statusService.setStatus('RUNNING');
+        statusService.registerCallback(cb);
+        cb.mockClear();
+
+        statusService.setStatus('RUNNING');
+
+        expect(cb).not.toHaveBeenCalled();
+      });
+
+      test('does not re-emit non-RUNNING statuses when the transfer client changes', () => {
+        const cb = jest.fn();
+        statusService.setStatus('INITIALIZING');
+        statusService.registerCallback(cb);
+        cb.mockClear();
+
+        // e.g. HTTP Gateway becomes verified mid-initialization
+        asperaSdk.globals.httpGatewayVerified = true;
+        statusService.setStatus('INITIALIZING');
+
+        expect(cb).not.toHaveBeenCalled();
+      });
+    });
+
     test('remaps DISCONNECTED to DEGRADED when HTTP Gateway is ready', () => {
       asperaSdk.globals.httpGatewayVerified = true;
       statusService.setStatus('RUNNING');

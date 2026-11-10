@@ -1,4 +1,4 @@
-import {SdkStatus} from '../models/models';
+import {SdkStatus, TransferClient} from '../models/models';
 import {randomUUID} from '../helpers/helpers';
 import {asperaSdk} from '../index';
 
@@ -6,6 +6,8 @@ type StatusCallback = (status: SdkStatus) => void;
 
 class StatusService {
   private currentStatus: SdkStatus | undefined = undefined;
+  /** The transfer client that was active when RUNNING was last emitted. */
+  private runningClient: TransferClient | undefined = undefined;
   private callbacks = new Map<string, StatusCallback>();
   private pollTimerId: ReturnType<typeof setInterval> | null = null;
   private failTimeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -20,7 +22,12 @@ class StatusService {
       status = 'DEGRADED';
     }
 
-    if (this.currentStatus === status) {
+    // RUNNING is re-emitted when the active transfer client changes (e.g. Connect -> Desktop
+    // in the fallback flow) so consumers know to re-check currentTransferClient().
+    const client = status === 'RUNNING' ? asperaSdk.currentTransferClient() : undefined;
+    const clientChanged = status === 'RUNNING' && client !== this.runningClient;
+
+    if (this.currentStatus === status && !clientChanged) {
       return;
     }
 
@@ -32,6 +39,7 @@ class StatusService {
     }
 
     this.currentStatus = status;
+    this.runningClient = client;
     this.callbacks.forEach(cb => cb(status));
   }
 
@@ -130,6 +138,7 @@ class StatusService {
   reset(): void {
     this.stopPolling();
     this.currentStatus = undefined;
+    this.runningClient = undefined;
     this.callbacks.clear();
   }
 }

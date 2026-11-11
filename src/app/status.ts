@@ -97,7 +97,7 @@ class StatusService {
   }
 
   /**
-   * Resume Desktop detection polling without resetting status or setting a fail timeout.
+   * Resume IBM Aspera for desktop detection polling without resetting status or setting a fail timeout.
    * Used after a fallback decision (e.g. FAILED/DEGRADED) to continue detecting Desktop
    * in the background so a late launch can still transition to RUNNING.
    *

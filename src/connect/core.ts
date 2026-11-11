@@ -63,7 +63,7 @@ export const connectInstallationFlow = (): void => {
 
 /**
  * Tear down an active Connect session so the SDK stops routing calls to Connect.
- * Used by the desktop fallback flow, either when Connect fails to start or when
+ * Used only in the fallback flow, either when Connect fails to start or when
  * IBM Aspera for desktop is detected and takes over as the transfer client.
  *
  * Listeners are removed before stopping so Connect cannot emit a final status
@@ -79,7 +79,6 @@ export const stopConnect = (): void => {
   connect.removeEventListener();
   connect.stop();
   asperaSdk.globals.connectStatus = 'STOPPED';
-  // removeEventListener() dropped the TRANSFER listener too, so allow a future initConnect to re-add it
   transferMonitorActivated = false;
 };
 

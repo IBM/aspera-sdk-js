@@ -22,27 +22,12 @@ import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
  */
 const CONNECT_EXTENSION_DETECT_TIMEOUT = 1500;
 
-/**
- * Check if IBM Aspera for Desktop connection works. This function is called by init
- * when initializing the SDK. This function can be used at any point for checking.
- *
- * @returns a promise that resolves if server can connect or rejects if not
- */
-export const testConnection = (): Promise<any> => {
-  if (asperaSdk.isReady || asperaSdk.useConnect) {
-    return Promise.resolve(asperaSdk.globals.sdkResponseData);
-  }
-
-  return verifyDesktop().then(() => asperaSdk.globals.sdkResponseData);
-};
-
 /*
  * Desktop-only internals. Unlike their public counterparts, these always talk to
  * IBM Aspera for desktop regardless of which transfer client is currently active,
  * so Desktop can be detected in the background while Connect is in use.
  */
-
-const verifyDesktop = (): Promise<void> => {
+const getDesktopInfo = (): Promise<void> => {
   return client.request('get_info')
     .then((data: AsperaSdkClientInfo) => {
       asperaSdk.globals.asperaSdkInfo = data;
@@ -75,6 +60,20 @@ const initDesktopDragDrop = (initCall?: boolean): Promise<boolean> => {
 
       return Promise.reject(generateErrorBody(messages.dragDropInitFailed, error));
     });
+};
+
+/**
+ * Check if IBM Aspera for desktop connection works. This function is called by init
+ * when initializing the SDK. This function can be used at any point for checking.
+ *
+ * @returns a promise that resolves if server can connect or rejects if not
+ */
+export const testConnection = (): Promise<any> => {
+  if (asperaSdk.isReady || asperaSdk.useConnect) {
+    return Promise.resolve(asperaSdk.globals.sdkResponseData);
+  }
+
+  return getDesktopInfo().then(() => asperaSdk.globals.sdkResponseData);
 };
 
 /**
@@ -135,7 +134,7 @@ const setupAppId = (options?: {appId?: string; supportMultipleUsers?: boolean}):
 
 const connectDesktop = (): Promise<void> => {
   return asperaSdk.activityTracking.setup()
-    .then(() => verifyDesktop())
+    .then(() => getDesktopInfo())
     .then(() => discoverDesktopRpc())
     .then(() => initDesktopDragDrop(true))
     .then((): void => undefined);
@@ -262,9 +261,6 @@ export const init = (options?: InitOptions): Promise<any> => {
  * immediately — lifecycle status is communicated asynchronously via {@link registerStatusCallback}.
  *
  * The SDK supports three transfer clients. By default, IBM Aspera for desktop is used.
- * Set `connectSettings.useConnect` to use IBM Aspera Connect instead, or `connectSettings.fallback`
- * to prefer Desktop and fall back to Connect if Desktop is not found within `retryTimeout`.
- * Only one of Desktop or Connect is active at a time.
  *
  * ## HTTP Gateway
  *
@@ -377,9 +373,9 @@ export const initSession = (options?: InitOptions): void => {
   const hasFallback = options?.connectSettings?.fallback && !options?.connectSettings?.useConnect;
 
   /**
-   * Background Desktop detection used while Connect is the fallback client. Connect is
+   * Background IBM Aspera for desktop detection used while Connect is the fallback client. Connect is
    * torn down *before* the poll resolves, so by the time StatusService emits RUNNING,
-   * calls route to Desktop and currentTransferClient() reports 'desktop'.
+   * calls route to IBM Aspera for desktop and currentTransferClient() reports 'desktop'.
    */
   const connectDesktopReplacingConnect = (): Promise<void> => {
     return connectDesktop().then(() => stopConnect());
@@ -392,16 +388,19 @@ export const initSession = (options?: InitOptions): void => {
         detectConnectExtension(CONNECT_EXTENSION_DETECT_TIMEOUT).then(found => {
           if (found) {
             initConnect({...options.connectSettings, hideIncludedInstaller: true});
-            // Desktop is preferred over Connect, so keep looking for it even if Connect starts
+
+            // IBM Aspera for desktop is preferred over Connect, so keep looking for it even if Connect starts. For example,
+            // the user might be downloading/installing the desktop app while their existing Connect installation gets used.
             statusService.resumePolling(connectDesktopReplacingConnect, retryInterval);
+
             const callbackId = statusService.registerCallback((status) => {
               if (status === 'INITIALIZING') {
                 return;
               }
               statusService.deregisterCallback(callbackId);
-              // A RUNNING status here is either Connect starting or Desktop already having
+              // A RUNNING status here is either Connect starting or IBM Aspera for desktop already having
               // replaced it. Anything else means Connect could not start, so fall back to
-              // Desktop-only mode. The background Desktop poll is already running.
+              // desktop-only mode. The background desktop app poll is already running.
               if (status !== 'RUNNING') {
                 stopConnect();
                 // Explicitly set status to FAILED since we go back to desktop mode

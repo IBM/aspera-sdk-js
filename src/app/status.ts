@@ -11,6 +11,8 @@ class StatusService {
   private callbacks = new Map<string, StatusCallback>();
   private pollTimerId: ReturnType<typeof setInterval> | null = null;
   private failTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  /** Identifies the current poll loop. Incremented by stopPolling() to invalidate in-flight attempts. */
+  private pollSession = 0;
 
   getStatus(): SdkStatus | undefined {
     return this.currentStatus;
@@ -81,19 +83,7 @@ class StatusService {
       }
     }, failTimeout);
 
-    const attempt = (): void => {
-      detectFn()
-        .then(() => {
-          this.stopPolling();
-          this.setStatus('RUNNING');
-        })
-        .catch(() => {
-          // Stay in current status (INITIALIZING or FAILED), poll continues
-        });
-    };
-
-    attempt();
-    this.pollTimerId = setInterval(attempt, interval);
+    this.runPollLoop(detectFn, interval);
   }
 
   /**
@@ -109,14 +99,45 @@ class StatusService {
       return;
     }
 
+    this.runPollLoop(detectFn, interval);
+  }
+
+  /**
+   * Run `detectFn` every `interval` ms until it resolves, then transition to RUNNING.
+   *
+   * At most one attempt is in flight at a time. While IBM Aspera for desktop is absent, an attempt
+   * does not settle (it waits on the websocket/Safari extension), so starting a new attempt
+   * every tick would pile up pending chains for as long as the page is open and then burst
+   * RPC calls at Desktop once it appears. Waiting is safe because the pending attempt
+   * resolves as soon as Desktop becomes reachable.
+   *
+   * Each loop is tied to a poll session. When the loop is stopped or replaced, any attempt
+   * still in flight is ignored when it settles, so a stale attempt can neither block the new
+   * loop nor report RUNNING on its behalf.
+   */
+  private runPollLoop(detectFn: () => Promise<void>, interval: number): void {
+    const session = this.pollSession;
+    let attemptInFlight = false;
+
     const attempt = (): void => {
+      if (attemptInFlight) {
+        return;
+      }
+
+      attemptInFlight = true;
       detectFn()
         .then(() => {
+          attemptInFlight = false;
+          if (session !== this.pollSession) {
+            return;
+          }
+
           this.stopPolling();
           this.setStatus('RUNNING');
         })
         .catch(() => {
           // Stay in current status, poll continues
+          attemptInFlight = false;
         });
     };
 
@@ -125,6 +146,9 @@ class StatusService {
   }
 
   stopPolling(): void {
+    // Invalidate any attempt still in flight from the loop being stopped
+    this.pollSession++;
+
     if (this.pollTimerId) {
       clearInterval(this.pollTimerId);
       this.pollTimerId = null;

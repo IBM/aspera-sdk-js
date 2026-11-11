@@ -3,6 +3,7 @@ import {client} from '../../src/helpers/client/client';
 import {detectConnectExtension} from '../../src/helpers/connect-extension';
 import {SdkStatus} from '../../src/models/models';
 import {resetSdk} from '../test-helpers';
+import {websocketService} from '../../src/helpers/ws';
 
 jest.mock('../../src/helpers/connect-extension', () => ({
   detectConnectExtension: jest.fn(),
@@ -87,7 +88,7 @@ describe('Connect fallback with background Desktop detection', () => {
       appId: 'app',
       retryInterval: RETRY_INTERVAL,
       retryTimeout: RETRY_TIMEOUT,
-      connectSettings: {fallback: true},
+      connectSettings: {useConnect: false, fallback: true},
     });
   });
 
@@ -197,4 +198,74 @@ describe('Connect fallback with background Desktop detection', () => {
     expect(getStatus()).toBe('RUNNING');
     expect(currentTransferClient()).toBe('connect');
   });
+});
+
+describe('Connect fallback background Desktop detection over a long session', () => {
+  const realWebSocket = global.WebSocket;
+  let desktopRunning: boolean;
+
+  /** Minimal WebSocket that connects only while Desktop is running and acks the subscription. */
+  class FakeWebSocket {
+    url = 'ws://127.0.0.1:33024';
+    onopen: () => void;
+    onerror: () => void;
+    onclose: () => void;
+    onmessage: (message: {data: string}) => void;
+
+    constructor() {
+      setTimeout(() => (desktopRunning ? this.onopen?.() : this.onerror?.()), 10);
+    }
+
+    send(): void {
+      setTimeout(() => this.onmessage?.({data: JSON.stringify({id: 1})}), 0);
+    }
+
+    close(): void {}
+  }
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+    connectInstances.length = 0;
+    desktopRunning = false;
+    (global as any).WebSocket = FakeWebSocket;
+
+    (detectConnectExtension as jest.Mock).mockResolvedValue(true);
+    jest.spyOn(client, 'request').mockImplementation((method: String) => {
+      return Promise.resolve(method === 'rpc.discover' ? {methods: [{name: 'start_transfer'}]} : {});
+    });
+  });
+
+  afterEach(() => {
+    websocketService.disconnect();
+    (global as any).WebSocket = realWebSocket;
+    resetSdk();
+    asperaSdk.globals.rpcMethods = [];
+    jest.restoreAllMocks();
+    jest.useRealTimers();
+  });
+
+  it('does not accumulate detection attempts that burst into Desktop when it appears', async () => {
+    initSession({
+      appId: 'app',
+      retryInterval: RETRY_INTERVAL,
+      retryTimeout: RETRY_TIMEOUT,
+      connectSettings: {useConnect: false, fallback: true},
+    });
+    await jest.advanceTimersByTimeAsync(RETRY_TIMEOUT);
+    connectInstances[0].emitStatus('RUNNING');
+
+    // Two minutes on Connect: ~60 poll ticks while Desktop is unreachable
+    for (let i = 0; i < 120; i++) {
+      await jest.advanceTimersByTimeAsync(1000);
+    }
+
+    desktopRunning = true;
+    for (let i = 0; i < 5; i++) {
+      await jest.advanceTimersByTimeAsync(1000);
+    }
+
+    const getInfoCalls = (client.request as jest.Mock).mock.calls.filter(([m]) => m === 'get_info');
+    expect(getInfoCalls).toHaveLength(1);
+    expect(currentTransferClient()).toBe('desktop');
+  }, 30000);
 });

@@ -167,6 +167,213 @@ export const updateHttpGatewaySettings = (settings: {chunkSize?: number; concurr
 };
 
 /**
+ * Remove dropzone.
+ *
+ * @param elementSelector the selector of the element on the page that should remove
+ */
+export const removeDropzone = (elementSelector: string): void => {
+  // Make sure to also remove from legacy SDK. This is a no-op if nothing is registered.
+  asperaHttpGateway.removeDropzone(elementSelector);
+  // Connect listeners cannot be detached; dropping the registration makes them ignore events
+  asperaSdk.globals.connectDropzones.delete(elementSelector);
+
+  const foundDropzone = asperaSdk.globals.dropZonesCreated.get(elementSelector);
+
+  if (foundDropzone) {
+    const elements = document.querySelectorAll(elementSelector);
+
+    foundDropzone.forEach((data) => {
+      if (elements && elements.length) {
+        elements.forEach(element => {
+          element.removeEventListener(data.event, data.callback);
+        });
+      }
+    });
+
+    asperaSdk.globals.dropZonesCreated.delete(elementSelector);
+  }
+};
+
+/**
+ * Create a dropzone for the given element selector. Creating a dropzone for a selector that
+ * already has one replaces it.
+ *
+ * Dropzones created while Connect is the transfer client are moved over automatically if the SDK
+ * later stops using Connect (see Connect fallback in {@link initSession}). They are re-attached to
+ * the elements matching the selector at that time.
+ *
+ * @param callback the function to call once the files are dropped
+ * @param elementSelector the selector of the element on the page that should watch for drop events
+ * @param options options to configure which drag and drop events trigger the listener
+ */
+export const createDropzone = (
+  callback: (data: DropzoneEventData) => void,
+  elementSelector: string,
+  options?: DropzoneOptions,
+): void => {
+  const resolvedOptions: Required<DropzoneOptions> = {
+    dragEnter: options?.dragEnter ?? false,
+    dragOver: options?.dragOver ?? false,
+    dragLeave: options?.dragLeave ?? false,
+    drop: options?.drop ?? true,
+    allowPropagation: options?.allowPropagation ?? true,
+    allowDefaultBehavior: options?.allowDefaultBehavior ?? false,
+  };
+
+  if (asperaSdk.useOldHttpGateway) {
+    return asperaHttpGateway.createDropzone(callback, elementSelector);
+  } else if (asperaSdk.useConnect) {
+    const connectOptions = {
+      dragenter: resolvedOptions.dragEnter,
+      dragover: resolvedOptions.dragOver,
+      dragleave: resolvedOptions.dragLeave,
+      drop: resolvedOptions.drop,
+      allowPropagation: resolvedOptions.allowPropagation,
+      disablePreventDefault: resolvedOptions.allowDefaultBehavior,
+    } as unknown as ConnectTypes.DragDropOptions;
+
+    // Connect has no API to remove drop targets, so its listeners stay on the element after
+    // removeDropzone() or after the SDK stops using Connect. Only forward events while Connect
+    // is active and this is still the current registration for the selector.
+    const registration = {callback, options};
+    asperaSdk.globals.connectDropzones.set(elementSelector, registration);
+
+    asperaSdk.globals.connect.setDragDropTargets(elementSelector, connectOptions, result => {
+      if (!asperaSdk.useConnect || asperaSdk.globals.connectDropzones.get(elementSelector) !== registration) {
+        return;
+      }
+
+      callback({
+        event: result.event,
+        files: result.files as unknown as DataTransferResponse,
+      });
+    });
+
+    return;
+  }
+
+  // Replace any existing dropzone for this selector so its listeners are not attached twice
+  removeDropzone(elementSelector);
+
+  const elements = document.querySelectorAll(elementSelector);
+  if (!elements || !elements.length) {
+    errorLog(messages.unableToFindElementOnPage);
+    return;
+  }
+
+  const handleEventDefaults = (event: DragEvent) => {
+    if (!resolvedOptions.allowDefaultBehavior) {
+      event.preventDefault();
+    }
+    if (!resolvedOptions.allowPropagation) {
+      event.stopPropagation();
+    }
+  };
+
+  const handleRequiredEventDefaults = (event: DragEvent) => {
+    event.preventDefault();
+    if (!resolvedOptions.allowPropagation) {
+      event.stopPropagation();
+    }
+  };
+
+  const registeredListeners: {event: DropzoneEventType; callback: (event: DragEvent) => void}[] = [];
+
+  if (resolvedOptions.dragEnter) {
+    registeredListeners.push({
+      event: 'dragenter',
+      callback: (event: DragEvent) => {
+        handleEventDefaults(event);
+        callback({event});
+      },
+    });
+  }
+
+  if (resolvedOptions.dragLeave) {
+    registeredListeners.push({
+      event: 'dragleave',
+      callback: (event: DragEvent) => {
+        handleEventDefaults(event);
+        callback({event});
+      },
+    });
+  }
+
+  if (resolvedOptions.drop || resolvedOptions.dragOver) {
+    registeredListeners.push({
+      event: 'dragover',
+      callback: (event: DragEvent) => {
+        handleRequiredEventDefaults(event);
+        if (resolvedOptions.dragOver) {
+          callback({event});
+        }
+      },
+    });
+  }
+
+  if (resolvedOptions.drop) {
+    registeredListeners.push({
+      event: 'drop',
+      callback: (event: DragEvent) => {
+        handleRequiredEventDefaults(event);
+        if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length && event.dataTransfer.files[0]) {
+          const files: BrowserStyleFile[] = [];
+
+          for (let i = 0; i < event.dataTransfer.files.length; i++) {
+            const file = event.dataTransfer.files[i];
+            files.push({
+              lastModified: file.lastModified,
+              name: file.name,
+              size: file.size,
+              type: file.type
+            });
+          }
+
+          const payload = {
+            files,
+            app_id: asperaSdk.globals.appId,
+          };
+
+          if (asperaSdk.isReady) {
+            client.request('dropped_files', payload)
+              .then((data: DataTransferResponse) => callback({event, files: data}))
+              .catch(error => {
+                errorLog(messages.unableToReadDropped, error);
+              });
+          } else if (asperaSdk.httpGatewayIsReady) {
+            handleHttpGatewayDrop(event.dataTransfer.items, callback, event);
+          }
+        }
+      },
+    });
+  }
+
+  elements.forEach(element => {
+    registeredListeners.forEach(({event, callback: listener}) => {
+      element.addEventListener(event, listener);
+    });
+  });
+
+  asperaSdk.globals.dropZonesCreated.set(elementSelector, registeredListeners);
+};
+
+/**
+ * Stop Connect and re-create its dropzones with the SDK's own listeners, so drag and drop
+ * keeps working after the Connect fallback is abandoned. Those listeners pick IBM Aspera for
+ * desktop or HTTP Gateway when files are dropped, so this is safe even if neither is ready yet.
+ */
+const stopConnectAndMoveDropzones = (): void => {
+  stopConnect();
+
+  const connectDropzones = Array.from(asperaSdk.globals.connectDropzones);
+  asperaSdk.globals.connectDropzones.clear();
+
+  connectDropzones.forEach(([elementSelector, {callback, options}]) => {
+    createDropzone(callback, elementSelector, options);
+  });
+};
+
+/**
  * Initialize the SDK and connect to a transfer client. Returns a promise that resolves
  * when the transfer client is ready, or rejects if it cannot be reached.
  *
@@ -1300,213 +1507,6 @@ export const setBranding = (id: string, options: CustomBrandingOptions): Promise
     });
 
   return promiseInfo.promise;
-};
-
-/**
- * Create a dropzone for the given element selector. Creating a dropzone for a selector that
- * already has one replaces it.
- *
- * Dropzones created while Connect is the transfer client are moved over automatically if the SDK
- * later stops using Connect (see Connect fallback in {@link initSession}). They are re-attached to
- * the elements matching the selector at that time.
- *
- * @param callback the function to call once the files are dropped
- * @param elementSelector the selector of the element on the page that should watch for drop events
- * @param options options to configure which drag and drop events trigger the listener
- */
-export const createDropzone = (
-  callback: (data: DropzoneEventData) => void,
-  elementSelector: string,
-  options?: DropzoneOptions,
-): void => {
-  const resolvedOptions: Required<DropzoneOptions> = {
-    dragEnter: options?.dragEnter ?? false,
-    dragOver: options?.dragOver ?? false,
-    dragLeave: options?.dragLeave ?? false,
-    drop: options?.drop ?? true,
-    allowPropagation: options?.allowPropagation ?? true,
-    allowDefaultBehavior: options?.allowDefaultBehavior ?? false,
-  };
-
-  if (asperaSdk.useOldHttpGateway) {
-    return asperaHttpGateway.createDropzone(callback, elementSelector);
-  } else if (asperaSdk.useConnect) {
-    const connectOptions = {
-      dragenter: resolvedOptions.dragEnter,
-      dragover: resolvedOptions.dragOver,
-      dragleave: resolvedOptions.dragLeave,
-      drop: resolvedOptions.drop,
-      allowPropagation: resolvedOptions.allowPropagation,
-      disablePreventDefault: resolvedOptions.allowDefaultBehavior,
-    } as unknown as ConnectTypes.DragDropOptions;
-
-    // Connect has no API to remove drop targets, so its listeners stay on the element after
-    // removeDropzone() or after the SDK stops using Connect. Only forward events while Connect
-    // is active and this is still the current registration for the selector.
-    const registration = {callback, options};
-    asperaSdk.globals.connectDropzones.set(elementSelector, registration);
-
-    asperaSdk.globals.connect.setDragDropTargets(elementSelector, connectOptions, result => {
-      if (!asperaSdk.useConnect || asperaSdk.globals.connectDropzones.get(elementSelector) !== registration) {
-        return;
-      }
-
-      callback({
-        event: result.event,
-        files: result.files as unknown as DataTransferResponse,
-      });
-    });
-
-    return;
-  }
-
-  // Replace any existing dropzone for this selector so its listeners are not attached twice
-  removeDropzone(elementSelector);
-
-  const elements = document.querySelectorAll(elementSelector);
-  if (!elements || !elements.length) {
-    errorLog(messages.unableToFindElementOnPage);
-    return;
-  }
-
-  const handleEventDefaults = (event: DragEvent) => {
-    if (!resolvedOptions.allowDefaultBehavior) {
-      event.preventDefault();
-    }
-    if (!resolvedOptions.allowPropagation) {
-      event.stopPropagation();
-    }
-  };
-
-  const handleRequiredEventDefaults = (event: DragEvent) => {
-    event.preventDefault();
-    if (!resolvedOptions.allowPropagation) {
-      event.stopPropagation();
-    }
-  };
-
-  const registeredListeners: {event: DropzoneEventType; callback: (event: DragEvent) => void}[] = [];
-
-  if (resolvedOptions.dragEnter) {
-    registeredListeners.push({
-      event: 'dragenter',
-      callback: (event: DragEvent) => {
-        handleEventDefaults(event);
-        callback({event});
-      },
-    });
-  }
-
-  if (resolvedOptions.dragLeave) {
-    registeredListeners.push({
-      event: 'dragleave',
-      callback: (event: DragEvent) => {
-        handleEventDefaults(event);
-        callback({event});
-      },
-    });
-  }
-
-  if (resolvedOptions.drop || resolvedOptions.dragOver) {
-    registeredListeners.push({
-      event: 'dragover',
-      callback: (event: DragEvent) => {
-        handleRequiredEventDefaults(event);
-        if (resolvedOptions.dragOver) {
-          callback({event});
-        }
-      },
-    });
-  }
-
-  if (resolvedOptions.drop) {
-    registeredListeners.push({
-      event: 'drop',
-      callback: (event: DragEvent) => {
-        handleRequiredEventDefaults(event);
-        if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length && event.dataTransfer.files[0]) {
-          const files: BrowserStyleFile[] = [];
-
-          for (let i = 0; i < event.dataTransfer.files.length; i++) {
-            const file = event.dataTransfer.files[i];
-            files.push({
-              lastModified: file.lastModified,
-              name: file.name,
-              size: file.size,
-              type: file.type
-            });
-          }
-
-          const payload = {
-            files,
-            app_id: asperaSdk.globals.appId,
-          };
-
-          if (asperaSdk.isReady) {
-            client.request('dropped_files', payload)
-              .then((data: DataTransferResponse) => callback({event, files: data}))
-              .catch(error => {
-                errorLog(messages.unableToReadDropped, error);
-              });
-          } else if (asperaSdk.httpGatewayIsReady) {
-            handleHttpGatewayDrop(event.dataTransfer.items, callback, event);
-          }
-        }
-      },
-    });
-  }
-
-  elements.forEach(element => {
-    registeredListeners.forEach(({event, callback: listener}) => {
-      element.addEventListener(event, listener);
-    });
-  });
-
-  asperaSdk.globals.dropZonesCreated.set(elementSelector, registeredListeners);
-};
-
-/**
- * Remove dropzone.
- *
- * @param elementSelector the selector of the element on the page that should remove
- */
-export const removeDropzone = (elementSelector: string): void => {
-  // Make sure to also remove from legacy SDK. This is a no-op if nothing is registered.
-  asperaHttpGateway.removeDropzone(elementSelector);
-  // Connect listeners cannot be detached; dropping the registration makes them ignore events
-  asperaSdk.globals.connectDropzones.delete(elementSelector);
-
-  const foundDropzone = asperaSdk.globals.dropZonesCreated.get(elementSelector);
-
-  if (foundDropzone) {
-    const elements = document.querySelectorAll(elementSelector);
-
-    foundDropzone.forEach((data) => {
-      if (elements && elements.length) {
-        elements.forEach(element => {
-          element.removeEventListener(data.event, data.callback);
-        });
-      }
-    });
-
-    asperaSdk.globals.dropZonesCreated.delete(elementSelector);
-  }
-};
-
-/**
- * Stop Connect and re-create its dropzones with the SDK's own listeners, so drag and drop
- * keeps working after the Connect fallback is abandoned. Those listeners pick IBM Aspera for
- * desktop or HTTP Gateway when files are dropped, so this is safe even if neither is ready yet.
- */
-const stopConnectAndMoveDropzones = (): void => {
-  stopConnect();
-
-  const connectDropzones = Array.from(asperaSdk.globals.connectDropzones);
-  asperaSdk.globals.connectDropzones.clear();
-
-  connectDropzones.forEach(([elementSelector, {callback, options}]) => {
-    createDropzone(callback, elementSelector, options);
-  });
 };
 
 /**

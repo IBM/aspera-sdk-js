@@ -296,8 +296,9 @@ export const init = (options?: InitOptions): Promise<any> => {
  * within `retryTimeout` and the Connect extension is installed, Connect is started. Desktop
  * detection continues in the background even while Connect is `RUNNING`. If Desktop is later
  * detected, Connect is stopped and `RUNNING` is emitted again, with {@link currentTransferClient}
- * now returning `'desktop'`. Transfers already started through Connect keep running in the
- * Connect application, but the SDK no longer reports their activity.
+ * now returning `'desktop'`. Dropzones created through {@link createDropzone} keep working.
+ * Transfers already started through Connect keep running in the Connect application, but the
+ * SDK no longer reports their activity.
  *
  * **HTTP Gateway path** (`forceGateway: true`): `INITIALIZING` → `RUNNING` or `FAILED`.
  *
@@ -378,7 +379,7 @@ export const initSession = (options?: InitOptions): void => {
    * calls route to IBM Aspera for desktop and currentTransferClient() reports 'desktop'.
    */
   const connectDesktopReplacingConnect = (): Promise<void> => {
-    return connectDesktop().then(() => stopConnect());
+    return connectDesktop().then(() => stopConnectAndMoveDropzones());
   };
 
   const startDesktopDetection = (): void => {
@@ -402,7 +403,7 @@ export const initSession = (options?: InitOptions): void => {
               // replaced it. Anything else means Connect could not start, so fall back to
               // desktop-only mode. The background desktop app poll is already running.
               if (status !== 'RUNNING') {
-                stopConnect();
+                stopConnectAndMoveDropzones();
                 // Explicitly set status to FAILED since we go back to desktop mode
                 statusService.setStatus('FAILED');
               }
@@ -1302,7 +1303,12 @@ export const setBranding = (id: string, options: CustomBrandingOptions): Promise
 };
 
 /**
- * Create a dropzone for the given element selector.
+ * Create a dropzone for the given element selector. Creating a dropzone for a selector that
+ * already has one replaces it.
+ *
+ * Dropzones created while Connect is the transfer client are moved over automatically if the SDK
+ * later stops using Connect (see Connect fallback in {@link initSession}). They are re-attached to
+ * the elements matching the selector at that time.
  *
  * @param callback the function to call once the files are dropped
  * @param elementSelector the selector of the element on the page that should watch for drop events
@@ -1334,7 +1340,17 @@ export const createDropzone = (
       disablePreventDefault: resolvedOptions.allowDefaultBehavior,
     } as unknown as ConnectTypes.DragDropOptions;
 
+    // Connect has no API to remove drop targets, so its listeners stay on the element after
+    // removeDropzone() or after the SDK stops using Connect. Only forward events while Connect
+    // is active and this is still the current registration for the selector.
+    const registration = {callback, options};
+    asperaSdk.globals.connectDropzones.set(elementSelector, registration);
+
     asperaSdk.globals.connect.setDragDropTargets(elementSelector, connectOptions, result => {
+      if (!asperaSdk.useConnect || asperaSdk.globals.connectDropzones.get(elementSelector) !== registration) {
+        return;
+      }
+
       callback({
         event: result.event,
         files: result.files as unknown as DataTransferResponse,
@@ -1343,6 +1359,9 @@ export const createDropzone = (
 
     return;
   }
+
+  // Replace any existing dropzone for this selector so its listeners are not attached twice
+  removeDropzone(elementSelector);
 
   const elements = document.querySelectorAll(elementSelector);
   if (!elements || !elements.length) {
@@ -1454,6 +1473,8 @@ export const createDropzone = (
 export const removeDropzone = (elementSelector: string): void => {
   // Make sure to also remove from legacy SDK. This is a no-op if nothing is registered.
   asperaHttpGateway.removeDropzone(elementSelector);
+  // Connect listeners cannot be detached; dropping the registration makes them ignore events
+  asperaSdk.globals.connectDropzones.delete(elementSelector);
 
   const foundDropzone = asperaSdk.globals.dropZonesCreated.get(elementSelector);
 
@@ -1470,6 +1491,22 @@ export const removeDropzone = (elementSelector: string): void => {
 
     asperaSdk.globals.dropZonesCreated.delete(elementSelector);
   }
+};
+
+/**
+ * Stop Connect and re-create its dropzones with the SDK's own listeners, so drag and drop
+ * keeps working after the Connect fallback is abandoned. Those listeners pick IBM Aspera for
+ * desktop or HTTP Gateway when files are dropped, so this is safe even if neither is ready yet.
+ */
+const stopConnectAndMoveDropzones = (): void => {
+  stopConnect();
+
+  const connectDropzones = Array.from(asperaSdk.globals.connectDropzones);
+  asperaSdk.globals.connectDropzones.clear();
+
+  connectDropzones.forEach(([elementSelector, {callback, options}]) => {
+    createDropzone(callback, elementSelector, options);
+  });
 };
 
 /**

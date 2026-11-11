@@ -1,4 +1,4 @@
-import {asperaSdk, currentTransferClient, getStatus, initSession, registerStatusCallback} from '../../src/index';
+import {asperaSdk, createDropzone, currentTransferClient, getStatus, initSession, registerStatusCallback, removeDropzone} from '../../src/index';
 import {client} from '../../src/helpers/client/client';
 import {detectConnectExtension} from '../../src/helpers/connect-extension';
 import {SdkStatus} from '../../src/models/models';
@@ -18,6 +18,9 @@ interface MockConnect {
   removeEventListener: jest.Mock;
   stop: jest.Mock;
   initSession: jest.Mock;
+  setDragDropTargets: jest.Mock;
+  /** Simulate Connect's own DOM listener for `selector` firing (Connect attaches these itself). */
+  emitDragDrop: (selector: string, result: {event: Event; files?: unknown}) => void;
 }
 
 jest.mock('@ibm-aspera/connect-sdk-js', () => {
@@ -32,6 +35,13 @@ jest.mock('@ibm-aspera/connect-sdk-js', () => {
     });
     stop = jest.fn();
     initSession = jest.fn();
+    private dropTargets: {selector: string; listener: Function}[] = [];
+    setDragDropTargets = jest.fn((selector: string, _options: unknown, listener: Function) => {
+      this.dropTargets.push({selector, listener});
+    });
+    emitDragDrop = (selector: string, result: unknown): void => {
+      this.dropTargets.filter(t => t.selector === selector).forEach(t => t.listener(result));
+    };
     emitStatus = (status: string): void => {
       this.listeners.filter(l => l.type === EVENT.STATUS).forEach(l => l.cb(EVENT.STATUS, status));
     };
@@ -197,6 +207,106 @@ describe('Connect fallback with background Desktop detection', () => {
 
     expect(getStatus()).toBe('RUNNING');
     expect(currentTransferClient()).toBe('connect');
+  });
+
+  describe('drag and drop across the switch to Desktop', () => {
+    const SELECTOR = '#dropzone';
+    let element: HTMLElement;
+
+    const dispatchDrop = (): void => {
+      const event = new Event('drop', {cancelable: true});
+      Object.defineProperty(event, 'dataTransfer', {
+        value: {files: [{name: 'file.txt', size: 1, type: 'text/plain', lastModified: 0}], items: []},
+      });
+      element.dispatchEvent(event);
+    };
+
+    const droppedFilesRequests = (): number => {
+      return (client.request as jest.Mock).mock.calls.filter(([m]) => m === 'dropped_files').length;
+    };
+
+    /** Fall back to Connect, then let Desktop take over. */
+    const switchToDesktop = async (connect: MockConnect): Promise<void> => {
+      desktopRunning = true;
+      await jest.advanceTimersByTimeAsync(RETRY_INTERVAL);
+      expect(currentTransferClient()).toBe('desktop');
+      expect(connect.stop).toHaveBeenCalled();
+    };
+
+    beforeEach(() => {
+      element = document.createElement('div');
+      element.id = 'dropzone';
+      document.body.appendChild(element);
+    });
+
+    afterEach(() => {
+      element.remove();
+    });
+
+    it('moves a dropzone created on Connect over to Desktop', async () => {
+      const connect = await fallBackToConnect();
+      connect.emitStatus('RUNNING');
+      const callback = jest.fn();
+      createDropzone(callback, SELECTOR, {dragEnter: true});
+      expect(connect.setDragDropTargets).toHaveBeenCalledTimes(1);
+
+      await switchToDesktop(connect);
+      element.dispatchEvent(new Event('dragenter'));
+      dispatchDrop();
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(droppedFilesRequests()).toBe(1);
+      expect(callback).toHaveBeenCalledWith(expect.objectContaining({event: expect.objectContaining({type: 'dragenter'})}));
+      expect(callback).toHaveBeenCalledWith(expect.objectContaining({files: true}));
+    });
+
+    it('ignores events from Connect listeners once Desktop has taken over', async () => {
+      const connect = await fallBackToConnect();
+      connect.emitStatus('RUNNING');
+      const callback = jest.fn();
+      createDropzone(callback, SELECTOR, {dragEnter: true});
+
+      await switchToDesktop(connect);
+      connect.emitDragDrop(SELECTOR, {event: new Event('dragenter')});
+
+      expect(callback).not.toHaveBeenCalled();
+    });
+
+    it('does not double up listeners when the app re-creates its dropzone on RUNNING', async () => {
+      const callback = jest.fn();
+      registerStatusCallback(status => {
+        if (status === 'RUNNING') {
+          createDropzone(callback, SELECTOR);
+        }
+      });
+
+      const connect = await fallBackToConnect();
+      connect.emitStatus('RUNNING');
+      await switchToDesktop(connect);
+      dispatchDrop();
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(droppedFilesRequests()).toBe(1);
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it('removeDropzone stops a Connect dropzone and it is not moved to Desktop', async () => {
+      const connect = await fallBackToConnect();
+      connect.emitStatus('RUNNING');
+      const callback = jest.fn();
+      createDropzone(callback, SELECTOR, {dragEnter: true});
+      removeDropzone(SELECTOR);
+
+      connect.emitDragDrop(SELECTOR, {event: new Event('dragenter')});
+      expect(callback).not.toHaveBeenCalled();
+
+      await switchToDesktop(connect);
+      dispatchDrop();
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(droppedFilesRequests()).toBe(0);
+      expect(callback).not.toHaveBeenCalled();
+    });
   });
 });
 

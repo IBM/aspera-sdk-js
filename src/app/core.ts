@@ -9,7 +9,7 @@ import {AsperaSdkInfo, AsperaSdkClientInfo, TransferResponse} from '../models/as
 import {CustomBrandingOptions, DataTransferResponse, DropzoneEventData, DropzoneEventType, DropzoneOptions, AsperaSdkSpec, BrowserStyleFile, AsperaSdkTransfer, FileDialogOptions, FolderDialogOptions, SaveFileDialogOptions, InitOptions, ModifyTransferOptions, Pagination, PaginatedFilesResponse, ResumeTransferOptions, TransferSpec, ReadChunkAsArrayBufferResponse, ReadAsArrayBufferResponse, OpenRpcSpec, SdkCapabilities, SdkStatus, GetChecksumOptions, ChecksumFileResponse, ReadDirectoryOptions, ReadDirectoryResponse, ShowPreferencesPageOptions, PreferencesPage, TestSshPortsOptions, TransferClient} from '../models/models';
 import {statusService} from './status';
 import {websocketService} from '../helpers/ws';
-import {initConnect} from '../connect/core';
+import {initConnect, stopConnect} from '../connect/core';
 import {detectConnectExtension} from '../helpers/connect-extension';
 import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
 
@@ -22,8 +22,48 @@ import * as ConnectTypes from '@ibm-aspera/connect-sdk-js/dist/esm/core/types';
  */
 const CONNECT_EXTENSION_DETECT_TIMEOUT = 1500;
 
+/*
+ * Desktop-only internals. Unlike their public counterparts, these always talk to
+ * IBM Aspera for desktop regardless of which transfer client is currently active,
+ * so Desktop can be detected in the background while Connect is in use.
+ */
+const getDesktopInfo = (): Promise<void> => {
+  return client.request('get_info')
+    .then((data: AsperaSdkClientInfo) => {
+      asperaSdk.globals.asperaSdkInfo = data;
+      asperaSdk.globals.asperaAppVerified = true;
+    });
+};
+
+const discoverDesktopRpc = (): Promise<OpenRpcSpec> => {
+  return client.request('rpc.discover')
+    .then((data: OpenRpcSpec) => {
+      asperaSdk.globals.rpcMethods = data.methods.map(m => m.name);
+      return data;
+    })
+    .catch(error => {
+      errorLog(messages.rpcDiscoverFailed, error);
+      return Promise.reject(generateErrorBody(messages.rpcDiscoverFailed, error));
+    });
+};
+
+const initDesktopDragDrop = (initCall?: boolean): Promise<boolean> => {
+  return client.request('init_drag_drop')
+    .then((data: boolean) => data)
+    .catch(error => {
+      errorLog(messages.dragDropInitFailed, error);
+
+      if (initCall) {
+        errorLog(messages.dragDropInitFailedInit, error);
+        return false;
+      }
+
+      return Promise.reject(generateErrorBody(messages.dragDropInitFailed, error));
+    });
+};
+
 /**
- * Check if IBM Aspera for Desktop connection works. This function is called by init
+ * Check if IBM Aspera for desktop connection works. This function is called by init
  * when initializing the SDK. This function can be used at any point for checking.
  *
  * @returns a promise that resolves if server can connect or rejects if not
@@ -33,12 +73,7 @@ export const testConnection = (): Promise<any> => {
     return Promise.resolve(asperaSdk.globals.sdkResponseData);
   }
 
-  return client.request('get_info')
-    .then((data: AsperaSdkClientInfo) => {
-      asperaSdk.globals.asperaSdkInfo = data;
-      asperaSdk.globals.asperaAppVerified = true;
-      return asperaSdk.globals.sdkResponseData;
-    });
+  return getDesktopInfo().then(() => asperaSdk.globals.sdkResponseData);
 };
 
 /**
@@ -59,15 +94,7 @@ const rpcDiscover = (): Promise<any> => {
     return throwError(messages.serverNotVerified);
   }
 
-  return client.request('rpc.discover')
-    .then((data: OpenRpcSpec) => {
-      asperaSdk.globals.rpcMethods = data.methods.map(m => m.name);
-      return data;
-    })
-    .catch(error => {
-      errorLog(messages.rpcDiscoverFailed, error);
-      return Promise.reject(generateErrorBody(messages.rpcDiscoverFailed, error));
-    });
+  return discoverDesktopRpc();
 };
 
 /**
@@ -84,22 +111,7 @@ export const initDragDrop = (initCall?: boolean): Promise<boolean> => {
     return throwError(messages.serverNotVerified);
   }
 
-  const promiseInfo = generatePromiseObjects();
-
-  client.request('init_drag_drop')
-    .then((data: boolean) => promiseInfo.resolver(data))
-    .catch(error => {
-      errorLog(messages.dragDropInitFailed, error);
-
-      if (initCall) {
-        promiseInfo.resolver(false);
-        errorLog(messages.dragDropInitFailedInit, error);
-      } else {
-        promiseInfo.rejecter(generateErrorBody(messages.dragDropInitFailed, error));
-      }
-    });
-
-  return promiseInfo.promise;
+  return initDesktopDragDrop(initCall);
 };
 
 /**
@@ -122,9 +134,9 @@ const setupAppId = (options?: {appId?: string; supportMultipleUsers?: boolean}):
 
 const connectDesktop = (): Promise<void> => {
   return asperaSdk.activityTracking.setup()
-    .then(() => testConnection())
-    .then(() => rpcDiscover())
-    .then(() => initDragDrop(true))
+    .then(() => getDesktopInfo())
+    .then(() => discoverDesktopRpc())
+    .then(() => initDesktopDragDrop(true))
     .then((): void => undefined);
 };
 
@@ -152,6 +164,213 @@ export const updateHttpGatewaySettings = (settings: {chunkSize?: number; concurr
   if (typeof settings?.concurrentUploads === 'number') {
     asperaHttpGateway.overwriteDefaultConcurrentUploads(settings.concurrentUploads);
   }
+};
+
+/**
+ * Remove dropzone.
+ *
+ * @param elementSelector the selector of the element on the page that should remove
+ */
+export const removeDropzone = (elementSelector: string): void => {
+  // Make sure to also remove from legacy SDK. This is a no-op if nothing is registered.
+  asperaHttpGateway.removeDropzone(elementSelector);
+  // Connect listeners cannot be detached; dropping the registration makes them ignore events
+  asperaSdk.globals.connectDropzones.delete(elementSelector);
+
+  const foundDropzone = asperaSdk.globals.dropZonesCreated.get(elementSelector);
+
+  if (foundDropzone) {
+    const elements = document.querySelectorAll(elementSelector);
+
+    foundDropzone.forEach((data) => {
+      if (elements && elements.length) {
+        elements.forEach(element => {
+          element.removeEventListener(data.event, data.callback);
+        });
+      }
+    });
+
+    asperaSdk.globals.dropZonesCreated.delete(elementSelector);
+  }
+};
+
+/**
+ * Create a dropzone for the given element selector. Creating a dropzone for a selector that
+ * already has one replaces it.
+ *
+ * Dropzones created while Connect is the transfer client are moved over automatically if the SDK
+ * later stops using Connect (see Connect fallback in {@link initSession}). They are re-attached to
+ * the elements matching the selector at that time.
+ *
+ * @param callback the function to call once the files are dropped
+ * @param elementSelector the selector of the element on the page that should watch for drop events
+ * @param options options to configure which drag and drop events trigger the listener
+ */
+export const createDropzone = (
+  callback: (data: DropzoneEventData) => void,
+  elementSelector: string,
+  options?: DropzoneOptions,
+): void => {
+  const resolvedOptions: Required<DropzoneOptions> = {
+    dragEnter: options?.dragEnter ?? false,
+    dragOver: options?.dragOver ?? false,
+    dragLeave: options?.dragLeave ?? false,
+    drop: options?.drop ?? true,
+    allowPropagation: options?.allowPropagation ?? true,
+    allowDefaultBehavior: options?.allowDefaultBehavior ?? false,
+  };
+
+  if (asperaSdk.useOldHttpGateway) {
+    return asperaHttpGateway.createDropzone(callback, elementSelector);
+  } else if (asperaSdk.useConnect) {
+    const connectOptions = {
+      dragenter: resolvedOptions.dragEnter,
+      dragover: resolvedOptions.dragOver,
+      dragleave: resolvedOptions.dragLeave,
+      drop: resolvedOptions.drop,
+      allowPropagation: resolvedOptions.allowPropagation,
+      disablePreventDefault: resolvedOptions.allowDefaultBehavior,
+    } as unknown as ConnectTypes.DragDropOptions;
+
+    // Connect has no API to remove drop targets, so its listeners stay on the element after
+    // removeDropzone() or after the SDK stops using Connect. Only forward events while Connect
+    // is active and this is still the current registration for the selector.
+    const registration = {callback, options};
+    asperaSdk.globals.connectDropzones.set(elementSelector, registration);
+
+    asperaSdk.globals.connect.setDragDropTargets(elementSelector, connectOptions, result => {
+      if (!asperaSdk.useConnect || asperaSdk.globals.connectDropzones.get(elementSelector) !== registration) {
+        return;
+      }
+
+      callback({
+        event: result.event,
+        files: result.files as unknown as DataTransferResponse,
+      });
+    });
+
+    return;
+  }
+
+  // Replace any existing dropzone for this selector so its listeners are not attached twice
+  removeDropzone(elementSelector);
+
+  const elements = document.querySelectorAll(elementSelector);
+  if (!elements || !elements.length) {
+    errorLog(messages.unableToFindElementOnPage);
+    return;
+  }
+
+  const handleEventDefaults = (event: DragEvent) => {
+    if (!resolvedOptions.allowDefaultBehavior) {
+      event.preventDefault();
+    }
+    if (!resolvedOptions.allowPropagation) {
+      event.stopPropagation();
+    }
+  };
+
+  const handleRequiredEventDefaults = (event: DragEvent) => {
+    event.preventDefault();
+    if (!resolvedOptions.allowPropagation) {
+      event.stopPropagation();
+    }
+  };
+
+  const registeredListeners: {event: DropzoneEventType; callback: (event: DragEvent) => void}[] = [];
+
+  if (resolvedOptions.dragEnter) {
+    registeredListeners.push({
+      event: 'dragenter',
+      callback: (event: DragEvent) => {
+        handleEventDefaults(event);
+        callback({event});
+      },
+    });
+  }
+
+  if (resolvedOptions.dragLeave) {
+    registeredListeners.push({
+      event: 'dragleave',
+      callback: (event: DragEvent) => {
+        handleEventDefaults(event);
+        callback({event});
+      },
+    });
+  }
+
+  if (resolvedOptions.drop || resolvedOptions.dragOver) {
+    registeredListeners.push({
+      event: 'dragover',
+      callback: (event: DragEvent) => {
+        handleRequiredEventDefaults(event);
+        if (resolvedOptions.dragOver) {
+          callback({event});
+        }
+      },
+    });
+  }
+
+  if (resolvedOptions.drop) {
+    registeredListeners.push({
+      event: 'drop',
+      callback: (event: DragEvent) => {
+        handleRequiredEventDefaults(event);
+        if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length && event.dataTransfer.files[0]) {
+          const files: BrowserStyleFile[] = [];
+
+          for (let i = 0; i < event.dataTransfer.files.length; i++) {
+            const file = event.dataTransfer.files[i];
+            files.push({
+              lastModified: file.lastModified,
+              name: file.name,
+              size: file.size,
+              type: file.type
+            });
+          }
+
+          const payload = {
+            files,
+            app_id: asperaSdk.globals.appId,
+          };
+
+          if (asperaSdk.isReady) {
+            client.request('dropped_files', payload)
+              .then((data: DataTransferResponse) => callback({event, files: data}))
+              .catch(error => {
+                errorLog(messages.unableToReadDropped, error);
+              });
+          } else if (asperaSdk.httpGatewayIsReady) {
+            handleHttpGatewayDrop(event.dataTransfer.items, callback, event);
+          }
+        }
+      },
+    });
+  }
+
+  elements.forEach(element => {
+    registeredListeners.forEach(({event, callback: listener}) => {
+      element.addEventListener(event, listener);
+    });
+  });
+
+  asperaSdk.globals.dropZonesCreated.set(elementSelector, registeredListeners);
+};
+
+/**
+ * Stop Connect and re-create its dropzones with the SDK's own listeners, so drag and drop
+ * keeps working after the Connect fallback is abandoned. Those listeners pick IBM Aspera for
+ * desktop or HTTP Gateway when files are dropped, so this is safe even if neither is ready yet.
+ */
+const stopConnectAndMoveDropzones = (): void => {
+  stopConnect();
+
+  const connectDropzones = Array.from(asperaSdk.globals.connectDropzones);
+  asperaSdk.globals.connectDropzones.clear();
+
+  connectDropzones.forEach(([elementSelector, {callback, options}]) => {
+    createDropzone(callback, elementSelector, options);
+  });
 };
 
 /**
@@ -249,8 +468,6 @@ export const init = (options?: InitOptions): Promise<any> => {
  * immediately — lifecycle status is communicated asynchronously via {@link registerStatusCallback}.
  *
  * The SDK supports three transfer clients. By default, IBM Aspera for desktop is used.
- * Set `connectSettings.useConnect` to use IBM Aspera Connect instead. Desktop and Connect
- * are mutually exclusive — one or the other is detected, not both.
  *
  * ## HTTP Gateway
  *
@@ -281,6 +498,14 @@ export const init = (options?: InitOptions): Promise<any> => {
  * **Connect path**: `INITIALIZING` → `RUNNING`, `FAILED`, `OUTDATED`, or
  * `EXTENSION_INSTALL` depending on the state of the Connect browser extension
  * and application.
+ *
+ * **Connect fallback path** (`fallback: true`): Desktop is detected first. If it is not found
+ * within `retryTimeout` and the Connect extension is installed, Connect is started. Desktop
+ * detection continues in the background even while Connect is `RUNNING`. If Desktop is later
+ * detected, Connect is stopped and `RUNNING` is emitted again, with {@link currentTransferClient}
+ * now returning `'desktop'`. Dropzones created through {@link createDropzone} keep working.
+ * Transfers already started through Connect keep running in the Connect application, but the
+ * SDK no longer reports their activity.
  *
  * **HTTP Gateway path** (`forceGateway: true`): `INITIALIZING` → `RUNNING` or `FAILED`.
  *
@@ -355,6 +580,15 @@ export const initSession = (options?: InitOptions): void => {
 
   const hasFallback = options?.connectSettings?.fallback && !options?.connectSettings?.useConnect;
 
+  /**
+   * Background IBM Aspera for desktop detection used while Connect is the fallback client. Connect is
+   * torn down *before* the poll resolves, so by the time StatusService emits RUNNING,
+   * calls route to IBM Aspera for desktop and currentTransferClient() reports 'desktop'.
+   */
+  const connectDesktopReplacingConnect = (): Promise<void> => {
+    return connectDesktop().then(() => stopConnectAndMoveDropzones());
+  };
+
   const startDesktopDetection = (): void => {
     const onFallback = hasFallback
       ? (): void => {
@@ -362,17 +596,23 @@ export const initSession = (options?: InitOptions): void => {
         detectConnectExtension(CONNECT_EXTENSION_DETECT_TIMEOUT).then(found => {
           if (found) {
             initConnect({...options.connectSettings, hideIncludedInstaller: true});
+
+            // IBM Aspera for desktop is preferred over Connect, so keep looking for it even if Connect starts. For example,
+            // the user might be downloading/installing the desktop app while their existing Connect installation gets used.
+            statusService.resumePolling(connectDesktopReplacingConnect, retryInterval);
+
             const callbackId = statusService.registerCallback((status) => {
               if (status === 'INITIALIZING') {
                 return;
               }
               statusService.deregisterCallback(callbackId);
+              // A RUNNING status here is either Connect starting or IBM Aspera for desktop already having
+              // replaced it. Anything else means Connect could not start, so fall back to
+              // desktop-only mode. The background desktop app poll is already running.
               if (status !== 'RUNNING') {
-                asperaSdk.globals.connect.removeEventListener();
-                asperaSdk.globals.connect.stop();
+                stopConnectAndMoveDropzones();
                 // Explicitly set status to FAILED since we go back to desktop mode
                 statusService.setStatus('FAILED');
-                statusService.resumePolling(connectDesktop, retryInterval);
               }
             });
           } else {
@@ -591,7 +831,9 @@ export const deregisterActivityCallback = (id: string): void => {
  * Status values:
  *
  * - `INITIALIZING` — The SDK is detecting a transfer client.
- * - `RUNNING` — A transfer client is ready. Full functionality is available.
+ * - `RUNNING` — A transfer client is ready. Full functionality is available. This can be emitted
+ *   more than once in a row if the active transfer client changes (e.g. from Connect to IBM Aspera
+ *   for desktop when using Connect fallback). Check {@link currentTransferClient} on each `RUNNING`.
  * - `DEGRADED` — The primary transfer client (IBM Aspera for desktop) was not detected, but HTTP
  *   Gateway is available as a fallback. This is only available if XXX...
  * - `FAILED` — No transfer client could be reached. This could be because the user does
@@ -1268,177 +1510,6 @@ export const setBranding = (id: string, options: CustomBrandingOptions): Promise
 };
 
 /**
- * Create a dropzone for the given element selector.
- *
- * @param callback the function to call once the files are dropped
- * @param elementSelector the selector of the element on the page that should watch for drop events
- * @param options options to configure which drag and drop events trigger the listener
- */
-export const createDropzone = (
-  callback: (data: DropzoneEventData) => void,
-  elementSelector: string,
-  options?: DropzoneOptions,
-): void => {
-  const resolvedOptions: Required<DropzoneOptions> = {
-    dragEnter: options?.dragEnter ?? false,
-    dragOver: options?.dragOver ?? false,
-    dragLeave: options?.dragLeave ?? false,
-    drop: options?.drop ?? true,
-    allowPropagation: options?.allowPropagation ?? true,
-    allowDefaultBehavior: options?.allowDefaultBehavior ?? false,
-  };
-
-  if (asperaSdk.useOldHttpGateway) {
-    return asperaHttpGateway.createDropzone(callback, elementSelector);
-  } else if (asperaSdk.useConnect) {
-    const connectOptions = {
-      dragenter: resolvedOptions.dragEnter,
-      dragover: resolvedOptions.dragOver,
-      dragleave: resolvedOptions.dragLeave,
-      drop: resolvedOptions.drop,
-      allowPropagation: resolvedOptions.allowPropagation,
-      disablePreventDefault: resolvedOptions.allowDefaultBehavior,
-    } as unknown as ConnectTypes.DragDropOptions;
-
-    asperaSdk.globals.connect.setDragDropTargets(elementSelector, connectOptions, result => {
-      callback({
-        event: result.event,
-        files: result.files as unknown as DataTransferResponse,
-      });
-    });
-
-    return;
-  }
-
-  const elements = document.querySelectorAll(elementSelector);
-  if (!elements || !elements.length) {
-    errorLog(messages.unableToFindElementOnPage);
-    return;
-  }
-
-  const handleEventDefaults = (event: DragEvent) => {
-    if (!resolvedOptions.allowDefaultBehavior) {
-      event.preventDefault();
-    }
-    if (!resolvedOptions.allowPropagation) {
-      event.stopPropagation();
-    }
-  };
-
-  const handleRequiredEventDefaults = (event: DragEvent) => {
-    event.preventDefault();
-    if (!resolvedOptions.allowPropagation) {
-      event.stopPropagation();
-    }
-  };
-
-  const registeredListeners: {event: DropzoneEventType; callback: (event: DragEvent) => void}[] = [];
-
-  if (resolvedOptions.dragEnter) {
-    registeredListeners.push({
-      event: 'dragenter',
-      callback: (event: DragEvent) => {
-        handleEventDefaults(event);
-        callback({event});
-      },
-    });
-  }
-
-  if (resolvedOptions.dragLeave) {
-    registeredListeners.push({
-      event: 'dragleave',
-      callback: (event: DragEvent) => {
-        handleEventDefaults(event);
-        callback({event});
-      },
-    });
-  }
-
-  if (resolvedOptions.drop || resolvedOptions.dragOver) {
-    registeredListeners.push({
-      event: 'dragover',
-      callback: (event: DragEvent) => {
-        handleRequiredEventDefaults(event);
-        if (resolvedOptions.dragOver) {
-          callback({event});
-        }
-      },
-    });
-  }
-
-  if (resolvedOptions.drop) {
-    registeredListeners.push({
-      event: 'drop',
-      callback: (event: DragEvent) => {
-        handleRequiredEventDefaults(event);
-        if (event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length && event.dataTransfer.files[0]) {
-          const files: BrowserStyleFile[] = [];
-
-          for (let i = 0; i < event.dataTransfer.files.length; i++) {
-            const file = event.dataTransfer.files[i];
-            files.push({
-              lastModified: file.lastModified,
-              name: file.name,
-              size: file.size,
-              type: file.type
-            });
-          }
-
-          const payload = {
-            files,
-            app_id: asperaSdk.globals.appId,
-          };
-
-          if (asperaSdk.isReady) {
-            client.request('dropped_files', payload)
-              .then((data: DataTransferResponse) => callback({event, files: data}))
-              .catch(error => {
-                errorLog(messages.unableToReadDropped, error);
-              });
-          } else if (asperaSdk.httpGatewayIsReady) {
-            handleHttpGatewayDrop(event.dataTransfer.items, callback, event);
-          }
-        }
-      },
-    });
-  }
-
-  elements.forEach(element => {
-    registeredListeners.forEach(({event, callback: listener}) => {
-      element.addEventListener(event, listener);
-    });
-  });
-
-  asperaSdk.globals.dropZonesCreated.set(elementSelector, registeredListeners);
-};
-
-/**
- * Remove dropzone.
- *
- * @param elementSelector the selector of the element on the page that should remove
- */
-export const removeDropzone = (elementSelector: string): void => {
-  // Make sure to also remove from legacy SDK. This is a no-op if nothing is registered.
-  asperaHttpGateway.removeDropzone(elementSelector);
-
-  const foundDropzone = asperaSdk.globals.dropZonesCreated.get(elementSelector);
-
-  if (foundDropzone) {
-    const elements = document.querySelectorAll(elementSelector);
-
-    foundDropzone.forEach((data) => {
-      if (elements && elements.length) {
-        elements.forEach(element => {
-          element.removeEventListener(data.event, data.callback);
-        });
-      }
-    });
-
-    asperaSdk.globals.dropZonesCreated.delete(elementSelector);
-  }
-};
-
-/**
  * Get metadata about the IBM Aspera installation.
  *
  * @returns a promise that returns information about the user's IBM Aspera installation.
@@ -1738,6 +1809,15 @@ export const hasCapability = (capability: keyof SdkCapabilities): boolean => {
   return !!getCapabilities()[capability];
 };
 
+/**
+ * Get the transfer client that SDK calls are currently routed to.
+ *
+ * This can change during a session. With Connect fallback (`connectSettings.fallback`),
+ * the SDK may start on Connect and switch to IBM Aspera for desktop once it is detected.
+ * A `RUNNING` status is emitted on every such switch, so re-check this from your status callback.
+ *
+ * @returns the active transfer client, or `undefined` if none is ready
+ */
 export const currentTransferClient = (): TransferClient | undefined => {
   if (asperaSdk.useHttpGateway) {
     return 'http-gateway';

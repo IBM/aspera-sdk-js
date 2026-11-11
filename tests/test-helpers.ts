@@ -171,6 +171,8 @@ export function resetSdk() {
   asperaSdk.globals.rpcPort = 33024;
   asperaSdk.globals.connectStatus = 'WAITING';
   asperaSdk.globals.connect = undefined;
+  asperaSdk.globals.connectDropzones.clear();
+  asperaSdk.globals.dropZonesCreated.clear();
   connectCalls = [];
   statusService.reset();
 }

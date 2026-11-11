@@ -32,6 +32,11 @@ export class AsperaSdkGlobals {
   sessionId?: string;
   /** Map of drop zones created by querySelector */
   dropZonesCreated: Map<string, {event: DropzoneEventType; callback: (event: DragEvent) => void}[]> = new Map();
+  /**
+   * Map of drop zones registered with Connect, by querySelector. Kept so they can be ignored once
+   * removed (Connect cannot remove its listeners) and re-created when the SDK stops using Connect.
+   */
+  connectDropzones: Map<string, {callback: (data: DropzoneEventData) => void; options?: DropzoneOptions}> = new Map();
   /** HTTP Gateway URL after successful passing */
   httpGatewayUrl?: string;
   /** Version-based route prefix for HTTP Gateway API endpoints (e.g. "/v3" for v3+, "" for v2) */
@@ -177,6 +182,11 @@ export class ActivityTracking {
    * @param webSocketEvent the event type.
    */
   handleWebSocketEvents(webSocketEvent: WebsocketEvent): void {
+    // IBM Aspera for desktop websocket events are ignored while Connect is the active client
+    if (asperaSdk.useConnect) {
+      return;
+    }
+
     const current_status = statusService.getStatus();
 
     if (webSocketEvent === 'CLOSED') {
@@ -218,6 +228,11 @@ export class ActivityTracking {
    * @param running whether the client is running or not.
    */
   handleClientEvents(running: boolean): void {
+    // IBM Aspera for desktop events are ignored while Connect is the active client
+    if (asperaSdk.useConnect) {
+      return;
+    }
+
     if (!running) {
       statusService.setStatus('DISCONNECTED');
     }

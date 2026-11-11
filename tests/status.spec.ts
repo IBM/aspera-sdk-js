@@ -51,6 +51,57 @@ describe('StatusService', () => {
       expect(cb).toHaveBeenCalledWith('DISCONNECTED');
     });
 
+    describe('transfer client changes', () => {
+      afterEach(() => {
+        asperaSdk.globals.connectStatus = 'WAITING';
+        asperaSdk.globals.appId = '';
+      });
+
+      test('re-emits RUNNING when the active transfer client changes', () => {
+        const cb = jest.fn();
+        asperaSdk.globals.appId = 'app';
+        asperaSdk.globals.connectStatus = 'RUNNING';
+        statusService.setStatus('RUNNING');
+        statusService.registerCallback(cb);
+        cb.mockClear();
+
+        // Connect -> Desktop
+        asperaSdk.globals.connectStatus = 'STOPPED';
+        asperaSdk.globals.asperaAppVerified = true;
+        statusService.setStatus('RUNNING');
+
+        expect(cb).toHaveBeenCalledTimes(1);
+        expect(cb).toHaveBeenCalledWith('RUNNING');
+        expect(asperaSdk.currentTransferClient()).toBe('desktop');
+      });
+
+      test('still deduplicates RUNNING when the transfer client is unchanged', () => {
+        const cb = jest.fn();
+        asperaSdk.globals.appId = 'app';
+        asperaSdk.globals.asperaAppVerified = true;
+        statusService.setStatus('RUNNING');
+        statusService.registerCallback(cb);
+        cb.mockClear();
+
+        statusService.setStatus('RUNNING');
+
+        expect(cb).not.toHaveBeenCalled();
+      });
+
+      test('does not re-emit non-RUNNING statuses when the transfer client changes', () => {
+        const cb = jest.fn();
+        statusService.setStatus('INITIALIZING');
+        statusService.registerCallback(cb);
+        cb.mockClear();
+
+        // e.g. HTTP Gateway becomes verified mid-initialization
+        asperaSdk.globals.httpGatewayVerified = true;
+        statusService.setStatus('INITIALIZING');
+
+        expect(cb).not.toHaveBeenCalled();
+      });
+    });
+
     test('remaps DISCONNECTED to DEGRADED when HTTP Gateway is ready', () => {
       asperaSdk.globals.httpGatewayVerified = true;
       statusService.setStatus('RUNNING');
@@ -195,7 +246,7 @@ describe('StatusService', () => {
       expect(statusService.getStatus()).toBe('INITIALIZING');
 
       // Advance past the first poll interval
-      jest.advanceTimersByTime(2000);
+      await jest.advanceTimersByTimeAsync(2000);
       await Promise.resolve();
 
       expect(statusService.getStatus()).toBe('INITIALIZING');
@@ -212,16 +263,16 @@ describe('StatusService', () => {
       await Promise.resolve();
 
       // Before timeout: still INITIALIZING
-      jest.advanceTimersByTime(4999);
+      await jest.advanceTimersByTimeAsync(4999);
       await Promise.resolve();
       expect(statusService.getStatus()).toBe('INITIALIZING');
 
       // At timeout: transitions to FAILED
-      jest.advanceTimersByTime(1);
+      await jest.advanceTimersByTimeAsync(1);
       expect(statusService.getStatus()).toBe('FAILED');
 
       // Polling still runs (advance to next poll)
-      jest.advanceTimersByTime(2000);
+      await jest.advanceTimersByTimeAsync(2000);
       await Promise.resolve();
       expect(detectFn.mock.calls.length).toBeGreaterThanOrEqual(4);
     });
@@ -240,7 +291,7 @@ describe('StatusService', () => {
       expect(detectFn).toHaveBeenCalledTimes(1);
 
       // Verify polling stopped — advancing time should not trigger more calls
-      jest.advanceTimersByTime(4000);
+      await jest.advanceTimersByTimeAsync(4000);
       await Promise.resolve();
       expect(detectFn).toHaveBeenCalledTimes(1);
     });
@@ -252,7 +303,7 @@ describe('StatusService', () => {
       const detectFn = jest.fn().mockRejectedValue(new Error('not found'));
       statusService.startPolling(detectFn, 2000, 5000);
 
-      jest.advanceTimersByTime(5000);
+      await jest.advanceTimersByTimeAsync(5000);
       expect(statusService.getStatus()).toBe('DEGRADED');
     });
 
@@ -262,7 +313,7 @@ describe('StatusService', () => {
       const detectFn = jest.fn().mockRejectedValue(new Error('not found'));
       statusService.startPolling(detectFn, 2000, 5000);
 
-      jest.advanceTimersByTime(5000);
+      await jest.advanceTimersByTimeAsync(5000);
       expect(statusService.getStatus()).toBe('FAILED');
     });
 
@@ -289,12 +340,12 @@ describe('StatusService', () => {
       expect(statusService.getStatus()).toBe('INITIALIZING');
 
       // Advance past timeout
-      jest.advanceTimersByTime(5000);
+      await jest.advanceTimersByTimeAsync(5000);
       await Promise.resolve();
       expect(statusService.getStatus()).toBe('DEGRADED');
 
       // Next poll interval triggers attempt that succeeds
-      jest.advanceTimersByTime(2000);
+      await jest.advanceTimersByTimeAsync(2000);
       await Promise.resolve();
       await Promise.resolve();
 
@@ -313,18 +364,18 @@ describe('StatusService', () => {
       await Promise.resolve();
 
       // Before timeout: still INITIALIZING, no fallback
-      jest.advanceTimersByTime(4999);
+      await jest.advanceTimersByTimeAsync(4999);
       await Promise.resolve();
       expect(onFallback).not.toHaveBeenCalled();
       expect(statusService.getStatus()).toBe('INITIALIZING');
 
       // At timeout: onFallback called
-      jest.advanceTimersByTime(1);
+      await jest.advanceTimersByTimeAsync(1);
       expect(onFallback).toHaveBeenCalledTimes(1);
 
       // Polling stopped — no more detectFn calls after timeout
       const callsBefore = detectFn.mock.calls.length;
-      jest.advanceTimersByTime(4000);
+      await jest.advanceTimersByTimeAsync(4000);
       await Promise.resolve();
       expect(detectFn.mock.calls.length).toBe(callsBefore);
     });
@@ -343,7 +394,7 @@ describe('StatusService', () => {
       expect(onFallback).not.toHaveBeenCalled();
 
       // Advance past timeout to make sure onFallback is not called
-      jest.advanceTimersByTime(6000);
+      await jest.advanceTimersByTimeAsync(6000);
       expect(onFallback).not.toHaveBeenCalled();
     });
 
@@ -369,12 +420,12 @@ describe('StatusService', () => {
       expect(statusService.getStatus()).toBe('INITIALIZING');
 
       // Advance past timeout
-      jest.advanceTimersByTime(5000);
+      await jest.advanceTimersByTimeAsync(5000);
       await Promise.resolve();
       expect(statusService.getStatus()).toBe('FAILED');
 
       // Next poll interval triggers attempt that succeeds
-      jest.advanceTimersByTime(2000);
+      await jest.advanceTimersByTimeAsync(2000);
       await Promise.resolve();
       await Promise.resolve();
 
@@ -405,7 +456,7 @@ describe('StatusService', () => {
 
       expect(detectFn).toHaveBeenCalledTimes(1);
 
-      jest.advanceTimersByTime(4000);
+      await jest.advanceTimersByTimeAsync(4000);
       await Promise.resolve();
 
       expect(detectFn).toHaveBeenCalledTimes(3);
@@ -435,9 +486,65 @@ describe('StatusService', () => {
       await Promise.resolve();
 
       const callsBefore = detectFn.mock.calls.length;
-      jest.advanceTimersByTime(4000);
+      await jest.advanceTimersByTimeAsync(4000);
       await Promise.resolve();
       expect(detectFn.mock.calls.length).toBe(callsBefore);
+    });
+
+    test('does not start a new attempt while one is still in flight', async () => {
+      jest.useFakeTimers();
+
+      // Never settles, like an attempt waiting for Desktop's websocket
+      const detectFn = jest.fn().mockReturnValue(new Promise<void>(() => {}));
+      statusService.resumePolling(detectFn, 2000);
+
+      await jest.advanceTimersByTimeAsync(60000);
+
+      expect(detectFn).toHaveBeenCalledTimes(1);
+    });
+
+    test('starts the next attempt once the in-flight attempt settles', async () => {
+      jest.useFakeTimers();
+
+      let rejectAttempt: (e: Error) => void;
+      const detectFn = jest.fn()
+        .mockReturnValueOnce(new Promise<void>((_, reject) => {
+          rejectAttempt = reject;
+        }))
+        .mockReturnValue(new Promise<void>(() => {}));
+      statusService.resumePolling(detectFn, 2000);
+
+      await jest.advanceTimersByTimeAsync(10000);
+      expect(detectFn).toHaveBeenCalledTimes(1);
+
+      rejectAttempt(new Error('not found'));
+      await jest.advanceTimersByTimeAsync(2000);
+      expect(detectFn).toHaveBeenCalledTimes(2);
+    });
+
+    test('an in-flight attempt from a stopped loop neither blocks the next loop nor reports RUNNING', async () => {
+      jest.useFakeTimers();
+
+      let resolveStale: () => void;
+      const staleDetectFn = jest.fn().mockReturnValue(new Promise<void>((resolve) => {
+        resolveStale = resolve;
+      }));
+      const nextDetectFn = jest.fn().mockRejectedValue(new Error('not found'));
+
+      statusService.setStatus('FAILED');
+      statusService.resumePolling(staleDetectFn, 2000);
+      statusService.stopPolling();
+      statusService.resumePolling(nextDetectFn, 2000);
+
+      expect(nextDetectFn).toHaveBeenCalledTimes(1);
+
+      resolveStale();
+      await jest.advanceTimersByTimeAsync(0);
+      expect(statusService.getStatus()).toBe('FAILED');
+
+      // The new loop is still polling
+      await jest.advanceTimersByTimeAsync(2000);
+      expect(nextDetectFn).toHaveBeenCalledTimes(2);
     });
 
     test('does not start if already polling', async () => {
@@ -449,7 +556,7 @@ describe('StatusService', () => {
       statusService.startPolling(detectFn1, 2000, 10000);
       statusService.resumePolling(detectFn2, 2000);
 
-      jest.advanceTimersByTime(4000);
+      await jest.advanceTimersByTimeAsync(4000);
       await Promise.resolve();
 
       expect(detectFn2).not.toHaveBeenCalled();
@@ -484,7 +591,7 @@ describe('StatusService', () => {
       const callsBefore = detectFn.mock.calls.length;
       statusService.reset();
 
-      jest.advanceTimersByTime(10000);
+      await jest.advanceTimersByTimeAsync(10000);
       await Promise.resolve();
       expect(detectFn.mock.calls.length).toBe(callsBefore);
     });
